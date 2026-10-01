@@ -1,7 +1,4 @@
-(()=>{
-  const cfg=window.KI_ARENA_FIREBASE;
-  if(!cfg)return;
-  const docs=`https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/${encodeURIComponent(cfg.databaseId)}/documents`;
+export function createArenaCloud(cfg){const docs=`https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/${encodeURIComponent(cfg.databaseId)}/documents`;
   const paths={players:cfg.collectionPath,messages:`${cfg.environmentPath}Messages`,events:`${cfg.environmentPath}Events`};
   const status=document.querySelector('#firebase-status');
   const setStatus=(text,ok=false)=>{if(status){status.textContent=text;status.dataset.ok=ok?'true':'false'}};
@@ -17,7 +14,7 @@
   async function addEvent(type,value={}){return addRecord('events',{type,...value})}
   async function listMessages(){const page=await request(`${docs}/${paths.messages}?pageSize=50&orderBy=createdAt%20desc`);return(page.documents||[]).reverse().map(doc=>({id:doc.name.split('/').pop(),...fromFields(doc.fields)}))}
   async function health(){try{await listPlayers();setStatus(`Guardado en Firebase \u00b7 ${cfg.environment.toUpperCase()} \u00b7 ${cfg.projectId}`,true)}catch(e){setStatus('Firebase sin conexión: '+e.message);console.warn(e)}}
-  window.kiArenaCloud={get,save,listPlayers,addMessage,addEvent,listMessages,health,setStatus};
+  const api={get,save,listPlayers,addMessage,addEvent,listMessages,health,setStatus};
   health();
-})();
-
+  return api;
+}
