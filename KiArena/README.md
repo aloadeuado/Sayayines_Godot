@@ -9,6 +9,7 @@ KiArena/
 ├── firebase.json                 # Firebase Hosting sirve public/
 ├── .firebaserc                   # Proyecto de Firebase CLI
 ├── FIREBASE.md                   # Datos, entornos y seguridad
+├── docs/                         # Especificaciones e historial
 └── public/
     ├── index.html                # Página de entrada
     ├── ki-arena.html             # URL anterior redirigida a index.html
@@ -47,4 +48,13 @@ La página anterior `/ki-arena.html` permanece disponible como redirección a `/
 ## Desarrollo local
 
 Desde `KiArena/`, ejecuta `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe` y abre `http://127.0.0.1:5000/`.
+
+## Documentación detallada
+
+- [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md): reglas de juego, luchadores, progresión, poderes y estado pendiente.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): carpetas, módulos, dependencias y ejecución.
+- [`docs/FIRESTORE.md`](docs/FIRESTORE.md): rutas, campos, sincronización, entornos y seguridad.
+- [`docs/TWITCH_INTEGRATION.md`](docs/TWITCH_INTEGRATION.md): alcance planeado, OAuth y preguntas pendientes.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md): registro acumulativo de instrucciones y cambios.
+- `../AGENTS.md` y `../.agents/skills/ki-arena-project/SKILL.md`: contexto y flujo para agentes de desarrollo.
 
