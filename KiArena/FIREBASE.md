@@ -1,15 +1,17 @@
-# Ki Arena y Firebase
+# Firebase y entornos
 
-El cliente web queda enlazado al proyecto Firebase `sayayin-c0dfe` y a Firestore `(default)`, región `us-central1`. Firebase Hosting se configura para servir el contenido de `outputs/`.
+El proyecto actual `sayayin-c0dfe` contiene Firestore `(default)`. El selector usa `?env=dev`, `?env=qa` o `?env=prod` para definir el prefijo de las colecciones.
 
-## Datos
+- `environments/{env}/kiArenaPlayers/{username-normalizado}`
+- `environments/{env}/kiArenaMessages/{auto-id}`
+- `environments/{env}/kiArenaEvents/{auto-id}`
 
-Firestore es el único almacenamiento persistente del juego. Ki Arena guarda perfiles y estado recuperable en `environments/dev/kiArenaPlayers/{usuario-normalizado}`, chat en `environments/dev/kiArenaMessages/{auto-id}` y bajas en `environments/dev/kiArenaEvents/{auto-id}`. No guarda progreso en `localStorage`; posiciones y animaciones viven solo en memoria durante la partida y se regeneran al cargar. Las colecciones anteriores (`characters`, `warriors`, `interactions`, `messages`, `partners` y `settings`) no se modifican.
+Sin parámetro se usa `dev`. Los datos actuales de desarrollo permanecen en `environments/dev`. QA y Producción son espacios vacíos distintos dentro del mismo proyecto por ahora. Para producción real, configuren proyectos Firebase independientes y reglas propias; cambiar solo el prefijo no separa permisos, cuotas ni facturación.
 
-## Persistencia
+La aplicación no lee ni escribe almacenamiento local del navegador. Posiciones y animaciones viven en memoria durante la sesión.
 
-La partida ya fue migrada a Firestore. La aplicaci?n no lee ni escribe almacenamiento local del navegador y no incluye importaci?n de archivos. Posiciones y animaciones solo existen en memoria mientras la p?gina est? abierta; al volver a cargar, se reconstruyen desde los perfiles de Firestore.
+Firebase Hosting sirve los archivos estáticos desde `outputs/`. La vista del emulador local se inicia con `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`.
 
-## Seguridad y alcance
+## Seguridad pendiente
 
-Las reglas que ya están publicadas en el proyecto permiten lectura y escritura sin iniciar sesión para todos los documentos. La integración respeta esas reglas existentes y limita sus escrituras a la colección nueva, pero esto no vuelve privado el proyecto. No se cambiaron ni desplegaron reglas porque eso podría afectar el cliente anterior que usa `warriors` y las demás colecciones. Antes de publicar el juego, hay que revisar una sustitución de reglas con autenticación y confirmar qué acceso necesita la aplicación existente.
+Las reglas existentes de Firestore permiten lectura y escritura públicas. No se modificaron para evitar afectar otros clientes. Antes de exponer QA o Producción, deben añadirse Firebase Authentication, validaciones de reglas y, para operaciones de XP y bajas, autoridad del servidor mediante Cloud Functions.

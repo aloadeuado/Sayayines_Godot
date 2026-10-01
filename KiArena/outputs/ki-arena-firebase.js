@@ -2,7 +2,7 @@
   const cfg=window.KI_ARENA_FIREBASE;
   if(!cfg)return;
   const docs=`https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/${encodeURIComponent(cfg.databaseId)}/documents`;
-  const paths={players:cfg.collectionPath,messages:'environments/dev/kiArenaMessages',events:'environments/dev/kiArenaEvents'};
+  const paths={players:cfg.collectionPath,messages:`${cfg.environmentPath}Messages`,events:`${cfg.environmentPath}Events`};
   const status=document.querySelector('#firebase-status');
   const setStatus=(text,ok=false)=>{if(status){status.textContent=text;status.dataset.ok=ok?'true':'false'}};
   const normalize=s=>String(s||'').trim().toLowerCase();
