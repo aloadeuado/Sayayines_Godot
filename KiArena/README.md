@@ -1,16 +1,16 @@
 ﻿# Ki Arena
 
-Prototipo de arena 2D escrito en HTML, CSS y JavaScript. Incluye combate automático, sprites animados, poderes, chat de comandos y persistencia local; la integración opcional conecta el progreso a Firestore del proyecto Firebase `sayayin-c0dfe`.
+Prototipo de arena 2D escrito en HTML, CSS y JavaScript. Incluye combate automático, sprites animados, poderes, chat de comandos y persistencia exclusivamente en Firestore del proyecto `sayayin-c0dfe`.
 
 ## Ejecutar localmente
 
-Abre `outputs/ki-arena.html` para jugar en modo local. Para usar Firebase, sirve el contenido por HTTP desde esta carpeta:
+Sirve el contenido por HTTP desde esta carpeta para usar Firebase:
 
 ```powershell
 firebase.cmd emulators:start --only hosting --project sayayin-c0dfe
 ```
 
-Luego abre `http://127.0.0.1:5000/ki-arena.html`. El respaldo del progreso local se exporta desde la versión anterior y se importa con el botón del chat.
+Luego abre `http://127.0.0.1:5000/ki-arena.html`. El juego carga y guarda perfiles, comandos y bajas en Firestore. Las animaciones usan memoria temporal; no se conserva progreso en el navegador. Al iniciar, migra las claves del guardado anterior de forma automática si existen en el mismo origen.
 
 ## Estructura
 
@@ -20,4 +20,4 @@ Luego abre `http://127.0.0.1:5000/ki-arena.html`. El respaldo del progreso local
 - `outputs/*.png`: fondo y sprites
 - `firebase.json`, `.firebaserc`, `FIREBASE.md`: Hosting y notas de integración
 
-Las reglas de Firestore del proyecto son actualmente públicas; revisarlas antes de publicar el juego.
+El código del juego y los sprites son archivos estáticos en el repositorio/Hosting; Firestore guarda datos y progreso, no los binarios. Las reglas actuales de Firestore son públicas; revisarlas antes de publicar el juego.
