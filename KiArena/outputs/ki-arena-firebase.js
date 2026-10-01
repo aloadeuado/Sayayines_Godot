@@ -16,7 +16,7 @@
   async function addMessage(username,text){return addRecord('messages',{username:String(username||'Sistema'),text:String(text||'').slice(0,120),command:/^[EKM]$/i.test(String(text||''))?String(text).toUpperCase():''})}
   async function addEvent(type,value={}){return addRecord('events',{type,...value})}
   async function listMessages(){const page=await request(`${docs}/${paths.messages}?pageSize=50&orderBy=createdAt%20desc`);return(page.documents||[]).reverse().map(doc=>({id:doc.name.split('/').pop(),...fromFields(doc.fields)}))}
-  async function health(){try{await listPlayers();setStatus('Guardado en Firebase · sayayin-c0dfe',true)}catch(e){setStatus('Firebase sin conexión: '+e.message);console.warn(e)}}
+  async function health(){try{await listPlayers();setStatus(`Guardado en Firebase \u00b7 ${cfg.environment.toUpperCase()} \u00b7 ${cfg.projectId}`,true)}catch(e){setStatus('Firebase sin conexión: '+e.message);console.warn(e)}}
   window.kiArenaCloud={get,save,listPlayers,addMessage,addEvent,listMessages,health,setStatus};
   health();
 })();
