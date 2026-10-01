@@ -15,3 +15,4 @@ Firebase Hosting sirve los archivos estáticos desde `outputs/`. La vista del em
 ## Seguridad pendiente
 
 Las reglas existentes de Firestore permiten lectura y escritura públicas. No se modificaron para evitar afectar otros clientes. Antes de exponer QA o Producción, deben añadirse Firebase Authentication, validaciones de reglas y, para operaciones de XP y bajas, autoridad del servidor mediante Cloud Functions.
+

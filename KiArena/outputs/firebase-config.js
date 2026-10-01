@@ -14,3 +14,4 @@ window.KI_ARENA_FIREBASE = Object.freeze({
   environmentPath: `environments/${environment}/kiArena`,
   collectionPath: `environments/${environment}/kiArenaPlayers`
 });
+

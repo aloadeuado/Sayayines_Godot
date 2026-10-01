@@ -23,3 +23,4 @@ La aplicación no guarda progreso en almacenamiento local del navegador. La simu
 `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`
 
 Luego abre `http://127.0.0.1:5000/ki-arena.html`.
+
