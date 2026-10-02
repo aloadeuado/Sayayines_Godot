@@ -1,19 +1,17 @@
-# Ki Arena y Firebase
+# Firebase y entornos
 
-El cliente web queda enlazado al proyecto Firebase `sayayin-c0dfe` y a Firestore `(default)`, región `us-central1`. Firebase Hosting se configura para servir el contenido de `outputs/`.
+El proyecto actual `sayayin-c0dfe` contiene Firestore `(default)`. El selector usa `?env=dev`, `?env=qa` o `?env=prod` para definir el prefijo de las colecciones.
 
-## Datos
+- `environments/{env}/kiArenaPlayers/{username-normalizado}`
+- `environments/{env}/kiArenaMessages/{auto-id}`
+- `environments/{env}/kiArenaEvents/{auto-id}`
 
-Ki Arena guarda progreso en `environments/dev/kiArenaPlayers/{usuario-normalizado}`. El documento solo contiene el nombre público, raza, nivel, XP, bajas, derrotas y versión del esquema. Las colecciones que ya existían (`characters`, `warriors`, `interactions`, `messages`, `partners` y `settings`) no se modifican.
+Sin parámetro se usa `dev`. Los datos actuales de desarrollo permanecen en `environments/dev`. QA y Producción son espacios vacíos distintos dentro del mismo proyecto por ahora. Para producción real, configuren proyectos Firebase independientes y reglas propias; cambiar solo el prefijo no separa permisos, cuotas ni facturación.
 
-## Pasar la partida local
+La aplicación no lee ni escribe almacenamiento local del navegador. Posiciones y animaciones viven en memoria durante la sesión.
 
-1. Abre la versión actual de Ki Arena desde su pestaña `file://` y pulsa **Exportar progreso local**. Guarda `ki-arena-progreso.json`.
-2. Sirve la carpeta con `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe` desde la raíz de este proyecto y abre `http://127.0.0.1:5000/ki-arena.html`.
-3. Pulsa **Importar y migrar a Firebase** y selecciona el JSON. Los datos locales se conservan; para usuarios ya presentes en Firestore, la migración conserva el nivel más alto y no reduce bajas ni derrotas.
+Firebase Hosting sirve los archivos estáticos desde `public/`. Configuración de entorno y persistencia se encuentran en `public/src/config/firebase.js` y `public/src/services/firebase/arena-cloud.js`. La vista local se inicia desde `KiArena/` con `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`.
 
-`file://` y `http://localhost` tienen almacenamientos locales distintos, por eso se requiere el archivo de respaldo. No se publica nada a Hosting hasta ejecutar un comando explícito de deploy.
+## Seguridad pendiente
 
-## Seguridad y alcance
-
-Las reglas que ya están publicadas en el proyecto permiten lectura y escritura sin iniciar sesión para todos los documentos. La integración respeta esas reglas existentes y limita sus escrituras a la colección nueva, pero esto no vuelve privado el proyecto. No se cambiaron ni desplegaron reglas porque eso podría afectar el cliente anterior que usa `warriors` y las demás colecciones. Antes de publicar el juego, hay que revisar una sustitución de reglas con autenticación y confirmar qué acceso necesita la aplicación existente.
+Las reglas existentes de Firestore permiten lectura y escritura públicas. No se modificaron para evitar afectar otros clientes. Antes de exponer QA o Producción, deben añadirse Firebase Authentication, validaciones de reglas y, para operaciones de XP y bajas, autoridad del servidor mediante Cloud Functions.

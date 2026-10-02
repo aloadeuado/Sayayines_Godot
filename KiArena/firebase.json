@@ -1,6 +1,17 @@
 {
   "hosting": {
-    "public": "outputs",
+    "public": "public",
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "source": "/settings",
+        "destination": "/settings/index.html"
+      },
+      {
+        "source": "/bot",
+        "destination": "/bot/index.html"
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

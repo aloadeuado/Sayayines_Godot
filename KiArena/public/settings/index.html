@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Settings</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+</head>
+<body>
+  <main class="settings-page">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA · SETTINGS</h1>
+        <div class="tag">FÓRMULAS · MULTIPLICADORES · PERSONAJES ELEGIBLES</div>
+        <div id="firebase-status">Conectando con Firebase…</div>
+      </div>
+      <nav class="page-nav">
+        <a href="/" class="nav-btn">← Volver a la arena</a>
+        <a href="/bot" class="nav-btn">Bot / Chat</a>
+        <label class="env-settings">Entorno <select id="environment-switch" aria-label="Entorno de Firebase"><option value="dev">Desarrollo</option><option value="qa">QA</option><option value="prod">Producción</option></select></label>
+      </nav>
+    </header>
+    <section class="card settings-card">
+      <h2>FÓRMULAS Y PERSONAJES</h2>
+      <p class="settings-help">N representa el nivel (1–100). Estos ajustes se guardan en Firebase para el entorno seleccionado.</p>
+      <form id="game-settings-form">
+        <h3>Estadísticas por nivel</h3>
+        <div class="settings-grid">
+          <label><span>Sangre / HP</span><small>100 + M_HP × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="hp"></label>
+          <label><span>Ataque de ki</span><small>12 + M_KI × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="ki"></label>
+          <label><span>Ataque físico</span><small>9 + M_FIS × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="physicalAttack"></label>
+          <label><span>Defensa física</span><small>5 + M_DEF_FIS × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="physicalDefense"></label>
+          <label><span>Defensa de ki</span><small>5 + M_DEF_KI × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="kiDefense"></label>
+        </div>
+        <h3>Multiplicadores de poderes</h3>
+        <p class="settings-help">Daño = Ataque de ki(N) × multiplicador del poder(N) − defensa de ki del rival. La curva crece desde N=1 hasta N=100.</p>
+        <div id="power-settings"></div>
+        <h3>Poderes del catálogo aún no activos</h3><div id="pending-power-settings" class="pending-powers"></div>
+        <h3>Personajes elegibles para usuarios nuevos</h3>
+        <p class="settings-help">Deshabilitar una raza la excluye del sorteo de personajes nuevos. Los perfiles existentes conservan su raza y progreso.</p>
+        <div id="character-settings" class="character-settings"></div>
+        <div class="settings-actions"><button type="submit">Guardar ajustes</button><button id="settings-reset" type="button">Restablecer valores iniciales</button></div>
+        <div id="settings-status" class="settings-status" role="status" aria-live="polite">Cargando ajustes…</div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

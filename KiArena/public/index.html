@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Simulación en vivo</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+</head>
+<body>
+  <main class="arena-main">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA</h1>
+        <div class="tag">ARENA DE COMBATE CONTINUO 2D · DRAGON BALL</div>
+        <div id="firebase-status">Conectando con Firebase…</div>
+      </div>
+      <nav class="page-nav">
+        <a href="/bot" class="nav-btn">Bot / Chat & Roster →</a>
+        <a href="/settings" class="nav-btn">Settings</a>
+        <label class="env-settings">
+          Entorno
+          <select id="environment-switch" aria-label="Entorno de Firebase">
+            <option value="dev">Desarrollo</option>
+            <option value="qa">QA</option>
+            <option value="prod">Producción</option>
+          </select>
+        </label>
+      </nav>
+    </header>
+
+    <section class="stage stage-standalone">
+      <canvas id="game" width="900" height="540"></canvas>
+      <div class="legend">
+        <span>🟠 Saiyajin</span>
+        <span>🟢 Namekuseijin</span>
+        <span>🔷 Humano</span>
+        <span>🟣 Freezer</span>
+        <span>Los choques inician combates cuerpo a cuerpo automáticos</span>
+        <button id="hitbox-toggle" class="hitbox-toggle" type="button" aria-pressed="false">Mostrar hitboxes</button>
+        <span id="hitbox-legend" class="hitbox-legend" hidden>
+          <i class="hitbox-key fighter-core"></i> Cuerpo / Rayos
+          <i class="hitbox-key projectile-core"></i> Proyectil
+          <i class="hitbox-key melee-core"></i> Contacto melee
+        </span>
+      </div>
+    </section>
+
+    <footer class="arena-footer-info">
+      <span>Para ingresar o lanzar poderes usa el <a href="/bot">Panel de Bot & Chat</a> (Comandos: <b>E</b> Entrar, <b>K</b> Kamehameha, <b>M</b> Makankosappo, <b>V</b> Rayo Mortal). Ajusta fórmulas en <a href="/settings">Settings</a>.</span>
+    </footer>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
