@@ -25,7 +25,7 @@ La temática usa razas y poderes inspirados en Dragon Ball. Es un prototipo y no
 - La velocidad horizontal y vertical se conserva al rebotar contra los límites; el juego no usa navegación con pathfinding.
 - El sprite cambia de cuadro durante vuelo, combate y preparación de poderes. El tamaño de renderizado usa una escala reducida respecto de las poses base.
 - Cada personaje muestra aura que aumenta con el nivel: el tono progresa de verde en nivel bajo a rojo en nivel alto y el radio también crece.
-- Kamehameha, Makankosappo y Rayo Mortal tienen estados de preparación y cuadros de animación propios. Durante la preparación y lanzamiento, el luchador se mantiene quieto.
+- Kamehameha, Makankosappo y Rayo Mortal tienen estados de preparación y cuadros de animación propios. Durante la preparación y lanzamiento, el luchador se mantiene quieto. El Rayo Mortal sale desde la mano que apunta y se representa como un haz fino magenta con centro luminoso.
 
 ## 4. Razas y entrada de usuarios
 
@@ -36,14 +36,14 @@ El nombre normalizado en minúsculas es la clave única del jugador. Se aceptan 
 - `E` crea el perfil nuevo en nivel 1 o agrega a la arena el perfil guardado.
 - Si ya está vivo, el intento se rechaza como duplicado.
 - Si el perfil estaba eliminado, vuelve a la arena con su raza, nivel, XP y bajas conservadas; su HP se restaura según el nivel.
-- La lista muestra jugadores cargados desde Firestore, botón individual de ingreso y **Agregar todos** para perfiles pendientes.
+- La lista muestra jugadores cargados desde Firestore, botón individual de ingreso y **Agregar todos** para perfiles pendientes. El control **Elegir** de cada fila copia ese nombre al campo de usuario del chat; el resaltado indica quién enviará los próximos comandos. Elegir identidad para el chat es independiente de inspeccionar atributos.
 - No se crean luchadores iniciales de CPU como participantes nuevos por defecto. Un perfil vivo de Firestore puede volver a aparecer al abrir la arena.
 
 ## 5. Combate y daño
 
 Los golpes y patadas se resuelven en duelos animados de dos personajes. Cada golpe puede evadirse según la defensa física. Los disparos especiales se originan manualmente; el prototipo no lanza ráfagas de ki automáticas al entrar.
 
-Los tres rayos son horizontales. Usan el signo de la velocidad X del personaje para decidir hacia qué lado salen, conservando su línea Y. Cada rayo puede dañar a varios luchadores que intersecten su recorrido, una sola vez por rayo.
+Los tres rayos son horizontales. Usan el signo de la velocidad X del personaje para decidir hacia qué lado salen, conservando su línea Y. El Rayo Mortal de Freezer es un láser magenta delgado que parte de la mano extendida. Cada rayo puede dañar a varios luchadores que intersecten su recorrido, una sola vez por rayo.
 
 La mitigación implementada para ataques usa una base mínima de 4 puntos:
 
@@ -110,4 +110,3 @@ Estos datos están codificados en `FREEZER_POWER_PROGRESSION` dentro de `public/
 - No hay autenticación ni lógica autoritativa de XP/KO en Cloud Functions implementada.
 - No se ha verificado un despliegue de la nueva estructura a Firebase Hosting.
 - La física es arcade de movimiento lineal/rebote, no una colisión física realista.
-

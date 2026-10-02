@@ -39,6 +39,14 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 17. Publicar en GitHub ramas `dev` y `Twitch`; `Twitch` es el espacio de integración de stream. Al último registro, ambas recibieron commit `4797126…`; el refactor siguiente se hizo únicamente en `Twitch`.
 18. Se pidió recordar la arquitectura de carpetas y el diagrama de dependencias, no solo la arquitectura de Firebase/runtime. Esa precisión quedó reflejada en `ARCHITECTURE.md` y guio el refactor modular de la rama `Twitch`.
 
+## 2026-10-02 — selección rápida de chat y corrección del Rayo Mortal
+
+- **Solicitud:** añadir selección de usuario desde cada fila de luchador; corregir el rayo de Freezer según la referencia visual: láser fino magenta emitido por un dedo.
+- **Implementación:** cada luchador ahora tiene un botón **Elegir** que rellena el usuario del chat y resalta el remitente seleccionado, sin cambiar el panel de inspección. El Rayo Mortal entra en el mismo ciclo de avance y colisión que los rayos, y calcula su propio daño y radio de impacto en vez de pasar por la ruta de proyectiles dirigida a un objetivo. Su dibujo es magenta, delgado y luminoso; conserva la dirección horizontal del eje X.
+- **Archivos:** public/src/game/arena.js, public/styles/arena.css, docs/PROJECT_SPEC.md.
+- **Verificación:** pasó la comprobación de sintaxis de los módulos JavaScript y un smoke test HTTP local: página, CSS, módulos y sprite de poses respondieron 200. No se probó contra Firestore ni se desplegó Hosting.
+- **Rama/commit:** rama Twitch; commit pendiente de publicación. Sin despliegue a Firebase Hosting.
+
 ## Plantilla para entradas futuras
 
 ```text
@@ -49,4 +57,3 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - Verificación:
 - Rama/commit o dependencia pendiente:
 ```
-
