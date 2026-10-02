@@ -59,13 +59,13 @@ El nivel está limitado a **1–100**. Los atributos se derivan del nivel `L` (`
 
 | Atributo | Fórmula actual |
 |---|---:|
-| Vida máxima | `100 + 4g` |
+| Vida máxima | `100 + 8g` |
 | Ataque físico | `9 + 1.35g` |
 | Defensa física | `5 + 0.7g` |
 | Ataque de ki | `12 + 1.4g` |
 | Defensa de ki | `5 + 0.8g` |
 
-Una baja da al atacante `100 + round(nivel del rival × 4)` XP. Para avanzar desde el nivel `L` se requieren `round(100 + 24L + 1.3L²)` XP. El excedente se consume en una subida y puede permitir más de un nivel si alcanza. Al llegar a nivel 100, la XP se fija en cero.
+Los perfiles anteriores a la versión 2 de HP conservan su porcentaje de vida actual al migrar una sola vez desde la escala antigua (`100 + 4g`) a la nueva (`100 + 8g`). Una baja da al atacante `100 + round(nivel del rival × 4)` XP. Para avanzar desde el nivel `L` se requieren `round(100 + 24L + 1.3L²)` XP. El excedente se consume en una subida y puede permitir más de un nivel si alcanza. Al llegar a nivel 100, la XP se fija en cero.
 
 La interfaz muestra una barra de XP inmediatamente debajo de la barra de vida sobre el luchador, más el nivel, las bajas y las estadísticas al seleccionar un perfil.
 

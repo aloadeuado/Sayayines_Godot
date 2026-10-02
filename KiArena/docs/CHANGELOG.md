@@ -63,6 +63,14 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - **Verificación:** pasó la sintaxis ES module de los cuatro módulos y el smoke test HTTP: index, CSS, módulos y sprite respondieron 200. Sin escritura de datos de Firebase.
 - **Rama/commit:** rama Twitch; implementación publicada en dc2705e6cb628dc79242cdd4773665619b8a563c. Sin despliegue de Firebase Hosting.
 
+## 2026-10-02 — duplicar crecimiento de HP por nivel
+
+- **Solicitud:** cambiar la vida máxima de `100 + 4 × (nivel − 1)` a `100 + 8 × (nivel − 1)`.
+- **Implementación:** la HP máxima crece 8 puntos por nivel (100 en nivel 1 y 892 en nivel 100); se aplica al crear perfiles, subir niveles y reingresar. Los perfiles guardados se migran una sola vez según su porcentaje de HP previo, mediante `hpFormulaVersion: 2`.
+- **Archivos:** public/src/game/arena.js, public/src/services/firebase/arena-cloud.js y docs/PROJECT_SPEC.md.
+- **Verificación:** pasaron las comprobaciones de sintaxis de los módulos de arena y Firestore; el cálculo da 100, 108, 172 y 892 HP en niveles 1, 2, 10 y 100. Index y ambos módulos respondieron HTTP 200. No se mutaron datos de Firebase durante la verificación.
+- **Rama/commit:** Twitch; commit pendiente. Sin despliegue de Firebase Hosting.
+
 ## Plantilla para entradas futuras
 
 ```text
