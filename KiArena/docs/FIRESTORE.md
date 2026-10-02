@@ -20,6 +20,8 @@ Los tres entornos actuales son prefijos lógicos dentro del mismo proyecto:
 | `qa` | `environments/qa/kiArenaPlayers/{usernameKey}` | `environments/qa/kiArenaMessages/{auto-id}` | `environments/qa/kiArenaEvents/{auto-id}` |
 | `prod` | `environments/prod/kiArenaPlayers/{usernameKey}` | `environments/prod/kiArenaMessages/{auto-id}` | `environments/prod/kiArenaEvents/{auto-id}` |
 
+La configuración del juego se guarda en `environments/{dev|qa|prod}/kiArenaSettings/gameplay`. El documento contiene `settingsJson` (JSON serializado con versión, multiplicadores de atributos, curvas de daño por nivel y elegibilidad de personajes), `environment` y `updatedAt`. La pantalla lee y escribe únicamente el documento del entorno seleccionado. Si nunca se ha guardado Settings, los valores predeterminados del código se usan como fallback.
+
 Esto evita mezclar documentos por convención; **no** aísla permisos, cuotas, facturación o recursos. La configuración `.firebaserc` todavía tiene un alias `default` apuntando a `sayayin-c0dfe`. Antes de producción real, asignar proyectos por entorno y reglas propias.
 
 ## Documento de perfil
@@ -56,4 +58,3 @@ No guardar progreso en `localStorage` ni `sessionStorage`. La velocidad, posici�
 ## Seguridad y tareas pendientes
 
 El documento histórico `FIREBASE.md` indica que las reglas existentes permiten lectura/escritura públicas; comprobarlas en Firebase antes de abrir el juego ampliamente. Añadir Authentication y reglas por usuario/canal; mover decisiones de XP/KO a una función confiable para evitar trampas. Los prefijos de entorno no son una frontera de seguridad. Nunca probar la interfaz con comandos que escriban perfiles reales sin una instrucción explícita; usar `qa` o Emulator Suite.
-

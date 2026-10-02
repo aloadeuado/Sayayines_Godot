@@ -22,6 +22,7 @@ Repositorio/
 │           ├── main.js               # Configuración y composición
 │           ├── app/arena-app.js      # Arranque de la arena
 │           ├── config/firebase.js    # Entorno y configuración web
+│           ├── config/gameplay-settings.js # Fórmulas y multiplicadores por nivel
 │           ├── game/arena.js         # Simulación, canvas, chat y UI actual
 │           └── services/
 │               ├── firebase/arena-cloud.js
@@ -37,7 +38,8 @@ Repositorio/
 | `app/arena-app.js` | Punto de arranque y ciclo de vida de la vista de arena. | Formato REST de Firestore o OAuth. |
 | `game/arena.js` | Bucle de animación, movimiento, rebotes, duelos, técnicas, canvas y eventos de UI/chat. | Construir URLs Firestore ni contener secretos Twitch. |
 | `config/firebase.js` | Validar `env` de URL y componer el espacio lógico del proyecto. | Autenticación o aislamiento real entre proyectos. |
-| `services/firebase/arena-cloud.js` | Adaptar lecturas y escrituras Firestore a métodos de dominio (`get`, `save`, `addMessage`, `addEvent`, listas y estado). | Reglas de combate ni autoridad de XP/KO. |
+| `config/gameplay-settings.js` | Valores predeterminados, normalización, estadísticas derivadas de `N`, multiplicadores de poderes y razas habilitadas. | Persistencia, eventos de UI o reglas de combate. |
+| `services/firebase/arena-cloud.js` | Adaptar lecturas y escrituras Firestore a métodos de dominio (`get`, `save`, `getSettings`, `saveSettings`, `addMessage`, `addEvent`, listas y estado). | Reglas de combate ni autoridad de XP/KO. |
 | `services/twitch/` | Futuro adaptador: traducir mensaje entrante a nombre y comando de arena. | Persistir directamente el perfil o ejecutar combate. |
 
 Dependencias actuales:
@@ -71,4 +73,3 @@ firebase.cmd emulators:start --only hosting --project sayayin-c0dfe
 ```
 
 Abre `http://127.0.0.1:5000/` o la ruta compatible `/ki-arena.html?env=dev`. Hosting debe servir el contenido de `public/`; la configuración de entorno determina las colecciones consultadas.
-

@@ -1,44 +1,559 @@
-export function initArena(){const c=document.querySelector('#game'),ctx=c.getContext('2d'),W=c.width,H=c.height,bg=new Image();bg.src='assets/kame-house-background.png';const spriteSheet=new Image();spriteSheet.src='assets/fighter-sprites-v1.png';const kameSpriteSheet=new Image();kameSpriteSheet.src='assets/fighter-kame-poses-v1.png';const meleeSheet=new Image();meleeSheet.src='assets/fighter-melee-poses-v1.png';const makaSheet=new Image();makaSheet.src='assets/fighter-makankosappo-v1.png';const SPRITE_SCALE=.72;let fighters=[],bolts=[],particles=[],duels=[],logs=[],selected=null,last=0,paused=false,showHitboxes=false;const races=[['Saiyajin','#ff9d3d'],['Namekuseijin','#68e47b'],['Humano','#68b9ff'],['Freezer','#c487ff']];const powers={1:['Golpe de ki'],2:['Kamehameha'],3:['Destello final'],4:['Mafuba'],5:['Bola mortal']};const FREEZER_POWER_PROGRESSION={V:{name:'Rayo Mortal',unlockLevel:1,widthStart:10,widthEnd:7,damageStart:2.6,damageEnd:3.4},M:{name:'Makankosappo',unlockLevel:10,widthStart:8,widthEnd:5,damageStart:3.2,damageEnd:4.2},K:{name:'Kamehameha',unlockLevel:20,widthStart:6,widthEnd:3,damageStart:5.5,damageEnd:7}};
+import { CHARACTER_OPTIONS, DEFAULT_GAME_SETTINGS, calculateLevelStats, enabledCharacterRaces, normalizeGameSettings, powerMultiplierAtLevel } from '../config/gameplay-settings.js';
+export function initArena(){const c=document.querySelector('#game'),ctx=c.getContext('2d'),W=c.width,H=c.height,bg=new Image();bg.src='assets/kame-house-background.png';const spriteSheet=new Image();spriteSheet.src='assets/fighter-sprites-v1.png';const kameSpriteSheet=new Image();kameSpriteSheet.src='assets/fighter-kame-poses-v1.png';const meleeSheet=new Image();meleeSheet.src='assets/fighter-melee-poses-v1.png';const makaSheet=new Image();makaSheet.src='assets/fighter-makankosappo-v1.png';const SPRITE_SCALE=.72;let gameplaySettings=normalizeGameSettings(DEFAULT_GAME_SETTINGS);let fighters=[],bolts=[],particles=[],duels=[],logs=[],selected=null,last=0,paused=false,showHitboxes=false;const races=[['Saiyajin','#ff9d3d'],['Namekuseijin','#68e47b'],['Humano','#68b9ff'],['Freezer','#c487ff']];const powers={1:['Golpe de ki'],2:['Kamehameha'],3:['Destello final'],4:['Mafuba'],5:['Bola mortal']};const FREEZER_POWER_PROGRESSION={V:{name:'Rayo Mortal',unlockLevel:1,widthStart:10,widthEnd:7},M:{name:'Makankosappo',unlockLevel:10,widthStart:8,widthEnd:5},K:{name:'Kamehameha',unlockLevel:20,widthStart:6,widthEnd:3}};
 let cloudPlayers=new Map(),chatUserKey="";
 function normalizeUsername(name){return String(name||'').trim().toLowerCase()}
 function fighterLabel(f){return !f.isPlayer&&fighters.some(p=>p.isPlayer&&normalizeUsername(p.name)===normalizeUsername(f.name))?f.name+' (CPU)':f.name}
-function saveFighter(f){if(f.isPlayer&&window.kiArenaCloud)window.kiArenaCloud.save(f.name,{level:f.level,xp:f.xp,kills:f.kills,deaths:f.deaths||0,race:f.race,alive:f.alive,hp:f.hp,hpFormulaVersion:2}).catch(e=>window.kiArenaCloud.setStatus('Error guardando en Firebase: '+e.message))}function xpForNext(level){return Math.round(100+level*24+level*level*1.3)}
-function make(name,race,x,y,id=name,isPlayer=false,userKey='',rec={}){const level=Math.max(1,Math.min(100,Math.floor(Number(rec.level)||1))),growth=level-1,max=100+growth*8,legacyMax=100+growth*4,alive=rec.alive!==false,savedHp=Number(rec.hp),hp=alive?(Number(rec.hpFormulaVersion)>=2?Math.min(max,Math.max(0,savedHp||max)):Math.min(max,Math.max(0,savedHp||legacyMax)/legacyMax*max)):0;return {id,isPlayer,userKey,name,race:Number(rec.race??race),color:races[Number(rec.race??race)][1],x,y,vx:(Math.random()-.5)*2.8,vy:(Math.random()-.5)*2.8,hp,hpFormulaVersion:2,max,level,xp:Math.max(0,Number(rec.xp)||0),atk:9+growth*1.35,def:5+growth*.7,ki:12+growth*1.4,kidef:5+growth*.8,cd:Math.random()*2,fight:0,flash:0,seed:Math.random()*10,alive,kills:Math.max(0,Number(rec.kills)||0),deaths:Math.max(0,Number(rec.deaths)||0),kameCd:0,makaCd:0,deathCd:0}}function init(){fighters=[...cloudPlayers.values()].filter(record=>record.alive!==false).map((record,index)=>{const key=normalizeUsername(record.username),x=90+(index%5)*170,y=100+Math.floor(index/5)*95;return make(record.username,Number(record.race)||0,x,y,'user:'+key,true,key,record)});for(const f of fighters){const saved=cloudPlayers.get(f.userKey);if(Number(saved?.hpFormulaVersion)!==2)saveFighter(f)}bolts=[];particles=[];duels=[];logs=[];selected=fighters[0]||null;for(const f of fighters)addChatLine(f.name,'E');say('Comienza la batalla. Progreso guardado en Firebase.');drawRoster()}function say(s){logs.unshift(s);logs=logs.slice(0,24);document.querySelector('#feed').innerHTML=logs.map(x=>'<div>'+x+'</div>').join('')}
+function saveFighter(f){if(f.isPlayer&&window.kiArenaCloud)window.kiArenaCloud.save(f.name,{level:f.level,xp:f.xp,kills:f.kills,deaths:f.deaths||0,race:f.race,alive:f.alive,hp:f.hp,maxHp:f.max,hpFormulaVersion:2}).catch(e=>window.kiArenaCloud.setStatus('Error guardando en Firebase: '+e.message))}function xpForNext(level){return Math.round(100+level*24+level*level*1.3)}
+function make(name,race,x,y,id=name,isPlayer=false,userKey='',rec={}){const level=Math.max(1,Math.min(100,Math.floor(Number(rec.level)||1))),growth=level-1,stats=calculateLevelStats(level,gameplaySettings),max=stats.maxHp,legacyMax=Number(rec.hpFormulaVersion)>=2?100+growth*8:100+growth*4,previousMax=Math.max(1,Number(rec.maxHp)||legacyMax),alive=rec.alive!==false,savedHp=Number(rec.hp),hp=alive?Math.min(max,Math.max(0,(Number.isFinite(savedHp)?savedHp:previousMax)/previousMax*max)):0;return {id,isPlayer,userKey,name,race:Number(rec.race??race),color:races[Number(rec.race??race)][1],x,y,vx:(Math.random()-.5)*2.8,vy:(Math.random()-.5)*2.8,hp,max,hpFormulaVersion:2,atk:stats.physicalAttack,def:stats.physicalDefense,ki:stats.ki,kidef:stats.kiDefense,cd:Math.random()*2,fight:0,flash:0,seed:Math.random()*10,alive,kills:Math.max(0,Number(rec.kills)||0),deaths:Math.max(0,Number(rec.deaths)||0),kameCd:0,makaCd:0,deathCd:0}}function init(){fighters=[...cloudPlayers.values()].filter(record=>record.alive!==false).map((record,index)=>{const key=normalizeUsername(record.username),x=90+(index%5)*170,y=100+Math.floor(index/5)*95;return make(record.username,Number(record.race)||0,x,y,'user:'+key,true,key,record)});for(const f of fighters){const record=cloudPlayers.get(f.userKey);if(!Number(record?.maxHp))saveFighter(f)}bolts=[];particles=[];duels=[];logs=[];selected=fighters[0]||null;for(const f of fighters)addChatLine(f.name,'E');say('Comienza la batalla. Progreso guardado en Firebase.');drawRoster()}function say(s){logs.unshift(s);logs=logs.slice(0,24);document.querySelector('#feed').innerHTML=logs.map(x=>'<div>'+x+'</div>').join('')}
 function unlock(f){if(f.race===3)return Object.values(FREEZER_POWER_PROGRESSION).filter(power=>f.level>=power.unlockLevel).map(power=>power.name);return powers[Math.min(5,Math.ceil(f.level/2))]||powers[1]}
-function gain(f,victim){f.xp+=100+Math.round((victim?.level||1)*4);let oldMax=f.max;while(f.level<100&&f.xp>=xpForNext(f.level)){f.xp-=xpForNext(f.level);f.level++;const n=f.level-1;f.max=100+n*8;f.hp=Math.min(f.max,f.hp+(f.max-oldMax));oldMax=f.max;f.atk=9+n*1.35;f.def=5+n*.7;f.ki=12+n*1.4;f.kidef=5+n*.8;say('<b style="color:'+f.color+'">'+f.name+'</b> sube al nivel '+f.level+'.')}if(f.level>=100)f.xp=0;saveFighter(f)}
-function hit(target,amount,source,ki){if(!target.alive)return;target.hp-=Math.max(4,amount-(ki?target.kidef:target.def)*.45);target.flash=.12;for(let i=0;i<5;i++)particles.push({x:target.x,y:target.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:.3,color:ki?'#74e9ff':'#ffd46c'});if(target.hp<=0){target.hp=0;target.alive=false;target.deaths=(target.deaths||0)+1;saveFighter(target);if(source&&source!==target){window.kiArenaCloud.addEvent('knockout',{victim:target.name,killer:source.name}).catch(()=>{});source.kills++;gain(source,target);say('<b style="color:'+source.color+'">'+source.name+'</b> derrot? a '+target.name+'.')}else say(target.name+' cay? en combate.');drawRoster()}}
+function gain(f,victim){f.xp+=100+Math.round((victim?.level||1)*4);while(f.level<100&&f.xp>=xpForNext(f.level)){const oldMax=f.max;f.xp-=xpForNext(f.level);f.level++;const stats=calculateLevelStats(f.level,gameplaySettings);f.max=stats.maxHp;f.hp=Math.min(f.max,f.hp+(f.max-oldMax));f.atk=stats.physicalAttack;f.def=stats.physicalDefense;f.ki=stats.ki;f.kidef=stats.kiDefense;say('<b style="color:'+f.color+'">'+f.name+'</b> sube al nivel '+f.level+'.')}if(f.level>=100)f.xp=0;saveFighter(f)}function hit(target,amount,source,ki){if(!target.alive)return;target.hp-=Math.max(4,amount-(ki?target.kidef:target.def)*.45);target.flash=.12;for(let i=0;i<5;i++)particles.push({x:target.x,y:target.y,vx:(Math.random()-.5)*4,vy:(Math.random()-.5)*4,life:.3,color:ki?'#74e9ff':'#ffd46c'});if(target.hp<=0){target.hp=0;target.alive=false;target.deaths=(target.deaths||0)+1;saveFighter(target);if(source&&source!==target){window.kiArenaCloud.addEvent('knockout',{victim:target.name,killer:source.name}).catch(()=>{});source.kills++;gain(source,target);say('<b style="color:'+source.color+'">'+source.name+'</b> derrot? a '+target.name+'.')}else say(target.name+' cay? en combate.');drawRoster()}}
 function drawBackground(t){if(bg.complete&&bg.naturalWidth){const scale=Math.max(W/bg.naturalWidth,H/bg.naturalHeight),iw=bg.naturalWidth*scale,ih=bg.naturalHeight*scale;ctx.drawImage(bg,(W-iw)/2,(H-ih)/2,iw,ih)}else{const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#183451');g.addColorStop(1,'#253f60');ctx.fillStyle=g;ctx.fillRect(0,0,W,H)}ctx.fillStyle='rgba(5,12,25,.25)';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='bold 12px system-ui';ctx.fillText('ISLA KAME - ZONA DE COMBATE',18,24)}
-function sprite(f,t){if(!f.alive)return;const sx=f.x,sy=f.y+(f.kameState||f.makaState||f.deathRayState||f.combatState?0:Math.sin(t*5+f.seed)*4),maka=!!f.makaState,kame=!!f.kameState,finger=!!f.deathRayState,combat=!!f.combatState,action=maka||kame||finger,sheet=finger?makaSheet:maka?makaSheet:kame?kameSpriteSheet:combat?meleeSheet:spriteSheet;let rendered=false;if(sheet.complete&&sheet.naturalWidth){const state=finger?f.deathRayState:maka?f.makaState:kame?f.kameState:null,frame=finger?(state.phase==='focus'?2:3):maka?(state.phase==='focus'?(state.timer>.3?0:1):(state.phase==='aim'?2:3)):kame?(state.phase==='charge'?(state.timer>.28?0:1):(state.phase==='thrust'?2:3)):combat?f.combatState.frame:Math.floor(t*7+f.seed*4)%4,cw=sheet.naturalWidth/4,ch=sheet.naturalHeight/4,dw=(action||combat?112:90)*SPRITE_SCALE,dh=(action||combat?112:104)*SPRITE_SCALE;ctx.save();ctx.translate(Math.round(sx),Math.round(sy));ctx.scale(f.vx<0?-1:1,1);ctx.imageSmoothingEnabled=true;ctx.drawImage(sheet,frame*cw,f.race*ch,cw,ch,-dw/2,-dh/2,dw,dh);ctx.restore();rendered=true}if(!rendered){ctx.save();ctx.translate(Math.round(sx),Math.round(sy));ctx.scale(f.vx<0?-1:1,1);ctx.scale(SPRITE_SCALE,SPRITE_SCALE);ctx.fillStyle=f.color+'44';ctx.beginPath();ctx.ellipse(0,4,29,34,0,0,Math.PI*2);ctx.fill();ctx.fillStyle=f.race===1?'#79d887':f.race===3?'#e9eaff':'#f1c39a';ctx.fillRect(-7,-23,17,17);ctx.fillStyle=f.color;ctx.fillRect(-13,-5,27,25);ctx.fillStyle=f.race===0?'#17131c':f.race===3?'#ece9f6':'#37251c';ctx.fillRect(-11,-29,23,9);ctx.fillStyle='#27304a';ctx.fillRect(-12,18,9,12);ctx.fillRect(4,18,9,12);ctx.restore()}const barY=sy-(action||combat?50:47),xpRatio=f.level>=100?1:Math.max(0,Math.min(1,f.xp/xpForNext(f.level)));ctx.fillStyle='#08101d';ctx.fillRect(sx-24,barY,48,5);ctx.fillStyle=f.color;ctx.fillRect(sx-24,barY,48*Math.max(0,f.hp/f.max),5);ctx.fillStyle='#08101d';ctx.fillRect(sx-24,barY+7,48,3);ctx.fillStyle='#ffd45c';ctx.fillRect(sx-24,barY+7,48*xpRatio,3);ctx.fillStyle='#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText(fighterLabel(f)+' - Lv '+f.level,sx,barY-6);ctx.textAlign='left';if(selected===f){ctx.strokeStyle='#fff';ctx.setLineDash([4,4]);ctx.beginPath();ctx.arc(sx,sy,36,0,Math.PI*2);ctx.stroke();ctx.setLineDash([])}}
-function nearest(f){const enemies=fighters.filter(o=>o!==f&&o.alive);enemies.sort((a,b)=>Math.hypot(a.x-f.x,a.y-f.y)-Math.hypot(b.x-f.x,b.y-f.y));return enemies[0]}
-function startDuel(a,b){if(!a.alive||!b.alive||a.combatState||b.combatState||a.kameState||b.kameState)return;const left=a.x<=b.x?a:b,right=left===a?b:a,cx=Math.max(70,Math.min(W-70,(left.x+right.x)/2)),cy=(left.y+right.y)/2;left.x=cx-38;right.x=cx+38;left.y=right.y=Math.max(70,Math.min(H-45,cy));left.vx=Math.abs(left.vx)||1;right.vx=-(Math.abs(right.vx)||1);const duel={left,right,steps:[{attacker:left,defender:right,frame:1},{attacker:right,defender:left,frame:1},{attacker:left,defender:right,frame:2},{attacker:right,defender:left,frame:2}],index:0,timer:0,hitDone:false};left.combatState={duel,frame:0};right.combatState={duel,frame:0};duels.push(duel);say('<span style="color:'+left.color+'">'+left.name+'</span> y <span style="color:'+right.color+'">'+right.name+'</span> comienzan un combate cuerpo a cuerpo.')}
-function endDuel(d){const {left,right}=d;if(left.combatState?.duel===d)left.combatState=null;if(right.combatState?.duel===d)right.combatState=null;if(left.alive)left.vx=-Math.abs(left.vx||1);if(right.alive)right.vx=Math.abs(right.vx||1)}
-function updateDuels(dt){for(const d of [...duels]){const {left,right}=d;if(!left.alive||!right.alive){endDuel(d);duels=duels.filter(x=>x!==d);continue}if(d.timer<=0){if(d.index>=d.steps.length){endDuel(d);duels=duels.filter(x=>x!==d);continue}const step=d.steps[d.index];d.attacker=step.attacker;d.defender=step.defender;d.duration=.4;d.timer=d.duration;d.hitDone=false;d.attacker.combatState.frame=step.frame;d.defender.combatState.frame=0}d.timer-=dt;if(!d.hitDone&&d.timer<=d.duration*.5){d.hitDone=true;const evade=Math.random()<Math.min(.52,.25+d.defender.def*.004);if(evade){d.defender.combatState.frame=3;if(Math.random()<.35)say('<span style="color:'+d.defender.color+'">'+d.defender.name+'</span> esquiva el golpe.')}else hit(d.defender,d.attacker.atk*.95+Math.random()*3,d.attacker,false)}if(d.timer<=0)d.index++}}
-function update(dt,t){updateDuels(dt);for(const f of fighters){if(!f.alive)continue;f.cd-=dt;f.kameCd=Math.max(0,f.kameCd-dt);f.makaCd=Math.max(0,f.makaCd-dt);f.deathCd=Math.max(0,f.deathCd-dt);f.flash=Math.max(0,f.flash-dt);if(f.combatState)continue;if(f.deathRayState){const a=f.deathRayState;a.timer-=dt;if(a.timer<=0){if(a.phase==='focus'){a.phase='fire';a.timer=.4;fireDeathRay(f)}else f.deathRayState=null}continue}if(f.kameState){const a=f.kameState;a.timer-=dt;if(a.timer<=0){if(a.phase==='charge'){a.phase='thrust';a.timer=.22}else if(a.phase==='thrust'){a.phase='fire';a.timer=.82;fireKame(f)}else f.kameState=null}continue}if(f.makaState){const a=f.makaState;a.timer-=dt;if(a.timer<=0){if(a.phase==='focus'){a.phase='aim';a.timer=.24}else if(a.phase==='aim'){a.phase='fire';a.timer=.95;fireMaka(f)}else f.makaState=null}continue}const e=nearest(f);
-f.x+=f.vx*60*dt;f.y+=f.vy*60*dt;if(f.x<26){f.x=26;f.vx=Math.abs(f.vx)}else if(f.x>W-26){f.x=W-26;f.vx=-Math.abs(f.vx)}if(f.y<55){f.y=55;f.vy=Math.abs(f.vy)}else if(f.y>H-56){f.y=H-56;f.vy=-Math.abs(f.vy)}if(!e)continue;const dx=e.x-f.x,dy=e.y-f.y,d=Math.hypot(dx,dy);if(d<58&&!e.combatState&&!e.kameState){startDuel(f,e);continue}}
-for(const b of bolts){if(b.kame||b.maka||b.deathRay){b.dist=Math.min(b.length,b.dist+(b.deathRay?2200:b.maka?1650:1100)*dt);b.life-=dt;for(const target of fighters){if(!target.alive||target===b.owner||b.hit.has(target))continue;const rx=target.x-b.x,ry=target.y-b.y,along=rx*b.dx+ry*b.dy,side=Math.abs(rx*b.dy-ry*b.dx);const beamRadius=b.deathRay?deathRayHitRadius(b.owner):beamHitRadius(b.owner,b.maka,b.dist);if(along>=0&&along<=b.dist+18&&side<beamRadius){b.hit.add(target);hit(target,b.deathRay?deathRayDamage(b.owner):beamDamage(b.owner,b.maka),b.owner,true)}}continue}b.x+=b.vx*dt;b.y+=b.vy*dt;b.life-=dt;if(b.life<=0)continue;if(b.target.alive&&Math.hypot(b.x-b.target.x,b.y-b.target.y)<21){hit(b.target,b.owner.ki+Math.random()*6,b.owner,true);b.life=0}}bolts=bolts.filter(b=>b.life>0);for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.life-=dt}particles=particles.filter(p=>p.life>0)}
-function draw(t){drawBackground(t);for(const b of bolts){if(b.kame){const ex=b.x+b.dx*b.dist,ey=b.y+b.dy*b.dist,thickness=beamWidth(b.owner,false),pulse=Math.sin(t*25+b.phase)*Math.min(4,thickness*.08),sideX=-b.dy,sideY=b.dx;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.shadowColor='#58cfff';ctx.shadowBlur=34;ctx.strokeStyle='#239cff';ctx.globalAlpha=.78;ctx.lineWidth=thickness*1.35+pulse;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.shadowBlur=18;ctx.strokeStyle='#51dcff';ctx.globalAlpha=.95;ctx.lineWidth=thickness*.92+pulse;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle='#d9ffff';ctx.globalAlpha=.98;ctx.lineWidth=thickness*.45+pulse*.45;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle='#fff';ctx.globalAlpha=.9;ctx.lineWidth=Math.max(3,thickness*.15);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();for(let i=1;i<=7;i++){const q=b.dist*i/8,wig=Math.sin(t*22+i*2+b.phase)*12,cx=b.x+b.dx*q,cy=b.y+b.dy*q;ctx.strokeStyle=i%2?'#a5f7ff':'#4cbbff';ctx.lineWidth=3;ctx.globalAlpha=.7;ctx.beginPath();ctx.moveTo(cx+sideX*wig,cy+sideY*wig);ctx.lineTo(cx-sideX*(wig+10),cy-sideY*(wig+10));ctx.stroke()}ctx.restore()}else if(b.maka){const ex=b.x+b.dx*b.dist,ey=b.y,thickness=beamWidth(b.owner,true),pulse=Math.sin(t*20+b.phase)*Math.min(2,thickness*.06),nx=-b.dy,ny=b.dx,wide=thickness*.5+Math.min(5,b.dist*.009),tip=ex+b.dx*14;ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowColor='#ff54c8';ctx.shadowBlur=44;ctx.globalAlpha=1;ctx.beginPath();ctx.moveTo(b.x+nx*12,b.y+ny*12);ctx.lineTo(ex+nx*wide,ey+ny*wide);ctx.lineTo(tip,ey);ctx.lineTo(ex-nx*wide,ey-ny*wide);ctx.lineTo(b.x-nx*12,b.y-ny*12);ctx.closePath();const beam=ctx.createLinearGradient(b.x,b.y,ex,ey);beam.addColorStop(0,'#ff70df');beam.addColorStop(.22,'#fff080');beam.addColorStop(.72,'#ffc928');beam.addColorStop(1,'#fff5a0');ctx.fillStyle=beam;ctx.fill();ctx.lineCap='round';ctx.strokeStyle='#ff5ccf';ctx.lineWidth=thickness*.34+pulse;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.shadowBlur=26;ctx.strokeStyle='#fff52e';ctx.lineWidth=thickness*.5+pulse;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();ctx.strokeStyle='#fffde5';ctx.lineWidth=Math.max(2,thickness*.2);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,ey);ctx.stroke();for(let i=0;i<=Math.floor(b.dist/30);i++){const q=Math.min(b.dist,i*30),cx=b.x+b.dx*q,cy=b.y,flare=wide*(1.05+Math.sin(t*24+i*1.8+b.phase)*.14);ctx.strokeStyle=i%2?'#ff31c8':'#fff229';ctx.lineWidth=3.5;ctx.globalAlpha=.85;ctx.shadowBlur=11;ctx.beginPath();ctx.ellipse(cx,cy,12,flare,0,0,Math.PI*2);ctx.stroke()}ctx.restore()}else if(b.deathRay){const ex=b.x+b.dx*b.dist,width=deathRayWidth(b.owner),pulse=Math.sin(t*38+b.phase)*.8;ctx.save();ctx.globalCompositeOperation='lighter';ctx.lineCap='round';ctx.shadowColor='#ff4bd8';ctx.shadowBlur=16;ctx.strokeStyle='#ba31ff';ctx.globalAlpha=.82;ctx.lineWidth=Math.max(5,width*1.45);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,b.y);ctx.stroke();ctx.shadowBlur=11;ctx.strokeStyle='#ff48d7';ctx.globalAlpha=1;ctx.lineWidth=Math.max(2,width*.58)+pulse*.35;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,b.y);ctx.stroke();ctx.strokeStyle='#ffeaff';ctx.lineWidth=Math.max(1,width*.2);ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(ex,b.y);ctx.stroke();ctx.fillStyle='#fff4ff';ctx.shadowColor='#ff74e8';ctx.shadowBlur=18;ctx.beginPath();ctx.arc(ex,b.y,Math.max(2,width*.38),0,Math.PI*2);ctx.fill();ctx.restore()}else{ctx.strokeStyle=b.color;ctx.lineWidth=6;ctx.globalAlpha=.7;ctx.beginPath();ctx.moveTo(b.x-b.vx*.045,b.y-b.vy*.045);ctx.lineTo(b.x,b.y);ctx.stroke();ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x,b.y,4,0,7);ctx.fill()}}for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/.3);ctx.fillStyle=p.color;ctx.fillRect(p.x,p.y,4,4)}ctx.globalAlpha=1;fighters.forEach(f=>{if(f.alive){drawAura(f,t);drawChargeAura(f,t)}sprite(f,t)});if(showHitboxes)drawHitboxes()}
-function interruptDuel(f){if(!f.combatState)return;const duel=f.combatState.duel;endDuel(duel);duels=duels.filter(d=>d!==duel)}
-function launchKame(f){if(!f.alive||f.kameCd>0||f.kameState||f.makaState||f.deathRayState)return;if(f.combatState)interruptDuel(f);f.kameState={phase:'charge',timer:.55};f.kameCd=3.8;say('<span style="color:'+f.color+'">'+f.name+'</span> recoge las manos y carga un <b style="color:#65e8ff">KAMEHAMEHA</b>.')}
-function beamWidth(f,maka){const progress=freezerScale(f);if(f.race===3){const p=maka?FREEZER_POWER_PROGRESSION.M:FREEZER_POWER_PROGRESSION.K;return p.widthStart+(p.widthEnd-p.widthStart)*progress}return maka?10+progress*58:30+progress*56}
-function beamDamage(f,maka){const scale=freezerScale(f);if(f.race===3){const p=maka?FREEZER_POWER_PROGRESSION.M:FREEZER_POWER_PROGRESSION.K;return f.ki*(p.damageStart+(p.damageEnd-p.damageStart)*scale)}return f.ki*(maka?3.2+scale*5.3:1.9+scale*2.5)}
-function freezerScale(f){return (Math.max(1,Math.min(100,f.level||1))-1)/99}
-function deathRayWidth(f){const p=FREEZER_POWER_PROGRESSION.V,t=freezerScale(f);return p.widthStart+(p.widthEnd-p.widthStart)*t}
-function deathRayDamage(f){const p=FREEZER_POWER_PROGRESSION.V,t=freezerScale(f);return f.ki*(p.damageStart+(p.damageEnd-p.damageStart)*t)}
-function deathRayHitRadius(f){return deathRayWidth(f)*.5+12}
-function beamHitRadius(f,maka,distance){const width=beamWidth(f,maka),targetRadius=12;if(maka)return width*.5+Math.min(5,distance*.009)+targetRadius;return width*.675+12+targetRadius}
-function drawHitboxes(){for(const f of fighters){if(!f.alive)continue;ctx.save();ctx.lineWidth=2;ctx.setLineDash([5,4]);ctx.fillStyle='rgba(74,226,255,.09)';ctx.strokeStyle='#4ae2ff';ctx.beginPath();ctx.arc(f.x,f.y,12,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.setLineDash([3,4]);ctx.strokeStyle='#ff6b8a';ctx.beginPath();ctx.arc(f.x,f.y,21,0,Math.PI*2);ctx.stroke();ctx.setLineDash([2,5]);ctx.strokeStyle='#ffc45e';ctx.beginPath();ctx.arc(f.x,f.y,29,0,Math.PI*2);ctx.stroke();ctx.restore()}}function fireKame(f){const dx=Math.sign(f.vx)||1,dy=0;bolts.push({x:f.x+dx*25,y:f.y,dx,dy,dist:0,length:760,life:.82,owner:f,color:'#65e8ff',label:'Kamehameha',kame:true,hit:new Set(),phase:Math.random()*10});say('<span style="color:'+f.color+'">'+f.name+'</span> extiende los brazos y dispara el Kamehameha.')}
-function canMaka(f){return f.isPlayer||f.race===0||f.race===1}
-function launchMaka(f){if(!f.alive||!canMaka(f)||f.makaCd>0||f.makaState||f.kameState||f.deathRayState)return;if(f.combatState)interruptDuel(f);f.makaState={phase:'focus',timer:.62};f.makaCd=7;say('<span style="color:'+f.color+'">'+f.name+'</span> concentra energia en dos dedos para el <b style="color:#dc9cff">MAKANKOSAPPO</b>.')}
-function fireMaka(f){const dx=Math.sign(f.vx)||1,dy=0;bolts.push({x:f.x+dx*27,y:f.y,dx,dy,dist:0,length:780,life:.95,owner:f,color:'#dc9cff',label:'Makankosappo',maka:true,hit:new Set(),phase:Math.random()*10});say('<span style="color:'+f.color+'">'+f.name+'</span> dispara el rayo perforante horizontal.')}
-function launchDeathRay(f){if(!f.alive||f.race!==3||f.deathCd>0||f.deathRayState||f.kameState||f.makaState)return;if(f.combatState)interruptDuel(f);f.deathRayState={phase:"focus",timer:.24};f.deathCd=1.8;say("<span style=\"color:"+f.color+"\">"+f.name+"</span> apunta un dedo y carga el <b style=\"color:#ff536b\">RAYO MORTAL</b>.")}
-function fireDeathRay(f){const dx=Math.sign(f.vx)||1,dy=0;bolts.push({x:f.x+dx*34,y:f.y-12,dx,dy,dist:0,length:820,life:.4,owner:f,color:"#ff48d7",label:"Rayo Mortal",deathRay:true,hit:new Set(),phase:Math.random()*10});say("<span style=\"color:"+f.color+"\">"+f.name+"</span> dispara el Rayo Mortal con un dedo.")}
-function renderChatUserSelection(name){chatUserKey=normalizeUsername(name);document.querySelectorAll(".select-chat-user").forEach(btn=>{const active=normalizeUsername(btn.dataset.selectChatUser)===chatUserKey;btn.setAttribute("aria-pressed",String(active));btn.setAttribute("aria-label",active?btn.dataset.selectChatUser+" seleccionado para enviar comandos":"Usar "+btn.dataset.selectChatUser+" para enviar comandos");btn.textContent=active?"âœ“":"Elegir";btn.closest(".fighter")?.classList.toggle("chat-target",active)})}
-function selectChatUser(name,announce=false){const user=String(name||"").trim();if(!user)return;document.querySelector("#chat-user").value=user;renderChatUserSelection(user);if(announce)addChatLine("Sistema","El chat enviarÃ¡ comandos como @"+user+".",true)}
-function drawRoster(){const users=[...cloudPlayers.values()],activeKeys=new Set(fighters.filter(f=>f.isPlayer&&f.alive).map(f=>f.userKey)),knownKeys=new Set(fighters.filter(f=>f.isPlayer).map(f=>f.userKey));const live=fighters.map(f=>`<div class="fighter${chatUserKey===normalizeUsername(f.name)?" chat-target":""}" data-id="${escapeText(f.id)}" style="opacity:${f.alive?1:.58}"><i class="dot" style="color:${f.color};background:${f.color}"></i><div class="fighter-info"><div class="fighter-name-line"><strong>${fighterLabel(f)}</strong><button type="button" class="select-chat-user" data-select-chat-user="${escapeText(f.name)}" aria-label="Usar ${escapeText(f.name)} para comandos" aria-pressed="${chatUserKey===normalizeUsername(f.name)}">${chatUserKey===normalizeUsername(f.name)?"âœ“":"Elegir"}</button></div><small>${races[f.race][0]} | Nv. ${f.level} | ${f.kills} bajas</small><small>XP ${Math.floor(f.xp)}/${xpForNext(f.level)} | KO ${f.deaths}</small></div><div class="bar"><i style="width:${Math.max(0,f.hp/f.max*100)}%"></i></div><button class="fighter-entry" data-enter="${escapeText(f.name)}" ${f.alive?'disabled':''}>${f.alive?'Dentro':'Ingresar'}</button></div>`).join('');const waiting=users.filter(u=>!knownKeys.has(normalizeUsername(u.username))).map(u=>{const level=Math.max(1,Math.min(100,Math.floor(Number(u.level)||1))),xp=Math.max(0,Number(u.xp)||0),kills=Math.max(0,Number(u.kills)||0);return `<div class="fighter waiting${chatUserKey===normalizeUsername(u.username)?" chat-target":""}"><i class="dot" style="color:#ff9d3d;background:#ff9d3d"></i><div class="fighter-info"><div class="fighter-name-line"><strong>${escapeText(u.username)}</strong><button type="button" class="select-chat-user" data-select-chat-user="${escapeText(u.username)}" aria-label="Usar ${escapeText(u.username)} para comandos" aria-pressed="${chatUserKey===normalizeUsername(u.username)}">${chatUserKey===normalizeUsername(u.username)?"âœ“":"Elegir"}</button></div><small>Usuario en espera | Nv. ${level} | ${kills} bajas</small><small>XP ${Math.floor(xp)}/${xpForNext(level)}</small></div><div class="bar"><i style="width:0%"></i></div><button class="fighter-entry" data-enter="${escapeText(u.username)}">Ingresar</button></div>`}).join('');document.querySelector('#roster').innerHTML=live+waiting;document.querySelectorAll('.fighter[data-id]').forEach(el=>el.onclick=()=>{selected=fighters.find(f=>f.id===el.dataset.id);inspect()});document.querySelectorAll('.select-chat-user').forEach(btn=>btn.onclick=e=>{e.stopPropagation();selectChatUser(btn.dataset.selectChatUser,true)});document.querySelectorAll('.fighter-entry:not(:disabled)').forEach(btn=>btn.onclick=e=>{e.stopPropagation();selectChatUser(btn.dataset.enter);postChat(btn.dataset.enter,'E')});document.querySelector('#join-all').onclick=()=>{const pending=users.filter(u=>!activeKeys.has(normalizeUsername(u.username)));if(!pending.length){addChatLine('Sistema','No hay usuarios pendientes para ingresar.',true);return}for(const u of pending){selectChatUser(u.username);postChat(u.username,'E')}};inspect()}function inspect(){if(!selected)return;document.querySelector('#selected').innerHTML=`<b style="color:${selected.color}">${fighterLabel(selected)}</b> Ãƒâ€šÃ‚Â· ${races[selected.race][0]}<br>Nivel ${selected.level} Ãƒâ€šÃ‚Â· ${Math.floor(selected.xp)}/${xpForNext(selected.level)} XP Ãƒâ€šÃ‚Â· Victorias ${selected.kills}<br><br>Poderes: ${unlock(selected).join(', ')}`;document.querySelector('#stats').innerHTML=[['Ataque fÃƒÆ’Ã‚Â­sico',selected.atk],['Defensa fÃƒÆ’Ã‚Â­sica',selected.def],['Ataque de ki',selected.ki],['Defensa de ki',selected.kidef]].map(([n,v])=>`<div class="stat">${n}<b>${v}</b></div>`).join('')}
-function escapeText(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const chatLines=[];
-function addChatLine(user,text,system=false){chatLines.push({user,text,system});if(chatLines.length>50)chatLines.shift();const box=document.querySelector('#chat-log');box.innerHTML=chatLines.map(m=>m.system?'<div class="chat-system">'+escapeText(m.text)+'</div>':'<div class="chat-line"><b>'+escapeText(m.user)+'</b>: '+escapeText(m.text)+'</div>').join('');box.scrollTop=box.scrollHeight}
-async function joinPlayer(raw){const display=String(raw||'').trim(),key=normalizeUsername(display);if(!/^[A-Za-z0-9_.-]{3,24}$/.test(display)){addChatLine('Sistema','El usuario debe tener 3-24 caracteres: letras, numeros, punto, guion o _.',true);return}try{let record=await window.kiArenaCloud.get(key);if(!record){record={id:key,username:display,race:Math.floor(Math.random()*races.length),level:1,xp:0,kills:0,deaths:0,alive:true,hp:100,hpFormulaVersion:2};await window.kiArenaCloud.save(display,record)}else if(record.alive===false){const level=Math.max(1,Number(record.level)||1);record={...record,alive:true,hp:100+(level-1)*8,hpFormulaVersion:2};await window.kiArenaCloud.save(display,record)}const name=record.username||display;cloudPlayers.set(key,{...record,username:name});await window.kiArenaCloud.addMessage(name,'E');const old=fighters.find(f=>f.isPlayer&&f.userKey===key);if(old&&old.alive){addChatLine('Sistema','@'+name+' ya esta dentro; no se creo un duplicado.',true);return}if(old&&!old.alive){old.alive=true;old.hp=old.max;old.x=400+Math.random()*100;old.y=230+Math.random()*100;old.vx=(Math.random()-.5)*2.8;old.vy=(Math.random()-.5)*2.8;old.kameCd=0;old.makaCd=0;old.kameState=null;old.makaState=null;old.combatState=null;saveFighter(old);addChatLine('Sistema','@'+name+' vuelve a la arena con su progreso de Firebase.',true);drawRoster();return}const player=make(name,record.race||0,400+Math.random()*100,230+Math.random()*100,'user:'+key,true,key,record);fighters.push(player);saveFighter(player);addChatLine('Sistema','@'+name+' entro como '+races[player.race][0]+' en nivel '+player.level+'.',true);drawRoster()}catch(e){window.kiArenaCloud.setStatus('No se pudo ingresar: '+e.message);addChatLine('Sistema','No se pudo ingresar; Firebase no guardo el jugador.',true)}}async function postChat(rawUser,rawMessage){const name=String(rawUser||'').trim(),key=normalizeUsername(name),message=String(rawMessage||'').trim();if(!/^[A-Za-z0-9_.-]{3,24}$/.test(name)){addChatLine('Sistema','Escribe un usuario valido (3-24 caracteres).',true);return}if(!message)return;const cmd=message.toUpperCase();try{if(cmd==='E'){await joinPlayer(name);return}const record=await window.kiArenaCloud.get(key),canonical=record?.username||name;await window.kiArenaCloud.addMessage(canonical,message);addChatLine(canonical,message);if(cmd!=='K'&&cmd!=='M'&&cmd!=='V')return;if(!record){addChatLine('Sistema','Primero ingresa con E para crear tu jugador en Firebase.',true);return}const player=fighters.find(f=>f.isPlayer&&f.userKey===key);if(!player||!player.alive){addChatLine('Sistema','Ingresa a la arena con E antes de usar poderes.',true);return}if(player.race===3){const required=FREEZER_POWER_PROGRESSION[cmd]?.unlockLevel;if(required&&player.level<required){addChatLine('Sistema',FREEZER_POWER_PROGRESSION[cmd].name+' se desbloquea en el nivel '+required+'.',true);return}}if(cmd==='V'){if(player.race!==3){addChatLine('Sistema','V / Rayo Mortal solo est? disponible para la raza Freezer.',true);return}if(player.deathCd>0||player.deathRayState||player.kameState||player.makaState){addChatLine('Sistema','Rayo Mortal no disponible ahora.',true);return}launchDeathRay(player)}else if(cmd==='K'){if(player.kameCd>0||player.kameState||player.makaState||player.deathRayState){addChatLine('Sistema','Kamehameha no disponible ahora.',true);return}launchKame(player)}else{if(player.makaCd>0||player.makaState||player.kameState||player.deathRayState){addChatLine('Sistema','Makankosappo no disponible ahora.',true);return}launchMaka(player)}}catch(e){window.kiArenaCloud.setStatus('Error de Firebase: '+e.message);addChatLine('Sistema','Firebase no pudo guardar ese mensaje.',true)}}function wireChat(){const env=document.querySelector('#environment-switch');env.value=window.KI_ARENA_FIREBASE.environment;env.onchange=()=>{const url=new URL(location.href);if(env.value==='dev')url.searchParams.delete('env');else url.searchParams.set('env',env.value);location.assign(url.href)};const user=document.querySelector('#chat-user'),message=document.querySelector('#chat-message'),send=()=>{const value=message.value;message.value='';postChat(user.value,value)};user.addEventListener('input',()=>renderChatUserSelection(user.value));document.querySelector('#join-user').onclick=()=>postChat(user.value,'E');document.querySelector('#send-chat').onclick=send;user.addEventListener('keydown',e=>{if(e.key==='Enter')postChat(user.value,'E')});message.addEventListener('keydown',e=>{if(e.key==='Enter')send()});document.querySelectorAll('[data-sim-command]').forEach(btn=>btn.onclick=()=>postChat(user.value,btn.dataset.simCommand));const hitboxButton=document.querySelector('#hitbox-toggle'),hitboxLegend=document.querySelector('#hitbox-legend');if(hitboxButton)hitboxButton.onclick=()=>{showHitboxes=!showHitboxes;hitboxButton.setAttribute('aria-pressed',String(showHitboxes));hitboxButton.textContent=showHitboxes?'Ocultar hitboxes':'Mostrar hitboxes';if(hitboxLegend)hitboxLegend.hidden=!showHitboxes}}function drawChargeAura(f,t){if(!f.kameState&&!f.makaState)return;const intensity=1+Math.sin(t*18+f.seed)*.12,r=49*intensity;ctx.save();ctx.globalCompositeOperation='lighter';ctx.shadowColor='#ffd43b';ctx.shadowBlur=34;const glow=ctx.createRadialGradient(f.x,f.y,5,f.x,f.y,r*1.4);glow.addColorStop(0,'rgba(255,247,151,.75)');glow.addColorStop(.42,'rgba(255,190,31,.34)');glow.addColorStop(1,'rgba(255,115,0,0)');ctx.fillStyle=glow;ctx.beginPath();ctx.ellipse(f.x,f.y,r*.72,r*1.18,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff2a1';ctx.lineWidth=3;ctx.globalAlpha=.82;for(let i=0;i<16;i++){const a=i*Math.PI/8+t*(i%2?1.2:-.8),inner=r*(.34+Math.sin(t*15+i)*.04),outer=r*(.88+Math.sin(t*13+i*2.1)*.2),x1=f.x+Math.cos(a)*inner,y1=f.y+Math.sin(a)*inner,x2=f.x+Math.cos(a+.09)*outer,y2=f.y+Math.sin(a+.09)*outer;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo(f.x+Math.cos(a-.12)*outer*1.12,f.y+Math.sin(a-.12)*outer*1.12,x2,y2);ctx.stroke()}ctx.restore()}function drawAura(f,t){const p=Math.max(0,Math.min(1,(f.level-1)/99)),hue=Math.round(120*(1-p)),color='hsl('+hue+',100%,58%)',radius=34+Math.sqrt(Math.max(0,f.level-1))*4,pulse=Math.sin(t*8+f.seed)*2;ctx.save();ctx.globalCompositeOperation='lighter';ctx.globalAlpha=.65;const grad=ctx.createRadialGradient(f.x,f.y,3,f.x,f.y,radius*1.35);grad.addColorStop(0,'hsla('+hue+',100%,72%,.36)');grad.addColorStop(.48,'hsla('+hue+',100%,58%,.21)');grad.addColorStop(1,'hsla('+hue+',100%,52%,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.ellipse(f.x,f.y,radius*.78,radius*1.2,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle=color;ctx.shadowColor=color;ctx.shadowBlur=10+p*24;ctx.lineWidth=1.4+p*2;for(let i=0;i<12;i++){const a=i*Math.PI/6+t*(.8+p*1.8),r=radius*(.72+Math.sin(t*11+i*1.7+f.seed)*.13),x1=f.x+Math.cos(a)*radius*.35,y1=f.y+Math.sin(a)*radius*.5,x2=f.x+Math.cos(a+.12)*r,y2=f.y+Math.sin(a+.12)*r;ctx.globalAlpha=.42+p*.28;ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo(f.x+Math.cos(a-.16)*r*.83,f.y+Math.sin(a-.16)*r*.83,x2,y2);ctx.stroke()}ctx.restore()}
-function frame(ts){const t=ts/1000,dt=Math.min(.04,(ts-last)/1000||0);last=ts;update(dt,t);draw(t);if(Math.floor(ts/400)%1===0) {if(Math.floor(ts/400)!==frame.ui){frame.ui=Math.floor(ts/400);drawRoster()}}requestAnimationFrame(frame)}c.addEventListener('click',e=>{if(!fighters.length)return;let r=c.getBoundingClientRect(),x=(e.clientX-r.left)*W/r.width,y=(e.clientY-r.top)*H/r.height;selected=fighters.reduce((a,f)=>Math.hypot(f.x-x,f.y-x)<Math.hypot(a.x-x,a.y-y)?f:a,fighters[0]);inspect()});async function reloadCloudPlayers(){const docs=await window.kiArenaCloud.listPlayers();cloudPlayers=new Map(docs.map(p=>[normalizeUsername(p.username),p]));drawRoster()}
-async function refreshMessages(seen){try{for(const m of await window.kiArenaCloud.listMessages())if(!seen.has(m.id)){seen.add(m.id);addChatLine(m.username,m.text)}}catch(e){window.kiArenaCloud.setStatus('SincronizaciÃ³n Firebase pendiente: '+e.message)}}
-async function start(){wireChat();const seen=new Set();try{await reloadCloudPlayers();init();await refreshMessages(seen);setInterval(()=>refreshMessages(seen),2500);setInterval(()=>reloadCloudPlayers().catch(e=>window.kiArenaCloud.setStatus('Sincronizacion Firebase pendiente: '+e.message)),8000)}catch(e){window.kiArenaCloud.setStatus('No se pudo cargar la partida desde Firebase: '+e.message);addChatLine('Sistema','La arena espera conexion con Firestore.',true)}requestAnimationFrame(frame)}start()}
+function sprite(f,t){if(!f.alive)return;const sx=f.x,sy=f.y+(f.kameState||f.makaState||f.deathRayState||f.combatState?0:Math.sin(t*5+f.seed)*4),maka=!!f.makaState,kame=!!f.kameState,finger=!!f.deathRayState,combat=!!f.combatState,action=maka||kame||finger,sheet=finger?makaSheet:maka?makaSheet:kame?kameSpriteSheet:combat?meleeSheet:spriteSheet;let rendered=false;if(sheet.complete&&sheet.naturalWidth){const state=finger?f.deathRayState:maka?f.makaState:kame?f.kameState:null,frame=finger?(state.phase==='focus'?2:3):maka?(state.phase==='focus'?(state.timer>.3?0:1):(state.phase==='aim'?2:3)):kame?(state.phase==='charge'?(state.timer>.28?0:1):(state.phase==='thrust'?2:3)):combat?f.combatState.frame:Mußní¢G§²ÚîÆ­yÙš\™QX]˜^JŠ_Y[ÙH‹™X]˜^Tİ]O[[XÛÛ[Y_ZYŠ‹šØ[YTİ]J^ØÛÛœİOY‹šØ[YTİ]NØK[Y\‹OYÚYŠK[Y\L
+^ÚYŠKœ\ÙOOOIØÚ\™ÙIÊ^ØKœ\ÙOIİ\İ	ÎØK[Y\KŒŒŸY[ÙHYŠKœ\ÙOOOIİ\İ	Ê^ØKœ\ÙOIÙš\™IÎØK[Y\KÙš\™RØ[YJŠ_Y[ÙH‹šØ[YTİ]O[[XÛÛ[Y_ZYŠ‹›XZØTİ]J^ØÛÛœİOY‹›XZØTİ]NØK[Y\‹OYÚYŠK[Y\L
+^ÚYŠKœ\ÙOOOIÙ›Øİ\ÉÊ^ØKœ\ÙOIØZ[IÎØK[Y\KŒY[ÙHYŠKœ\ÙOOOIØZ[IÊ^ØKœ\ÙOIÙš\™IÎØK[Y\KMNÙš\™SXZØJŠ_Y[ÙH‹›XZØTİ]O[[XÛÛ[Y_XÛÛœİO[™X\™\İ
+ŠNÂ™‹
+ÏY‹
+Œ
+™Ù‹JÏY‹JŒ
+™ÚYŠ‹Š^Ù‹LÙ‹SX]˜XœÊ‹
+_Y[ÙHYŠ‹•ËLŠ^Ù‹UËLÙ‹KSX]˜XœÊ‹
+_ZYŠ‹OMJ^Ù‹OMMNÙ‹OSX]˜XœÊ‹J_Y[ÙHYŠ‹O’MMŠ^Ù‹ORMMÙ‹OKSX]˜XœÊ‹J_ZYŠYJXÛÛ[YNØÛÛœİYKY‹OYKKY‹KSX]š\İ
+JNÚYŠN	‰ˆYK˜ÛÛX˜]İ]I‰ˆYKšØ[YTİ]J^Üİ\Y[
+‹JNØÛÛ[Y__B™›ÜŠÛÛœİˆÙˆ›ÛÊ^ÚYŠ‹šØ[Y_‹›XZØ_‹™X]˜^J^Ø‹™\İSX]›Z[Š‹›[™İ‹™\İ
+Ê‹™X]˜^OÌŒŒ˜‹›XZØOÌMLŒLL
+J™
+NØ‹›Y™KOYÙ›ÜŠÛÛœİ\™Ù]ÙˆšYÚ\œÊ^ÚYŠ]\™Ù]˜[]™_\™Ù]OOX‹›İÛ™\Ÿ‹š]š\Ê\™Ù]
+JXÛÛ[YNØÛÛœİ]\™Ù]X‹O]\™Ù]KX‹K[Û™Ï\
+˜‹™
+ÜJ˜‹™KÚYOSX]˜XœÊ
+˜‹™K\J˜‹™
+NØÛÛœİ™X[T˜Y]\ÏX‹™X]˜^OÙX]˜^R]˜Y]\Ê‹›İÛ™\ŠN˜™X[R]˜Y]\Ê‹›İÛ™\‹‹›XZØK‹™\İ
+NÚYŠ[Û™ÏL	‰˜[Û™ÏX‹™\İ
+ÌN	‰œÚYO™X[T˜Y]\Ê^Ø‹š]˜Y
+\™Ù]
+NÚ]
+\™Ù]‹™X]˜^OÙX]˜^Q[XYÙJ‹›İÛ™\ŠN˜™X[Q[XYÙJ‹›İÛ™\‹‹›XZØJK‹›İÛ™\‹YJ__XÛÛ[Y_X‹
+ÏX‹
+™Ø‹JÏX‹J™Ø‹›Y™KOYÚYŠ‹›Y™OL
+XÛÛ[YNÚYŠ‹\™Ù]˜[]™I‰“X]š\İ
+‹X‹\™Ù]‹KX‹\™Ù]JOŒJ^Ú]
+‹\™Ù]‹›İÛ™\‹šÚJÓX]œ˜[™ÛJ
+J‹‹›İÛ™\‹YJNØ‹›Y™OL_X›ÛÏX›ÛË™š[\ŠO˜‹›Y™OŒ
+NÙ›ÜŠÛÛœİÙˆ\XÛ\Ê^Ü
+Ï\ÜJÏ\NÜ›Y™KOY\\XÛ\Ï\\XÛ\Ë™š[\ŠOœ›Y™OŒ
+_B™[˜İ[Ûˆ˜]Ê
+^Ù˜]Ğ˜XÚÙÜ›İ[™
+
+NÙ›ÜŠÛÛœİˆÙˆ›ÛÊ^ÚYŠ‹šØ[YJ^ØÛÛœİ^X‹
+Ø‹™
+˜‹™\İ^OX‹JØ‹™J˜‹™\İXÚÛ™\ÜÏX™X[UÚY
+‹›İÛ™\‹˜[ÙJK[ÙOSX]œÚ[Š
+ŒJØ‹œ\ÙJJ“X]›Z[ŠXÚÛ™\ÜÊ‹Œ
+KÚYVKX‹™KÚYVOX‹™ØİœØ]™J
+NØİ™ÛØ˜[ÛÛ\ÜÚ]SÜ\˜][ÛIÛYÚ\‰ÎØİ›[™PØ\IÜ›İ[™	ÎØİœÚYİĞÛÛÜIÈÍNÙ™™‰ÎØİœÚYİĞ›\LÍØİœİ›ÚÙTİ[OIÈÌŒÎXÙ™‰ÎØİ™ÛØ˜[[OKÎØİ›[™UÚY]XÚÛ™\ÜÊŒKŒÍJÜ[ÙNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NØİœÚYİĞ›\LNØİœİ›ÚÙTİ[OIÈÍLYÙ™‰ÎØİ™ÛØ˜[[OKMNØİ›[™UÚY]XÚÛ™\ÜÊ‹LŠÜ[ÙNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NØİœİ›ÚÙTİ[OIÈÙY™™™‰ÎØİ™ÛØ˜[[OKNØİ›[™UÚY]XÚÛ™\ÜÊ‹JÜ[ÙJ‹NØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NØİœİ›ÚÙTİ[OIÈÙ™™‰ÎØİ™ÛØ˜[[OKNØİ›[™UÚYSX]›X^
+ËXÚÛ™\ÜÊ‹ŒMJNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NÙ›ÜŠ]OLNÚOMÎÚJÊÊ^ØÛÛœİOX‹™\İ
+šKÎÚYÏSX]œÚ[Š
+ŒŒŠÚJŒŠØ‹œ\ÙJJŒL‹ŞX‹
+Ø‹™
+œKŞOX‹JØ‹™JœNØİœİ›ÚÙTİ[OZILÉÈØMYÙ™‰Î‰ÈÍØ˜™™‰ÎØİ›[™UÚYLÎØİ™ÛØ˜[[OKÎØİ˜™YÚ[”]
+
+NØİ›[İ™UÊŞ
+ÜÚYV
+ÚYËŞJÜÚYVJÚYÊNØİ›[™UÊŞ\ÚYV
+ŠÚYÊÌL
+KŞK\ÚYVJŠÚYÊÌL
+JNØİœİ›ÚÙJ
+_Xİœ™\İÜ™J
+_Y[ÙHYŠ‹›XZØJ^ØÛÛœİ^X‹
+Ø‹™
+˜‹™\İ^OX‹KXÚÛ™\ÜÏX™X[UÚY
+‹›İÛ™\‹YJK[ÙOSX]œÚ[Š
+ŒŒ
+Ø‹œ\ÙJJ“X]›Z[Š‹XÚÛ™\ÜÊ‹ŒŠKKX‹™KOX‹™ÚYO]XÚÛ™\ÜÊ‹JÓX]›Z[ŠK‹™\İ
+‹ŒJK\Y^
+Ø‹™
+ŒMØİœØ]™J
+NØİ™ÛØ˜[ÛÛ\ÜÚ]SÜ\˜][ÛIÛYÚ\‰ÎØİœÚYİĞÛÛÜIÈÙ™MÎ	ÎØİœÚYİĞ›\MØİ™ÛØ˜[[OLNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹
+Û
+ŒL‹‹JÛJŒLŠNØİ›[™UÊ^
+Û
+ÚYK^JÛJÚYJNØİ›[™UÊ\^JNØİ›[™UÊ^[
+ÚYK^K[JÚYJNØİ›[™UÊ‹[
+ŒL‹‹K[JŒLŠNØİ˜ÛÜÙT]
+
+NØÛÛœİ™X[OXİ˜Ü™X]S[™X\‘Ü˜YY[
+‹‹K^^JNØ™X[K˜YÛÛÜ”İÜ
+	ÈÙ™Ì‰ÊNØ™X[K˜YÛÛÜ”İÜ
+ŒŒ‹	ÈÙ™™Œ	ÊNØ™X[K˜YÛÛÜ”İÜ
+Ì‹	ÈÙ™˜ÎL	ÊNØ™X[K˜YÛÛÜ”İÜ
+K	ÈÙ™™XL	ÊNØİ™š[İ[OX™X[NØİ™š[
+
+NØİ›[™PØ\IÜ›İ[™	ÎØİœİ›ÚÙTİ[OIÈÙ™XØÙ‰ÎØİ›[™UÚY]XÚÛ™\ÜÊ‹ŒÍ
+Ü[ÙNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NØİœÚYİĞ›\LØİœİ›ÚÙTİ[OIÈÙ™™L™IÎØİ›[™UÚY]XÚÛ™\ÜÊ‹JÜ[ÙNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NØİœİ›ÚÙTİ[OIÈÙ™™™MIÎØİ›[™UÚYSX]›X^
+‹XÚÛ™\ÜÊ‹ŒŠNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^^JNØİœİ›ÚÙJ
+NÙ›ÜŠ]OLÚOSX]™›ÛÜŠ‹™\İÌÌ
+NÚJÊÊ^ØÛÛœİOSX]›Z[Š‹™\İJŒÌ
+KŞX‹
+Ø‹™
+œKŞOX‹K›\™O]ÚYJŠKŒJÓX]œÚ[Š
+Œ
+ÚJŒK
+Ø‹œ\ÙJJ‹ŒM
+NØİœİ›ÚÙTİ[OZILÉÈÙ™ŒÌXÎ	Î‰ÈÙ™™ŒŒIÎØİ›[™UÚYLËNØİ™ÛØ˜[[OKNØİœÚYİĞ›\LLNØİ˜™YÚ[”]
+
+NØİ™[\ÙJŞŞKL‹›\™KX]”JŒŠNØİœİ›ÚÙJ
+_Xİœ™\İÜ™J
+_Y[ÙHYŠ‹™X]˜^J^ØÛÛœİ^X‹
+Ø‹™
+˜‹™\İÚYYX]˜^UÚY
+‹›İÛ™\ŠK[ÙOSX]œÚ[Š
+ŒÎ
+Ø‹œ\ÙJJ‹ØİœØ]™J
+NØİ™ÛØ˜[ÛÛ\ÜÚ]SÜ\˜][ÛIÛYÚ\‰ÎØİ›[™PØ\IÜ›İ[™	ÎØİœÚYİĞÛÛÜIÈÙ™™	ÎØİœÚYİĞ›\LMØİœİ›ÚÙTİ[OIÈØ˜LÌY™‰ÎØİ™ÛØ˜[[OKØİ›[™UÚYSX]›X^
+KÚY
+ŒKJNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^‹JNØİœİ›ÚÙJ
+NØİœÚYİĞ›\LLNØİœİ›ÚÙTİ[OIÈÙ™ÉÎØİ™ÛØ˜[[OLNØİ›[™UÚYSX]›X^
+‹ÚY
+‹N
+JÜ[ÙJ‹ŒÍNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^‹JNØİœİ›ÚÙJ
+NØİœİ›ÚÙTİ[OIÈÙ™™XY™‰ÎØİ›[™UÚYSX]›X^
+KÚY
+‹ŒŠNØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹‹JNØİ›[™UÊ^‹JNØİœİ›ÚÙJ
+NØİ™š[İ[OIÈÙ™™™‰ÎØİœÚYİĞÛÛÜIÈÙ™ÍN	ÎØİœÚYİĞ›\LNØİ˜™YÚ[”]
+
+NØİ˜\˜Ê^‹KX]›X^
+‹ÚY
+‹ŒÎ
+KX]”JŒŠNØİ™š[
+
+NØİœ™\İÜ™J
+_Y[Ù^Øİœİ›ÚÙTİ[OX‹˜ÛÛÜØİ›[™UÚYMØİ™ÛØ˜[[OKÎØİ˜™YÚ[”]
+
+NØİ›[İ™UÊ‹X‹
+‹ŒK‹KX‹J‹ŒJNØİ›[™UÊ‹‹JNØİœİ›ÚÙJ
+NØİ™ÛØ˜[[OLNØİ™š[İ[OIÈÙ™™‰ÎØİ˜™YÚ[”]
+
+NØİ˜\˜Ê‹‹KÊNØİ™š[
+
+__Y›ÜŠÛÛœİÙˆ\XÛ\Ê^Øİ™ÛØ˜[[OSX]›X^
+›Y™KËŒÊNØİ™š[İ[O\˜ÛÛÜØİ™š[™Xİ
+K
+_Xİ™ÛØ˜[[OLNÙšYÚ\œË™›Ü‘XXÚ
+OÚYŠ‹˜[]™J^Ù˜]Ğ]\˜J‹
+NÙ˜]ĞÚ\™ÙP]\˜J‹
+_\Üš]J‹
+_JNÚYŠÚİÒ]›Ş\ÊY˜]Ò]›Ş\Ê
+_B™[˜İ[Ûˆ[\œ\Y[
+Š^ÚYŠY‹˜ÛÛX˜]İ]J\™]\›ØÛÛœİY[Y‹˜ÛÛX˜]İ]K™Y[Ù[™Y[
+Y[
+NÙY[ÏYY[Ë™š[\ŠO™OOYY[
+_B™[˜İ[Ûˆ][˜ÚØ[YJŠ^ÚYŠY‹˜[]™_‹šØ[YPÙŒ‹šØ[YTİ]_‹›XZØTİ]_‹™X]˜^Tİ]J\™]\›ÚYŠ‹˜ÛÛX˜]İ]JZ[\œ\Y[
+ŠNÙ‹šØ[YTİ]O^Ü\ÙN‰ØÚ\™ÙIË[Y\‹M_NÙ‹šØ[YPÙLËÜØ^J	ÏÜ[ˆİ[OH˜ÛÛÜ‰ÊÙ‹˜ÛÛÜŠÉÈ‰ÊÙ‹›˜[YJÉÏÜÜ[ˆ™XÛÙÙH\ÈX[›ÜÈHØ\™ØH[ˆˆİ[OH˜ÛÛÜˆÍYN™ˆ’ĞSQRSQROØ‹‰Ê_B™[˜İ[Ûˆ™X[UÚY
+‹XZØJ^ØÛÛœİ›ÙÜ™\ÜÏYœ™Y^™\”ØØ[JŠNÚYŠ‹œ˜XÙOOOLÊ^ØÛÛœİ[XZØOÑ”‘QV‘T—ÔÕÑT—Ô“ÑÔ‘TÔÒSÓ‹“N‘”‘QV‘T—ÔÕÑT—Ô“ÑÔ‘TÔÒSÓ‹’ÎÜ™]\›ˆÚYİ\
+ÊÚY[™\ÚYİ\
+Jœ›ÙÜ™\Üß\™]\›ˆXZØOÌL
+Ü›ÙÜ™\ÜÊNŒÌ
+Ü›ÙÜ™\ÜÊMŸB™[˜İ[Ûˆ™X[Q[XYÙJ‹XZØJ^Ü™]\›ˆ‹šÚJœİÙ\“][\Y\]]™[
+XZØOÉÛXZØ[šÛÜØ\ÉÎ‰ÚØ[YZ[YZIË‹œ˜XÙK‹›]™[Ø[Y\^TÙ][™ÜÊ_B™[˜İ[Ûˆœ™Y^™\”ØØ[JŠ^Ü™]\›ˆ
+X]›X^
+KX]›Z[ŠL‹›]™[JJKLJKÎN_B™[˜İ[ÛˆX]˜^UÚY
+Š^ØÛÛœİQ”‘QV‘T—ÔÕÑT—Ô“ÑÔ‘TÔÒSÓ‹•‹Yœ™Y^™\”ØØ[JŠNÜ™]\›ˆÚYİ\
+ÊÚY[™\ÚYİ\
+JB™[˜İ[ÛˆX]˜^Q[XYÙJŠ^Ü™]\›ˆ‹šÚJœİÙ\“][\Y\]]™[
+	ÙX]˜^IË‹œ˜XÙK‹›]™[Ø[Y\^TÙ][™ÜÊ_B™[˜İ[ÛˆX]˜^R]˜Y]\ÊŠ^Ü™]\›ˆX]˜^UÚY
+ŠJ‹JÌLŸB™[˜İ[Ûˆ™X[R]˜Y]\Ê‹XZØK\İ[˜ÙJ^ØÛÛœİÚYX™X[UÚY
+‹XZØJK\™Ù]˜Y]\ÏLLÚYŠXZØJ\™]\›ˆÚY
+‹JÓX]›Z[ŠK\İ[˜ÙJ‹ŒJJİ\™Ù]˜Y]\ÎÜ™]\›ˆÚY
+‹ÍJÌLŠİ\™Ù]˜Y]\ßB™[˜İ[Ûˆ˜]Ò]›Ş\Ê
+^Ù›ÜŠÛÛœİˆÙˆšYÚ\œÊ^ÚYŠY‹˜[]™JXÛÛ[YNØİœØ]™J
+NØİ›[™UÚYLØİœÙ][™Q\Ú
+ÍKJNØİ™š[İ[OIÜ™Ø˜JÍŒ‹MKŒJIÎØİœİ›ÚÙTİ[OIÈÍYL™™‰ÎØİ˜™YÚ[”]
+
+NØİ˜\˜Ê‹‹KL‹X]”JŒŠNØİ™š[
+
+NØİœİ›ÚÙJ
+NØİœÙ][™Q\Ú
+ÌËJNØİœİ›ÚÙTİ[OIÈÙ™˜IÎØİ˜™YÚ[”]
+
+NØİ˜\˜Ê‹‹KŒKX]”JŒŠNØİœİ›ÚÙJ
+NØİœÙ][™Q\Ú
+Ì‹WJNØİœİ›ÚÙTİ[OIÈÙ™˜ÍYIÎØİ˜™YÚ[”]
+
+NØİ˜\˜Ê‹‹KKX]”JŒŠNØİœİ›ÚÙJ
+NØİœ™\İÜ™J
+__Y[˜İ[Ûˆš\™RØ[YJŠ^ØÛÛœİSX]œÚYÛŠ‹
+_KOLØ›ÛËœ\Ú
+Ş™‹
+Ù
+ŒKN™‹KK\İŒ[™İÍŒY™N‹‹İÛ™\™‹ÛÛÜ‰ÈÍYN™‰ËX™[‰ÒØ[YZ[YZIËØ[YNYK]›™]ÈÙ]
+
+K\ÙN“X]œ˜[™ÛJ
+JŒLJNÜØ^J	ÏÜ[ˆİ[OH˜ÛÛÜ‰ÊÙ‹˜ÛÛÜŠÉÈ‰ÊÙ‹›˜[YJÉÏÜÜ[ˆ^Y[™HÜÈœ˜^›ÜÈH\Ü\˜H[Ø[YZ[YZK‰Ê_B™[˜İ[ÛˆØ[“XZØJŠ^Ü™]\›ˆ‹š\Ô^Y\Ÿ‹œ˜XÙOOOL‹œ˜XÙOOOL_B™[˜İ[Ûˆ][˜ÚXZØJŠ^ÚYŠY‹˜[]™_XØ[“XZØJŠ_‹›XZØPÙŒ‹›XZØTİ]_‹šØ[YTİ]_‹™X]˜^Tİ]J\™]\›ÚYŠ‹˜ÛÛX˜]İ]JZ[\œ\Y[
+ŠNÙ‹›XZØTİ]O^Ü\ÙN‰Ù›Øİ\ÉË[Y\‹ŒŸNÙ‹›XZØPÙMÎÜØ^J	ÏÜ[ˆİ[OH˜ÛÛÜ‰ÊÙ‹˜ÛÛÜŠÉÈ‰ÊÙ‹›˜[YJÉÏÜÜ[ˆÛÛ˜Ù[˜H[™\™ÚXH[ˆÜÈYÜÈ\˜H[ˆİ[OH˜ÛÛÜˆÙÎXÙ™ˆ“PRĞS’ÓÔĞTÏØ‹‰Ê_B™[˜İ[Ûˆš\™SXZØJŠ^ØÛÛœİSX]œÚYÛŠ‹
+_KOLØ›ÛËœ\Ú
+Ş™‹
+Ù
+ŒËN™‹KK\İŒ[™İÎY™N‹MKİÛ™\™‹ÛÛÜ‰ÈÙÎXÙ™‰ËX™[‰ÓXZØ[šÛÜØ\ÉËXZØNYK]›™]ÈÙ]
+
+K\ÙN“X]œ˜[™ÛJ
+JŒLJNÜØ^J	ÏÜ[ˆİ[OH˜ÛÛÜ‰ÊÙ‹˜ÛÛÜŠÉÈ‰ÊÙ‹›˜[YJÉÏÜÜ[ˆ\Ü\˜H[˜^[È\™›Ü˜[HÜš^›Û[‰Ê_B™[˜İ[Ûˆ][˜ÚX]˜^JŠ^ÚYŠY‹˜[]™_‹œ˜XÙHOOLß‹™X]ÙŒ‹™X]˜^Tİ]_‹šØ[YTİ]_‹›XZØTİ]J\™]\›ÚYŠ‹˜ÛÛX˜]İ]JZ[\œ\Y[
+ŠNÙ‹™X]˜^Tİ]O^Ü\ÙNˆ™›Øİ\È‹[Y\‹ŒNÙ‹™X]ÙLKÜØ^JÜ[ˆİ[OW˜ÛÛÜˆŠÙ‹˜ÛÛÜŠÈ—ˆŠÙ‹›˜[YJÈÜÜ[ˆ\[H[ˆYÈHØ\™ØH[ˆİ[OW˜ÛÛÜˆÙ™LÍ˜—”VSÈSÔ•SØ‹ˆŠ_B™[˜İ[Ûˆš\™QX]˜^JŠ^ØÛÛœİSX]œÚYÛŠ‹
+_KOLØ›ÛËœ\Ú
+Ş™‹
+Ù
+ŒÍN™‹KLL‹K\İŒ[™İŒY™N‹İÛ™\™‹ÛÛÜˆˆÙ™È‹X™[ˆ”˜^[È[Ü[‹X]˜^NYK]›™]ÈÙ]
+
+K\ÙN“X]œ˜[™ÛJ
+JŒLJNÜØ^JÜ[ˆİ[OW˜ÛÛÜˆŠÙ‹˜ÛÛÜŠÈ—ˆŠÙ‹›˜[YJÈÜÜ[ˆ\Ü\˜H[˜^[È[Ü[ÛÛˆ[ˆYËˆŠ_B™[˜İ[Ûˆ™[™\Ú]\Ù\”Ù[Xİ[ÛŠ˜[YJ^ØÚ]\Ù\’Ù^O[›Ü›X[^™U\Ù\›˜[YJ˜[YJNÙØİ[Y[œ]Y\TÙ[XİÜ[
+‹œÙ[XİXÚ]]\Ù\ˆŠK™›Ü‘XXÚ
+OØÛÛœİXİ]™O[›Ü›X[^™U\Ù\›˜[YJ‹™]\Ù]œÙ[XİÚ]\Ù\ŠOOOXÚ]\Ù\’Ù^NØ‹œÙ]]šX]J˜\šXK\™\ÜÙY‹İš[™ÊXİ]™JJNØ‹œÙ]]šX]J˜\šXK[X™[‹Xİ]™OØ‹™]\Ù]œÙ[XİÚ]\Ù\ŠÈˆÙ[XØÚ[Û˜YÈ\˜H[šX\ˆÛÛX[™ÜÈˆ•\Ø\ˆŠØ‹™]\Ù]œÙ[XİÚ]\Ù\ŠÈˆ\˜H[šX\ˆÛÛX[™ÜÈŠNØ‹^ÛÛ[XXİ]™OÈ¸§$Èˆ‘[YÚ\ˆØ‹˜ÛÜÙ\İ
+‹™šYÚ\ˆŠOË˜Û\ÜÓ\İÙÙÛJ˜Ú]]\™Ù]‹Xİ]™J_J_B™[˜İ[ÛˆÙ[XİÚ]\Ù\Š˜[YK[››İ[˜ÙOY˜[ÙJ^ØÛÛœİ\Ù\Tİš[™Ê˜[Y_ˆŠKš[J
+NÚYŠ]\Ù\Š\™]\›ÙØİ[Y[œ]Y\TÙ[XİÜŠˆØÚ]]\Ù\ˆŠK˜[YO]\Ù\Ü™[™\Ú]\Ù\”Ù[Xİ[ÛŠ\Ù\ŠNÚYŠ[››İ[˜ÙJXYÚ][™J”Ú\İ[XH‹‘[Ú][šX\°èHÛÛX[™ÜÈÛÛ[ÈŠİ\Ù\ŠÈ‹ˆ‹YJ_B™[˜İ[Ûˆ˜]Ô›Üİ\Š
+^ØÛÛœİ\Ù\œÏVË‹‹˜ÛİY^Y\œË˜[Y\Ê
+WKXİ]™RÙ^\Ï[™]ÈÙ]
+šYÚ\œË™š[\ŠO™‹š\Ô^Y\‰‰™‹˜[]™JK›X\
+O™‹\Ù\’Ù^JJKÛ›İÛ’Ù^\Ï[™]ÈÙ]
+šYÚ\œË™š[\ŠO™‹š\Ô^Y\ŠK›X\
+O™‹\Ù\’Ù^JJNØÛÛœİ]™OYšYÚ\œË›X\
+O˜]ˆÛ\ÜÏH™šYÚ\‰ØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJ‹›˜[YJOÈˆÚ]]\™Ù]ˆˆŸHˆ]KZYH‰Ù\ØØ\U^
+‹šY
+_Hˆİ[OH›ÜXÚ]N‰Ù‹˜[]™OÌN‹NHHÛ\ÜÏH™İˆİ[OH˜ÛÛÜ‰Ù‹˜ÛÛÜŸNØ˜XÚÙÜ›İ[™‰Ù‹˜ÛÛÜŸHÚO]ˆÛ\ÜÏH™šYÚ\‹Z[™›È]ˆÛ\ÜÏH™šYÚ\‹[˜[YK[[™Hİ›Û™Ï‰ÙšYÚ\“X™[
+Š_OÜİ›Û™Ï]Ûˆ\OH˜]ÛˆˆÛ\ÜÏHœÙ[XİXÚ]]\Ù\ˆˆ]K\Ù[XİXÚ]]\Ù\H‰Ù\ØØ\U^
+‹›˜[YJ_Hˆ\šXK[X™[H•\Ø\ˆ	Ù\ØØ\U^
+‹›˜[YJ_H\˜HÛÛX[™ÜÈˆ\šXK\™\ÜÙYH‰ØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJ‹›˜[YJ_H‰ØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJ‹›˜[YJOÈ¸§$Èˆ‘[YÚ\ˆŸOØ]ÛÙ]ÛX[‰Ü˜XÙ\ÖÙ‹œ˜XÙWVÌ_H‹ˆ	Ù‹›]™[H	Ù‹šÚ[ßH˜Z˜\ÏÜÛX[ÛX[–	ÓX]™›ÛÜŠ‹
+_KÉŞ›Ü“™^
+‹›]™[
+_HÓÈ	Ù‹™X]ßOÜÛX[Ù]]ˆÛ\ÜÏH˜˜\ˆHİ[OHÚY‰ÓX]›X^
+‹šÙ‹›X^
+ŒL
+_IHÚOÙ]]ÛˆÛ\ÜÏH™šYÚ\‹Y[Hˆ]KY[\H‰Ù\ØØ\U^
+‹›˜[YJ_Hˆ	Ù‹˜[]™OÉÙ\ØX›Y	Î‰ÉßO‰Ù‹˜[]™OÉÑ[›ÉÎ‰Ò[™Ü™\Ø\‰ßOØ]ÛÙ]˜
+Kš›Ú[Š	ÉÊNØÛÛœİØZ][™Ï]\Ù\œË™š[\ŠOOˆZÛ›İÛ’Ù^\Ëš\Ê›Ü›X[^™U\Ù\›˜[YJK\Ù\›˜[YJJJK›X\
+OOØÛÛœİ]™[SX]›X^
+KX]›Z[ŠLX]™›ÛÜŠ[X™\ŠK›]™[
+_JJJKSX]›X^
+[X™\ŠK
+_
+KÚ[ÏSX]›X^
+[X™\ŠKšÚ[Ê_
+NÜ™]\›ˆ]ˆÛ\ÜÏH™šYÚ\ˆØZ][™ÉØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJK\Ù\›˜[YJOÈˆÚ]]\™Ù]ˆˆŸHHÛ\ÜÏH™İˆİ[OH˜ÛÛÜˆÙ™YÙØ˜XÚÙÜ›İ[™ˆÙ™YÙÚO]ˆÛ\ÜÏH™šYÚ\‹Z[™›È]ˆÛ\ÜÏH™šYÚ\‹[˜[YK[[™Hİ›Û™Ï‰Ù\ØØ\U^
+K\Ù\›˜[YJ_OÜİ›Û™Ï]Ûˆ\OH˜]ÛˆˆÛ\ÜÏHœÙ[XİXÚ]]\Ù\ˆˆ]K\Ù[XİXÚ]]\Ù\H‰Ù\ØØ\U^
+K\Ù\›˜[YJ_Hˆ\šXK[X™[H•\Ø\ˆ	Ù\ØØ\U^
+K\Ù\›˜[YJ_H\˜HÛÛX[™ÜÈˆ\šXK\™\ÜÙYH‰ØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJK\Ù\›˜[YJ_H‰ØÚ]\Ù\’Ù^OOO[›Ü›X[^™U\Ù\›˜[YJK\Ù\›˜[YJOÈ¸§$Èˆ‘[YÚ\ˆŸOØ]ÛÙ]ÛX[•\İX\š[È[ˆ\Ü\˜H‹ˆ	Û]™[H	ÚÚ[ßH˜Z˜\ÏÜÛX[ÛX[–	ÓX]™›ÛÜŠ
+_KÉŞ›Ü“™^
+]™[
+_OÜÛX[Ù]]ˆÛ\ÜÏH˜˜\ˆHİ[OHÚYŒ	HÚOÙ]]ÛˆÛ\ÜÏH™šYÚ\‹Y[Hˆ]KY[\H‰Ù\ØØ\U^
+K\Ù\›˜[YJ_H’[™Ü™\Ø\Ø]ÛÙ]˜JKš›Ú[Š	ÉÊNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜ›Üİ\‰ÊKš[›™\’S[]™JİØZ][™ÎÙØİ[Y[œ]Y\TÙ[XİÜ[
+	Ë™šYÚ\–Ù]KZYIÊK™›Ü‘XXÚ
+[O™[›Û˜ÛXÚÏJ
+OOÜÙ[XİYYšYÚ\œË™š[™
+O™‹šYOOY[™]\Ù]šY
+NÚ[œÜXİ
+
+_JNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ËœÙ[XİXÚ]]\Ù\‰ÊK™›Ü‘XXÚ
+O˜‹›Û˜ÛXÚÏYOOÙKœİÜ›ÜYØ][ÛŠ
+NÜÙ[XİÚ]\Ù\Š‹™]\Ù]œÙ[XİÚ]\Ù\‹YJ_JNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	Ë™šYÚ\‹Y[N››İ
+™\ØX›Y
+IÊK™›Ü‘XXÚ
+O˜‹›Û˜ÛXÚÏYOOÙKœİÜ›ÜYØ][ÛŠ
+NÜÙ[XİÚ]\Ù\Š‹™]\Ù]™[\ŠNÜÜİÚ]
+‹™]\Ù]™[\‹	ÑIÊ_JNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÚ›Ú[‹X[	ÊK›Û˜ÛXÚÏJ
+OOØÛÛœİ[™[™Ï]\Ù\œË™š[\ŠOOˆXXİ]™RÙ^\Ëš\Ê›Ü›X[^™U\Ù\›˜[YJK\Ù\›˜[YJJJNÚYŠ\[™[™Ë›[™İ
+^ØYÚ][™J	ÔÚ\İ[XIË	Ó›È^H\İX\š[ÜÈ[™Y[\È\˜H[™Ü™\Ø\‹‰ËYJNÜ™]\›ŸY›ÜŠÛÛœİHÙˆ[™[™Ê^ÜÙ[XİÚ]\Ù\ŠK\Ù\›˜[YJNÜÜİÚ]
+K\Ù\›˜[YK	ÑIÊ__NÚ[œÜXİ
+
+_Y[˜İ[Ûˆ[œÜXİ
+
+^ÚYŠ\Ù[XİY
+\™]\›ÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜÙ[XİY	ÊKš[›™\’SXˆİ[OH˜ÛÛÜ‰ÜÙ[XİY˜ÛÛÜŸH‰ÙšYÚ\“X™[
+Ù[XİY
+_OØˆ0àø &°à°­È	Ü˜XÙ\ÖÜÙ[XİYœ˜XÙWVÌ_Oœ“š]™[	ÜÙ[XİY›]™[H0àø &°à°­È	ÓX]™›ÛÜŠÙ[XİY
+_KÉŞ›Ü“™^
+Ù[XİY›]™[
+_H0àø &°à°­ÈšXİÜšX\È	ÜÙ[XİYšÚ[ßOœœ”Ù\™\Îˆ	İ[›ØÚÊÙ[XİY
+Kš›Ú[Š	Ë	Ê_XÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜİ]ÉÊKš[›™\’SVÖÉĞ]\]YH°àñ¤°à°«\ÚXÛÉËÙ[XİY˜]×KÉÑY™[œØH°àñ¤°à°«\ÚXØIËÙ[XİY™Y—KÉĞ]\]YHHÚIËÙ[XİYšÚWKÉÑY™[œØHHÚIËÙ[XİYšÚYY—WK›X\
+
+Û‹—JOO˜]ˆÛ\ÜÏHœİ]‰ÛŸO‰İŸOØÙ]˜
+Kš›Ú[Š	ÉÊ_B™[˜İ[Ûˆ\ØØ\U^
+Ê^Ü™]\›ˆİš[™ÊÊKœ™\XÙJÖÉˆ‰×KÙËÏOŠÉÉ‰Î‰É˜[\ÉË	Ï	Î‰É›ÉË	Ï‰Î‰É™İÉË	È‰Î‰Éœ][İÉË‰È‰ÉˆÌÎNÉßVØ×JJ_B˜ÛÛœİÚ][™\ÏV×NÂ™[˜İ[ÛˆYÚ][™J\Ù\‹^Ş\İ[OY˜[ÙJ^ØÚ][™\Ëœ\Ú
+İ\Ù\‹^Ş\İ[_JNÚYŠÚ][™\Ë›[™İL
+XÚ][™\ËœÚY
+
+NØÛÛœİ›ŞYØİ[Y[œ]Y\TÙ[XİÜŠ	ÈØÚ][ÙÉÊNØ›Şš[›™\’SXÚ][™\Ë›X\
+OO›KœŞ\İ[OÉÏ]ˆÛ\ÜÏH˜Ú]\Ş\İ[H‰ÊÙ\ØØ\U^
+K^
+JÉÏÙ]‰Î‰Ï]ˆÛ\ÜÏH˜Ú][[™H‰ÊÙ\ØØ\U^
+K\Ù\ŠJÉÏØˆ	ÊÙ\ØØ\U^
+K^
+JÉÏÙ]‰ÊKš›Ú[Š	ÉÊNØ›ŞœØÜ›ÛÜX›ŞœØÜ›ÛZYÚB˜\Ş[˜È[˜İ[Ûˆ›Ú[”^Y\Š˜]Ê^ØÛÛœİ\Ü^OTİš[™Ê˜]ß	ÉÊKš[J
+KÙ^O[›Ü›X[^™U\Ù\›˜[YJ\Ü^JNÚYŠK×–ĞKV˜K^ŒNWË‹W^ÌËIË\İ
+\Ü^JJ^ØYÚ][™J	ÔÚ\İ[XIË	Ñ[\İX\š[ÈX™H[™\ˆËLØ\˜Xİ\™\Îˆ]˜\Ë[Y\›ÜË[ËİZ[ÛˆÈË‰ËYJNÜ™]\›Ÿ]^Û]™XÛÜ™X]ØZ]Ú[™İËšÚP\™[˜PÛİY™Ù]
+Ù^JNÚYŠ\™XÛÜ™
+^ØÛÛœİ[YÚX›OY[˜X›YÚ\˜Xİ\”˜XÙ\ÊØ[Y\^TÙ][™ÜÊNÚYŠY[YÚX›K›[™İ
+^ØYÚ][™J	ÔÚ\İ[XIË	Ó›È^H\œÛÛ˜Z™\ÈXš[]YÜÈ\˜HÜ™X\ˆ[ˆ\İX\š[ÈY]›Ë‰ËYJNÜ™]\›Ÿ\™XÛÜ™^ÚYšÙ^K\Ù\›˜[YN™\Ü^K˜XÙN™[YÚX›VÓX]™›ÛÜŠX]œ˜[™ÛJ
+J™[YÚX›K›[™İ
+WK]™[ŒKŒÚ[ÎŒX]ÎŒ[]™NYKŒL›Ü›][U™\œÚ[ÛŒ‹X^ŒLNØ]ØZ]Ú[™İËšÚP\™[˜PÛİYœØ]™J\Ü^K™XÛÜ™
+_Y[ÙHYŠ™XÛÜ™˜[]™OOOY˜[ÙJ^ØÛÛœİ]™[SX]›X^
+K[X™\Š™XÛÜ™›]™[
+_JNÜ™XÛÜ™^Ë‹‹œ™XÛÜ™[]™NYK˜Ø[İ[]S]™[İ]Ê]™[Ø[Y\^TÙ][™ÜÊK›X^›Ü›][U™\œÚ[ÛŒ‹X^˜Ø[İ[]S]™[İ]Ê]™[Ø[Y\^TÙ][™ÜÊK›X^NØ]ØZ]Ú[™İËšÚP\™[˜PÛİYœØ]™J\Ü^K™XÛÜ™
+_XÛÛœİ˜[YO\™XÛÜ™\Ù\›˜[Y_\Ü^NØÛİY^Y\œËœÙ]
+Ù^KË‹‹œ™XÛÜ™\Ù\›˜[YN›˜[Y_JNØ]ØZ]Ú[™İËšÚP\™[˜PÛİY˜YY\ÜØYÙJ˜[YK	ÑIÊNØÛÛœİÛYšYÚ\œË™š[™
+O™‹š\Ô^Y\‰‰™‹\Ù\’Ù^OOOZÙ^JNÚYŠÛ	‰›Û˜[]™J^ØYÚ][™J	ÔÚ\İ[XIË	Ğ	ÊÛ˜[YJÉÈXH\İH[›ÎÈ›ÈÙHÜ™[È[ˆ\XØYË‰ËYJNÜ™]\›ŸZYŠÛ	‰ˆ[Û˜[]™J^ÛÛ˜[]™O]YNÛÛš[Û›X^ÛÛM
+ÓX]œ˜[™ÛJ
+JŒLÛÛOLŒÌ
+ÓX]œ˜[™ÛJ
+JŒLÛÛJX]œ˜[™ÛJ
+KKJJŒ‹ÛÛOJX]œ˜[™ÛJ
+KKJJŒ‹ÛÛšØ[YPÙLÛÛ›XZØPÙLÛÛšØ[YTİ]O[[ÛÛ›XZØTİ]O[[ÛÛ˜ÛÛX˜]İ]O[[ÜØ]™QšYÚ\ŠÛ
+NØYÚ][™J	ÔÚ\İ[XIË	Ğ	ÊÛ˜[YJÉÈY[™HHH\™[˜HÛÛˆİH›ÙÜ™\ÛÈHš\™X˜\ÙK‰ËYJNÙ˜]Ô›Üİ\Š
+NÜ™]\›ŸXÛÛœİ^Y\[XZÙJ˜[YK™XÛÜ™œ˜XÙ_
+ÓX]œ˜[™ÛJ
+JŒLŒÌ
+ÓX]œ˜[™ÛJ
+JŒL	İ\Ù\‰ÊÚÙ^KYKÙ^K™XÛÜ™
+NÙšYÚ\œËœ\Ú
+^Y\ŠNÜØ]™QšYÚ\Š^Y\ŠNØYÚ][™J	ÔÚ\İ[XIË	Ğ	ÊÛ˜[YJÉÈ[›ÈÛÛ[È	ÊÜ˜XÙ\ÖÜ^Y\‹œ˜XÙWVÌJÉÈ[ˆš]™[	ÊÜ^Y\‹›]™[
+ÉË‰ËYJNÙ˜]Ô›Üİ\Š
+_XØ]Ú
+J^İÚ[™İËšÚP\™[˜PÛİYœÙ]İ]\Ê	Ó›ÈÙHYÈ[™Ü™\Ø\ˆ	ÊÙK›Y\ÜØYÙJNØYÚ][™J	ÔÚ\İ[XIË	Ó›ÈÙHYÈ[™Ü™\Ø\Èš\™X˜\ÙH›ÈİX\™È[YØYÜ‹‰ËYJ__X\Ş[˜È[˜İ[ÛˆÜİÚ]
+˜]Õ\Ù\‹˜]ÓY\ÜØYÙJ^ØÛÛœİ˜[YOTİš[™Ê˜]Õ\Ù\Ÿ	ÉÊKš[J
+KÙ^O[›Ü›X[^™U\Ù\›˜[YJ˜[YJKY\ÜØYÙOTİš[™Ê˜]ÓY\ÜØYÙ_	ÉÊKš[J
+NÚYŠK×–ĞKV˜K^ŒNWË‹W^ÌËIË\İ
+˜[YJJ^ØYÚ][™J	ÔÚ\İ[XIË	Ñ\ØÜšX™H[ˆ\İX\š[È˜[YÈ
+ËLØ\˜Xİ\™\ÊK‰ËYJNÜ™]\›ŸZYŠ[Y\ÜØYÙJ\™]\›ØÛÛœİÛY[Y\ÜØYÙKÕ\\Ø\ÙJ
+Nİ^ÚYŠÛYOOIÑIÊ^Ø]ØZ]›Ú[”^Y\Š˜[YJNÜ™]\›ŸXÛÛœİ™XÛÜ™X]ØZ]Ú[™İËšÚP\™[˜PÛİY™Ù]
+Ù^JKØ[›ÛšXØ[\™XÛÜ™Ë\Ù\›˜[Y_˜[YNØ]ØZ]Ú[™İËšÚP\™[˜PÛİY˜YY\ÜØYÙJØ[›ÛšXØ[Y\ÜØYÙJNØYÚ][™JØ[›ÛšXØ[Y\ÜØYÙJNÚYŠÛYOOIÒÉÉ‰˜ÛYOOIÓIÉ‰˜ÛYOOIÕ‰Ê\™]\›ÚYŠ\™XÛÜ™
+^ØYÚ][™J	ÔÚ\İ[XIË	Ôš[Y\›È[™Ü™\ØHÛÛˆH\˜HÜ™X\ˆHYØYÜˆ[ˆš\™X˜\ÙK‰ËYJNÜ™]\›ŸXÛÛœİ^Y\YšYÚ\œË™š[™
+O™‹š\Ô^Y\‰‰™‹\Ù\’Ù^OOOZÙ^JNÚYŠ\^Y\Ÿ\^Y\‹˜[]™J^ØYÚ][™J	ÔÚ\İ[XIË	Ò[™Ü™\ØHHH\™[˜HÛÛˆH[\ÈH\Ø\ˆÙ\™\Ë‰ËYJNÜ™]\›ŸZYŠ^Y\‹œ˜XÙOOOLÊ^ØÛÛœİ™\]Z\™YQ”‘QV‘T—ÔÕÑT—Ô“ÑÔ‘TÔÒSÓ–ØÛYOË[›ØÚÓ]™[ÚYŠ™\]Z\™Y	‰œ^Y\‹›]™[™\]Z\™Y
+^ØYÚ][™J	ÔÚ\İ[XIË”‘QV‘T—ÔÕÑT—Ô“ÑÔ‘TÔÒSÓ–ØÛYK›˜[YJÉÈÙH\Ø›Ü]YXH[ˆ[š]™[	ÊÜ™\]Z\™Y
+ÉË‰ËYJNÜ™]\›Ÿ_ZYŠÛYOOIÕ‰Ê^ÚYŠ^Y\‹œ˜XÙHOOLÊ^ØYÚ][™J	ÔÚ\İ[XIË	ÕˆÈ˜^[È[Ü[ÛÛÈ\İÈ\ÜÛšX›H\˜HH˜^˜Hœ™Y^™\‹‰ËYJNÜ™]\›ŸZYŠ^Y\‹™X]ÙŒ^Y\‹™X]˜^Tİ]_^Y\‹šØ[YTİ]_^Y\‹›XZØTİ]J^ØYÚ][™J	ÔÚ\İ[XIË	Ô˜^[È[Ü[›È\ÜÛšX›HZÜ˜K‰ËYJNÜ™]\›Ÿ[][˜ÚX]˜^J^Y\Š_Y[ÙHYŠÛYOOIÒÉÊ^ÚYŠ^Y\‹šØ[YPÙŒ^Y\‹šØ[YTİ]_^Y\‹›XZØTİ]_^Y\‹™X]˜^Tİ]J^ØYÚ][™J	ÔÚ\İ[XIË	ÒØ[YZ[YZH›È\ÜÛšX›HZÜ˜K‰ËYJNÜ™]\›Ÿ[][˜ÚØ[YJ^Y\Š_Y[Ù^ÚYŠ^Y\‹›XZØPÙŒ^Y\‹›XZØTİ]_^Y\‹šØ[YTİ]_^Y\‹™X]˜^Tİ]J^ØYÚ][™J	ÔÚ\İ[XIË	ÓXZØ[šÛÜØ\È›È\ÜÛšX›HZÜ˜K‰ËYJNÜ™]\›Ÿ[][˜ÚXZØJ^Y\Š__XØ]Ú
+J^İÚ[™İËšÚP\™[˜PÛİYœÙ]İ]\Ê	Ñ\œ›ÜˆHš\™X˜\ÙNˆ	ÊÙK›Y\ÜØYÙJNØYÚ][™J	ÔÚ\İ[XIË	Ñš\™X˜\ÙH›ÈYÈİX\™\ˆ\ÙHY[œØZ™K‰ËYJ__Y[˜İ[ÛˆÙ]Ù][™ÜÔİ]\ÊY\ÜØYÙKÚÏY˜[ÙK\œ›ÜY˜[ÙJ^ØÛÛœİ[YØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜÙ][™ÜË\İ]\ÉÊNÚYŠY[
+\™]\›Ù[^ÛÛ[[Y\ÜØYÙNÙ[™]\Ù]›ÚÏTİš[™ÊÚÊNÙ[™]\Ù]™\œ›ÜTİš[™Ê\œ›ÜŠ_B™[˜İ[Ûˆ™[™\”Ù][™ÜÑ›Ü›J
+^ÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ÖÙ]K\İ][][\Y\—IÊK™›Ü‘XXÚ
+[œ]OÚ[œ]˜[YOYØ[Y\^TÙ][™ÜËœİ]ÖÚ[œ]™]\Ù]œİ]][\Y\—_JNØÛÛœİİÙ\‘Ü›İ\ÏVŞÜØÛÜN‰ÙÙ[™\šXÉË]N‰Óİ˜\È˜^˜\ÉË›İÜÎ–ÖÉÚØ[YZ[YZIË	ÒØ[YZ[YZI×KÉÛXZØ[šÛÜØ\ÉË	ÓXZØ[šÛÜØ\É×W_KÜØÛÜN‰Ùœ™Y^™\‰Ë]N‰Ñœ™Y^™\‰Ë›İÜÎ–ÖÉÙX]˜^IË	Ô˜^[È[Ü[	×KÉÛXZØ[šÛÜØ\ÉË	ÓXZØ[šÛÜØ\É×KÉÚØ[YZ[YZIË	ÒØ[YZ[YZI×W_WNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜİÙ\‹\Ù][™ÜÉÊKš[›™\’S\İÙ\‘Ü›İ\Ë›X\
+Ü›İ\O‰Ï]ˆÛ\ÜÏHœİÙ\‹\Ù][™ÜËYÜ›İ\‰ÊÙÜ›İ\]JÉÏÚ‰ÊÙÜ›İ\œ›İÜË›X\
+
+ÚÙ^KX™[JOOØÛÛœİ˜[YOYØ[Y\^TÙ][™ÜËœİÙ\œÖÙÜ›İ\œØÛÜWVÚÙ^WNÜ™]\›ˆ	Ï]ˆÛ\ÜÏHœİÙ\‹\Ù][™Èİ›Û™Ï‰ÊÛX™[
+ÉÏÜİ›Û™ÏÛX[“][\XØYÜˆHÚH[™HLHHLLÜÛX[]ˆÛ\ÜÏHœİÙ\‹\Ù][™Ë\Z\ˆX™[’[šXÚ[Ï[œ]\OH›[X™\ˆˆZ[HŒˆX^HŒLˆİ\HŒŒHˆ]K\İÙ\‹\ØÛÜOH‰ÊÙÜ›İ\œØÛÜJÉÈˆ]K\İÙ\‹ZÙ^OH‰ÊÚÙ^JÉÈˆ]KX›İ[™Hœİ\ˆ˜[YOH‰Êİ˜[YKœİ\
+ÉÈÛX™[X™[“š]™[L[œ]\OH›[X™\ˆˆZ[HŒˆX^HŒLˆİ\HŒŒHˆ]K\İÙ\‹\ØÛÜOH‰ÊÙÜ›İ\œØÛÜJÉÈˆ]K\İÙ\‹ZÙ^OH‰ÊÚÙ^JÉÈˆ]KX›İ[™H™[™ˆ˜[YOH‰Êİ˜[YK™[™
+ÉÈÛX™[Ù]Ù]‰ßJKš›Ú[Š	ÉÊJÉÏÙ]‰ÊKš›Ú[Š	ÉÊNØÛÛœİ[™[™ÏVÖÉÑÛÛHHÚIË	ÚÚP›\İ	×KÉÑ\İ[Èš[˜[	Ë	Ùš[˜[›\Ú	×KÉÓXYX˜IË	ÛXYX˜I×KÉĞ›ÛH[Ü[	Ë	ÙX]˜[	×WNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜ[™[™Ë\İÙ\‹\Ù][™ÜÉÊKš[›™\’S\[™[™Ë›X\
+
+Û˜[YWJOO‰Ï]ˆÛ\ÜÏHœ[™[™Ë\İÙ\ˆİ›Û™Ï‰ÊÛ˜[YJÉÏÜİ›Û™ÏÜ[”[™Y[HH[\[Y[\ˆÛÛ[ÈXØÚpìÛÜÜ[Ù]‰ÊKš›Ú[Š	ÉÊNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈØÚ\˜Xİ\‹\Ù][™ÜÉÊKš[›™\’SPÒTPÕT—ÓÔSÓ”Ë›X\
+Ú\˜Xİ\O‰ÏX™[Û\ÜÏH˜Ú\˜Xİ\‹\Ù][™ÈÜ[‰ÊØÚ\˜Xİ\‹›˜[YJÉÈ0­È	ÊØÚ\˜Xİ\‹›X™[
+ÉÏÜÜ[[œ]\OH˜ÚXÚØ›Şˆ]KXÚ\˜Xİ\‹ZÙ^OH‰ÊØÚ\˜Xİ\‹šY
+ÉÈˆ	ÊÊØ[Y\^TÙ][™ÜË˜Ú\˜Xİ\œÖØÚ\˜Xİ\‹šYOÉØÚXÚÙY	Î‰ÉÊJÉÏÛX™[‰ÊKš›Ú[Š	ÉÊ_B™[˜İ[Ûˆ™XYØ[YTÙ][™ÜÊ
+^ØÛÛœİ™^R”ÓÓ‹œ\œÙJ”ÓÓ‹œİš[™ÚYJØ[Y\^TÙ][™ÜÊJNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ÖÙ]K\İ][][\Y\—IÊK™›Ü‘XXÚ
+[œ]OÛ™^œİ]ÖÚ[œ]™]\Ù]œİ]][\Y\—OS[X™\Š[œ]˜[YJ_JNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ÖÙ]K\İÙ\‹\ØÛÜWIÊK™›Ü‘XXÚ
+[œ]OÛ™^œİÙ\œÖÚ[œ]™]\Ù]œİÙ\”ØÛÜWVÚ[œ]™]\Ù]œİÙ\’Ù^WVÚ[œ]™]\Ù]˜›İ[™OS[X™\Š[œ]˜[YJ_JNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ÖÙ]KXÚ\˜Xİ\‹ZÙ^WIÊK™›Ü‘XXÚ
+[œ]OÛ™^˜Ú\˜Xİ\œÖÚ[œ]™]\Ù]˜Ú\˜Xİ\’Ù^WOZ[œ]˜ÚXÚÙYJNÜ™]\›ˆ›Ü›X[^™QØ[YTÙ][™ÜÊ™^
+_B™[˜İ[Ûˆ˜[Y]QØ[YTÙ][™ÜÊÙ][™ÜÊ^ÚYŠY[˜X›YÚ\˜Xİ\”˜XÙ\ÊÙ][™ÜÊK›[™İ
+\™]\›ˆ	ĞXİ]˜H[Y[›ÜÈ[ˆ\œÛÛ˜Z™H[YÚX›K‰ÎØÛÛœİÜ™\™YYÜ›İ\O™Ü›İ\œİ\Ü›İ\™[™Ù›ÜŠÛÛœİÜ›İ\ÙˆÜÙ][™ÜËœİÙ\œË™Ù[™\šXËÙ][™ÜËœİÙ\œË™œ™Y^™\—J^ÚYŠ[Ü™\™Y
+Ü›İ\šØ[YZ[YZJ_[Ü™\™Y
+Ü›İ\›XZØ[šÛÜØ\ÊJ\™]\›ˆ	Ñ[][\XØYÜˆX™H][Y[\ˆ\ÙH[š]™[H\İH[š]™[L‰ßXÛÛœİÏ\Ù][™ÜËœİÙ\œË™Ù[™\šXË\Ù][™ÜËœİÙ\œË™œ™Y^™\ÚYŠJËšØ[YZ[YZKœİ\Ë›XZØ[šÛÜØ\Ëœİ\	‰™ËšØ[YZ[YZK™[™Ë›XZØ[šÛÜØ\Ë™[™
+J\™]\›ˆ	Ô\˜Hİ˜\È˜^˜\ËXZØ[šÛÜØ\ÈX™Hİ\\˜\ˆHØ[YZ[YZK‰ÎÚYŠJ‹™X]˜^Kœİ\‹›XZØ[šÛÜØ\Ëœİ\	‰™‹›XZØ[šÛÜØ\Ëœİ\‹šØ[YZ[YZKœİ\	‰™‹™X]˜^K™[™‹›XZØ[šÛÜØ\Ë™[™	‰™‹›XZØ[šÛÜØ\Ë™[™‹šØ[YZ[YZK™[™
+J\™]\›ˆ	Ô\˜Hœ™Y^™\‹H\ØØ[HX™HÙ\ˆ˜^[È[Ü[XZØ[šÛÜØ\ÈØ[YZ[YZK‰ÎÜ™]\›ˆ	ÉßB™[˜İ[Ûˆ\TÙ][™ÜÕÑšYÚ\œÊ
+^Ù›ÜŠÛÛœİˆÙˆšYÚ\œÊ^ØÛÛœİ˜][ÏY‹›X^ŒÓX]›X^
+X]›Z[ŠK‹šÙ‹›X^
+JNŒKİ]ÏXØ[İ[]S]™[İ]Ê‹›]™[Ø[Y\^TÙ][™ÜÊNÙ‹›X^\İ]Ë›X^Ù‹šSX]›Z[Š‹›X^‹›X^
+œ˜][ÊNÙ‹˜]Ï\İ]Ëœ\ÚXØ[]XÚÎÙ‹™Y\İ]Ëœ\ÚXØ[Y™[œÙNÙ‹šÚO\İ]ËšÚNÙ‹šÚYY\İ]ËšÚQY™[œÙNÜØ]™QšYÚ\ŠŠ__B˜\Ş[˜È[˜İ[Ûˆ\œÚ\İØ[YTÙ][™ÜÊÙ][™ÜÊ^ØÛÛœİ›Ø›[O]˜[Y]QØ[YTÙ][™ÜÊÙ][™ÜÊNÚYŠ›Ø›[J^ÜÙ]Ù][™ÜÔİ]\Ê›Ø›[K˜[ÙKYJNÜ™]\›Ÿ]^Ø]ØZ]Ú[™İËšÚP\™[˜PÛİYœØ]™TÙ][™ÜÊÙ][™ÜÊNÙØ[Y\^TÙ][™ÜÏ\Ù][™ÜÎØ\TÙ][™ÜÕÑšYÚ\œÊ
+NÜ™[™\”Ù][™ÜÑ›Ü›J
+NÙ˜]Ô›Üİ\Š
+NÜÙ]Ù][™ÜÔİ]\Ê	ĞÛÛ™šYİ\˜XÚpìÛˆİX\™YH[ˆš\™X˜\ÙH0­È	ÊİÚ[™İË’ÒWĞT‘SWÑ’T‘PTÑK™[š\›Û›Y[Õ\\Ø\ÙJ
+KYJ_XØ]Ú
+J^ÜÙ]Ù][™ÜÔİ]\Ê	Ó›ÈÙHYÈİX\™\ˆ	ÊÙK›Y\ÜØYÙK˜[ÙKYJ__B™[˜İ[ÛˆÚ\™TÙ][™ÜÊ
+^Ü™[™\”Ù][™ÜÑ›Ü›J
+NÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÙØ[YK\Ù][™ÜËY›Ü›IÊK˜Y]™[\İ[™\Š	ÜİX›Z]	Ë]™[OÙ]™[œ™]™[Y˜][
+
+NÜ\œÚ\İØ[YTÙ][™ÜÊ™XYØ[YTÙ][™ÜÊ
+J_JNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜÙ][™ÜË\™\Ù]	ÊK›Û˜ÛXÚÏJ
+OOœ\œÚ\İØ[YTÙ][™ÜÊ›Ü›X[^™QØ[YTÙ][™ÜÊQUSÑĞSQWÔÑUS‘ÔÊJNÜÙ]Ù][™ÜÔİ]\Ê	Õ\Ø[™È°ìÜ›][\È[šXÚX[\ÎÈÙHYY[ˆİX\™\ˆ[ˆš\™X˜\ÙK‰Ë˜[ÙJ_B˜\Ş[˜È[˜İ[ÛˆØYØ[YTÙ][™ÜÊ
+^İ^ØÛÛœİİÜ™YX]ØZ]Ú[™İËšÚP\™[˜PÛİY™Ù]Ù][™ÜÊ
+NÙØ[Y\^TÙ][™ÜÏ[›Ü›X[^™QØ[YTÙ][™ÜÊİÜ™YQUSÑĞSQWÔÑUS‘ÔÊNÜ™[™\”Ù][™ÜÑ›Ü›J
+NÜÙ]Ù][™ÜÔİ]\ÊİÜ™YÉĞÛÛ™šYİ\˜XÚpìÛˆØ\™ØYH\ÙHš\™X˜\ÙH0­È	ÊİÚ[™İË’ÒWĞT‘SWÑ’T‘PTÑK™[š\›Û›Y[Õ\\Ø\ÙJ
+N‰ÔÚ[ˆZ\İ\ÈİX\™YÜÎÈ\Ø[™È˜[Ü™\È[šXÚX[\Ë‰ËH\İÜ™Y
+_XØ]Ú
+J^ÙØ[Y\^TÙ][™ÜÏ[›Ü›X[^™QØ[YTÙ][™ÜÊQUSÑĞSQWÔÑUS‘ÔÊNÜ™[™\”Ù][™ÜÑ›Ü›J
+NÜÙ]Ù][™ÜÔİ]\Ê	Ñš\™X˜\ÙH›È]›ÛšpìÈÜÈZ\İ\ÎÈ\Ø[™È°ìÜ›][\È[šXÚX[\Ëˆ	ÊÙK›Y\ÜØYÙK˜[ÙKYJ__B™[˜İ[ÛˆÚ\™PÚ]
+
+^ØÛÛœİ[YØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÙ[š\›Û›Y[\İÚ]Ú	ÊNÙ[‹˜[YO]Ú[™İË’ÒWĞT‘SWÑ’T‘PTÑK™[š\›Û›Y[Ù[‹›Û˜Ú[™ÙOJ
+OOØÛÛœİ\›[™]ÈT“
+ØØ][Û‹š™YŠNÚYŠ[‹˜[YOOOIÙ]‰Ê]\›œÙX\˜Ú\˜[\Ë™[]J	Ù[‰ÊNÙ[ÙH\›œÙX\˜Ú\˜[\ËœÙ]
+	Ù[‰Ë[‹˜[YJNÛØØ][Û‹˜\ÜÚYÛŠ\›š™YŠ_NØÛÛœİ\Ù\YØİ[Y[œ]Y\TÙ[XİÜŠ	ÈØÚ]]\Ù\‰ÊKY\ÜØYÙOYØİ[Y[œ]Y\TÙ[XİÜŠ	ÈØÚ][Y\ÜØYÙIÊKÙ[™J
+OOØÛÛœİ˜[YO[Y\ÜØYÙK˜[YNÛY\ÜØYÙK˜[YOIÉÎÜÜİÚ]
+\Ù\‹˜[YK˜[YJ_Nİ\Ù\‹˜Y]™[\İ[™\Š	Ú[œ]	Ë
+
+OOœ™[™\Ú]\Ù\”Ù[Xİ[ÛŠ\Ù\‹˜[YJJNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÚ›Ú[‹]\Ù\‰ÊK›Û˜ÛXÚÏJ
+OOœÜİÚ]
+\Ù\‹˜[YK	ÑIÊNÙØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÜÙ[™XÚ]	ÊK›Û˜ÛXÚÏ\Ù[™İ\Ù\‹˜Y]™[\İ[™\Š	ÚÙ^YİÛ‰ËOOÚYŠKšÙ^OOOIÑ[\‰Ê\ÜİÚ]
+\Ù\‹˜[YK	ÑIÊ_JNÛY\ÜØYÙK˜Y]™[\İ[™\Š	ÚÙ^YİÛ‰ËOOÚYŠKšÙ^OOOIÑ[\‰Ê\Ù[™
+
+_JNÙØİ[Y[œ]Y\TÙ[XİÜ[
+	ÖÙ]K\Ú[KXÛÛ[X[™IÊK™›Ü‘XXÚ
+O˜‹›Û˜ÛXÚÏJ
+OOœÜİÚ]
+\Ù\‹˜[YK‹™]\Ù]œÚ[PÛÛ[X[™
+JNØÛÛœİ]›Ş]ÛYØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÚ]›Ş]ÙÙÛIÊK]›ŞYÙ[™YØİ[Y[œ]Y\TÙ[XİÜŠ	ÈÚ]›Ş[YÙ[™	ÊNÚYŠ]›Ş]ÛŠZ]›Ş]Û‹›Û˜ÛXÚÏJ
+OOÜÚİÒ]›Ş\ÏH\ÚİÒ]›Ş\ÎÚ]›Ş]Û‹œÙ]]šX]J	Ø\šXK\™\ÜÙY	Ëİš[™ÊÚİÒ]›Ş\ÊJNÚ]›Ş]Û‹^ÛÛ[\ÚİÒ]›Ş\ÏÉÓØİ[\ˆ]›Ş\ÉÎ‰Ó[Üİ˜\ˆ]›Ş\ÉÎÚYŠ]›ŞYÙ[™
+Z]›ŞYÙ[™šY[H\ÚİÒ]›Ş\ß_Y[˜İ[Ûˆ˜]ĞÚ\™ÙP]\˜J‹
+^ÚYŠY‹šØ[YTİ]I‰ˆY‹›XZØTİ]J\™]\›ØÛÛœİ[[œÚ]OLJÓX]œÚ[Š
+ŒN
+Ù‹œÙYY
+J‹ŒL‹MJš[[œÚ]NØİœØ]™J
+NØİ™ÛØ˜[ÛÛ\ÜÚ]SÜ\˜][ÛIÛYÚ\‰ÎØİœÚYİĞÛÛÜIÈÙ™™Ø‰ÎØİœÚYİĞ›\LÍØÛÛœİÛİÏXİ˜Ü™X]T˜YX[Ü˜YY[
+‹‹KK‹‹KŠŒK
+NÙÛİË˜YÛÛÜ”İÜ
+	Ü™Ø˜JMKËMLKÍJIÊNÙÛİË˜YÛÛÜ”İÜ
+‹	Ü™Ø˜JMKNLÌKŒÍ
+IÊNÙÛİË˜YÛÛÜ”İÜ
+K	Ü™Ø˜JMKLMK
+IÊNØİ™š[İ[OYÛİÎØİ˜™YÚ[”]
+
+NØİ™[\ÙJ‹‹KŠ‹Ì‹ŠŒKŒNX]”JŒŠNØİ™š[
+
+NØİœİ›ÚÙTİ[OIÈÙ™™Œ˜LIÎØİ›[™UÚYLÎØİ™ÛØ˜[[OKÙ›ÜŠ]OLÚOMÚJÊÊ^ØÛÛœİOZJ“X]”KÎ
+İ
+ŠILÌKŒ‹K
+K[›™\\ŠŠŒÍ
+ÓX]œÚ[Š
+ŒMJÚJJ‹Œ
+Kİ]\\ŠŠ
+ÓX]œÚ[Š
+ŒLÊÚJŒ‹ŒJJ‹ŒŠKOY‹
+ÓX]˜ÛÜÊJJš[›™\‹LOY‹JÓX]œÚ[ŠJJš[›™\‹Y‹
+ÓX]˜ÛÜÊJËŒJJ›İ]\‹LY‹JÓX]œÚ[ŠJËŒJJ›İ]\Øİ˜™YÚ[”]
+
+NØİ›[İ™UÊKLJNØİœ]XY˜]XĞİ\™UÊ‹
+ÓX]˜ÛÜÊKKŒLŠJ›İ]\ŠŒKŒL‹‹JÓX]œÚ[ŠKKŒLŠJ›İ]\ŠŒKŒL‹‹LŠNØİœİ›ÚÙJ
+_Xİœ™\İÜ™J
+_Y[˜İ[Ûˆ˜]Ğ]\˜J‹
+^ØÛÛœİSX]›X^
+X]›Z[ŠK
+‹›]™[LJKÎNJJKYOSX]œ›İ[™
+LŒ
+ŠK\
+JKÛÛÜIÚÛ
+	ÊÚYJÉËL	KN	JIË˜Y]\ÏLÍ
+ÓX]œÜ\
+X]›X^
+‹›]™[LJJJ[ÙOSX]œÚ[Š
+
+Ù‹œÙYY
+JŒØİœØ]™J
+NØİ™ÛØ˜[ÛÛ\ÜÚ]SÜ\˜][ÛIÛYÚ\‰ÎØİ™ÛØ˜[[OKNØÛÛœİÜ˜YXİ˜Ü™X]T˜YX[Ü˜YY[
+‹‹KË‹‹K˜Y]\ÊŒKŒÍJNÙÜ˜Y˜YÛÛÜ”İÜ
+	ÚÛJ	ÊÚYJÉËL	KÌ‰KŒÍŠIÊNÙÜ˜Y˜YÛÛÜ”İÜ
+	ÚÛJ	ÊÚYJÉËL	KN	KŒŒJIÊNÙÜ˜Y˜YÛÛÜ”İÜ
+K	ÚÛJ	ÊÚYJÉËL	KL‰K
+IÊNØİ™š[İ[OYÜ˜YØİ˜™YÚ[”]
+
+NØİ™[\ÙJ‹‹K˜Y]\Ê‹Î˜Y]\ÊŒKŒ‹X]”JŒŠNØİ™š[
+
+NØİœİ›ÚÙTİ[OXÛÛÜØİœÚYİĞÛÛÜXÛÛÜØİœÚYİĞ›\LL
+Ü
+ŒØİ›[™UÚYLK
+Ü
+ŒÙ›ÜŠ]OLÚOLÚJÊÊ^ØÛÛœİOZJ“X]”KÍŠİ
+Š
+Ü
+ŒK
+K\˜Y]\ÊŠÌŠÓX]œÚ[Š
+ŒLJÚJŒKÊÙ‹œÙYY
+J‹ŒLÊKOY‹
+ÓX]˜ÛÜÊJJœ˜Y]\Ê‹ŒÍKLOY‹JÓX]œÚ[ŠJJœ˜Y]\Ê‹KY‹
+ÓX]˜ÛÜÊJËŒLŠJœ‹LY‹JÓX]œÚ[ŠJËŒLŠJœØİ™ÛØ˜[[OKŠÜ
+‹ŒØİ˜™YÚ[”]
+
+NØİ›[İ™UÊKLJNØİœ]XY˜]XĞİ\™UÊ‹
+ÓX]˜ÛÜÊKKŒMŠJœŠ‹Ë‹JÓX]œÚ[ŠKKŒMŠJœŠ‹Ë‹LŠNØİœİ›ÚÙJ
+_Xİœ™\İÜ™J
+_B™[˜İ[Ûˆœ˜[YJÊ^ØÛÛœİ]ËÌLSX]›Z[ŠŒ
+Ë[\İ
+KÌL
+NÛ\İ]Îİ\]J
+NÙ˜]Ê
+NÚYŠX]™›ÛÜŠËÍ
+ILOOOL
+HÚYŠX]™›ÛÜŠËÍ
+HOOYœ˜[YKZJ^Ùœ˜[YKZOSX]™›ÛÜŠËÍ
+NÙ˜]Ô›Üİ\Š
+__\™\]Y\İ[š[X][Û‘œ˜[YJœ˜[YJ_XË˜Y]™[\İ[™\Š	ØÛXÚÉËOOÚYŠYšYÚ\œË›[™İ
+\™]\›Û]XË™Ù]›İ[™[™ĞÛY[™Xİ
+
+KJK˜ÛY[\‹›Y
+J•ËÜ‹ÚYOJK˜ÛY[K\‹Ü
+J’Ü‹šZYÚÜÙ[XİYYšYÚ\œËœ™YXÙJ
+KŠOO“X]š\İ
+‹^‹K^
+OX]š\İ
+K^KK^JOÙ˜KšYÚ\œÖÌJNÚ[œÜXİ
+
+_JNØ\Ş[˜È[˜İ[Ûˆ™[ØYÛİY^Y\œÊ
+^ØÛÛœİØÜÏX]ØZ]Ú[™İËšÚP\™[˜PÛİY›\İ^Y\œÊ
+NØÛİY^Y\œÏ[™]ÈX\
+ØÜË›X\
+O–Û›Ü›X[^™U\Ù\›˜[YJ\Ù\›˜[YJKJJNÙ˜]Ô›Üİ\Š
+_B˜\Ş[˜È[˜İ[Ûˆ™Yœ™\ÚY\ÜØYÙ\ÊÙY[Š^İ^Ù›ÜŠÛÛœİHÙˆ]ØZ]Ú[™İËšÚP\™[˜PÛİY›\İY\ÜØYÙ\Ê
+JZYŠ\ÙY[‹š\ÊKšY
+J^ÜÙY[‹˜Y
+KšY
+NØYÚ][™JK\Ù\›˜[YKK^
+__XØ]Ú
+J^İÚ[™İËšÚP\™[˜PÛİYœÙ]İ]\Ê	ÔÚ[˜Ü›Ûš^˜XÚpìÛˆš\™X˜\ÙH[™Y[Nˆ	ÊÙK›Y\ÜØYÙJ__B˜\Ş[˜È[˜İ[Ûˆİ\
+
+^İÚ\™PÚ]
+
+NİÚ\™TÙ][™ÜÊ
+NØÛÛœİÙY[[™]ÈÙ]
+
+Nİ^Ø]ØZ]ØYØ[YTÙ][™ÜÊ
+NØ]ØZ]™[ØYÛİY^Y\œÊ
+NÚ[š]
+
+NØ]ØZ]™Yœ™\ÚY\ÜØYÙ\ÊÙY[ŠNÜÙ][\˜[
+
+
+OOœ™Yœ™\ÚY\ÜØYÙ\ÊÙY[ŠKL
+NÜÙ][\˜[
+
+
+OOœ™[ØYÛİY^Y\œÊ
+K˜Ø]Ú
+OOÚ[™İËšÚP\™[˜PÛİYœÙ]İ]\Ê	ÔÚ[˜Ü›Ûš^˜XÚ[Ûˆš\™X˜\ÙH[™Y[Nˆ	ÊÙK›Y\ÜØYÙJJK
+_XØ]Ú
+J^İÚ[™İËšÚP\™[˜PÛİYœÙ]İ]\Ê	Ó›ÈÙHYÈØ\™Ø\ˆH\YH\ÙHš\™X˜\ÙNˆ	ÊÙK›Y\ÜØYÙJNØYÚ][™J	ÔÚ\İ[XIË	ÓH\™[˜H\Ü\˜HÛÛ™^[ÛˆÛÛˆš\™\İÜ™K‰ËYJ_\™\]Y\İ[š[X][Û‘œ˜[YJœ˜[YJ_\İ\
+
+_

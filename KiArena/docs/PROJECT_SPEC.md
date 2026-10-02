@@ -59,11 +59,13 @@ El nivel está limitado a **1–100**. Los atributos se derivan del nivel `L` (`
 
 | Atributo | Fórmula actual |
 |---|---:|
-| Vida máxima | `100 + 8g` |
-| Ataque físico | `9 + 1.35g` |
-| Defensa física | `5 + 0.7g` |
-| Ataque de ki | `12 + 1.4g` |
-| Defensa de ki | `5 + 0.8g` |
+| Vida máxima (sangre) | `100 + M_hp × (N − 1)`; valor inicial de `M_hp = 8` |
+| Ataque físico | `9 + M_fis × (N − 1)`; valor inicial de `M_fis = 1.35` |
+| Defensa física | `5 + M_defFis × (N − 1)`; valor inicial de `M_defFis = 0.7` |
+| Ataque de ki | `12 + M_ki × (N − 1)`; valor inicial de `M_ki = 1.4` |
+| Defensa de ki | `5 + M_defKi × (N − 1)`; valor inicial de `M_defKi = 0.8` |
+
+`N` siempre es el nivel entero actual limitado a 1–100. Los multiplicadores `M_*` se editan en **Settings → Fórmulas y personajes** y se guardan por entorno en Firestore. Las estadísticas se recalculan desde el nivel y la configuración vigente; si se cambia una fórmula durante una partida, los combatientes conservan su porcentaje de HP actual y reciben los nuevos atributos derivados.
 
 Los perfiles anteriores a la versión 2 de HP conservan su porcentaje de vida actual al migrar una sola vez desde la escala antigua (`100 + 4g`) a la nueva (`100 + 8g`). Una baja da al atacante `100 + round(nivel del rival × 4)` XP. Para avanzar desde el nivel `L` se requieren `round(100 + 24L + 1.3L²)` XP. El excedente se consume en una subida y puede permitir más de un nivel si alcanza. Al llegar a nivel 100, la XP se fija en cero.
 
@@ -89,6 +91,12 @@ El diseño específico para Freezer cumple la proporción pedida: técnica poste
 | `V` | Rayo Mortal | 1 | 10 → 7 | 2.6 → 3.4 |
 | `M` | Makankosappo | 10 | 8 → 5 | 3.2 → 4.2 |
 | `K` | Kamehameha | 20 | 6 → 3 | 5.5 → 7.0 |
+
+Los multiplicadores de daño bruto por poder son configurables en Settings y se interpolan linealmente por nivel: `M_poder(N) = M_inicio + (M_100 − M_inicio) × (N − 1)/99`. El daño bruto de una técnica es `AtaqueKi(N) × M_poder(N)` y luego se resta la defensa de ki del objetivo. Settings muestra los multiplicadores genéricos de Kamehameha/Makankosappo y el perfil particular Freezer para las tres técnicas activas. Cada técnica implementada nueva debe añadir su propia curva, conexión de daño y controles allí. Los poderes del catálogo que todavía no se pueden lanzar se muestran como pendientes y no participan en daño.
+
+### Settings de juego
+
+La tarjeta **Fórmulas y personajes** permite editar multiplicadores de sangre/HP, ataque de ki, ataque físico, defensa física y defensa de ki, y las curvas por nivel de cada técnica activa. Los valores se guardan en `environments/{env}/kiArenaSettings/gameplay`, separados por namespace `dev`, `qa` y `prod` dentro del proyecto Firebase existente. La sección de personajes permite activar/desactivar Saiyajin, Namekuseijin, Humano y Freezer para el sorteo de raza de usuarios nuevos; el cambio no altera personajes ya guardados. Debe existir al menos una opción habilitada.
 
 Estos datos están codificados en `FREEZER_POWER_PROGRESSION` dentro de `public/src/game/arena.js`. Para otras razas se mantienen las fórmulas generales existentes: Kamehameha se ensancha y escala su daño con nivel; Makankosappo usa su propia anchura y multiplicador. No aplicar la tabla Freezer como regla universal.
 

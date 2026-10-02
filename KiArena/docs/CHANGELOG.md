@@ -2,6 +2,15 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-02 — fórmulas por nivel y elegibilidad configurable
+
+- **Solicitud:** expresar los atributos y poderes como fórmulas de nivel `N`; editar multiplicadores desde Settings; guardar la regla en la skill; habilitar/deshabilitar personajes elegibles.
+- **Implementación:** Settings muestra los multiplicadores de sangre/HP, ataque de ki, ataque físico, defensa física y defensa de ki; permite editar curvas lineales de daño para Kamehameha, Makankosappo y Rayo Mortal, incluyendo perfiles genéricos y Freezer. El catálogo de técnicas aún no implementadas queda etiquetado como pendiente. La selección de personajes controla el sorteo de raza para nuevos perfiles; las razas/progresos persistidos existentes permanecen intactos. Settings se persiste en Firestore por entorno.
+- **Trazabilidad:** la skill del proyecto ahora exige registrar fórmulas, daño, controles de poderes y elegibilidad cada vez que se añada una técnica o personaje.
+- **Archivos:** `public/src/config/gameplay-settings.js`, `public/src/game/arena.js`, `public/src/services/firebase/arena-cloud.js`, `public/index.html`, `public/styles/arena.css`, `docs/PROJECT_SPEC.md`, `docs/ARCHITECTURE.md`, `docs/FIRESTORE.md`, `.agents/skills/ki-arena-project/SKILL.md`.
+- **Verificación:** pasaron las comprobaciones de sintaxis ES module para los seis módulos, `git diff --check` y el cálculo de atributos en N=1, 2, 50 y 100, así como la interpolación N=1→100 de los multiplicadores Freezer. No se escribieron documentos reales de Firestore.
+- **Rama/commit:** publicación en rama Twitch pendiente.
+
 ## 2026-10-01 — especificación persistente y contexto descargable
 
 - **Solicitud:** guardar skills y especificaciones con el contexto del proyecto; hacer que las futuras instrucciones se agreguen al registro; subirlo para que quien descargue el repositorio tenga el contexto técnico y funcional.
