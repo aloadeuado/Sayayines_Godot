@@ -86,7 +86,7 @@ El diseño específico para Freezer cumple la proporción pedida: técnica poste
 
 | Letra | Técnica | Desbloqueo | Grosor interpolado | Multiplicador sobre ataque de ki |
 |---|---|---:|---:|---:|
-| `V` | Rayo Mortal | 1 | 10 → 7 | 1.7 → 2.7 |
+| `V` | Rayo Mortal | 1 | 10 → 7 | 2.6 → 3.4 |
 | `M` | Makankosappo | 10 | 8 → 5 | 3.2 → 4.2 |
 | `K` | Kamehameha | 20 | 6 → 3 | 5.5 → 7.0 |
 

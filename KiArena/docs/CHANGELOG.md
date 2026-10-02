@@ -47,6 +47,14 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - **Verificación:** pasó la comprobación de sintaxis de los módulos JavaScript y un smoke test HTTP local: página, CSS, módulos y sprite de poses respondieron 200. No se probó contra Firestore ni se desplegó Hosting.
 - **Rama/commit:** rama Twitch; implementación publicada en c37e6c7b3d80405272d638b00ab840f6fd4e3143. Sin despliegue a Firebase Hosting.
 
+## 2026-10-02 — aumentar el daño del Rayo Mortal
+
+- **Solicitud:** el rayo impactaba, pero el daño se sentía demasiado bajo.
+- **Decisión:** aumentar solo el multiplicador de daño de `V` de 1.7–2.7 a 2.6–3.4 veces el ataque de ki. El daño sigue descontando defensa de ki y la técnica conserva su posición por debajo de Makankosappo (3.2–4.2) y Kamehameha (5.5–7.0). La anchura y la zona de colisión no cambian.
+- **Archivos:** public/src/game/arena.js y docs/PROJECT_SPEC.md.
+- **Verificación:** pendiente de sintaxis; no se escribieron datos de Firestore.
+- **Rama/commit:** Twitch; commit pendiente. Sin despliegue a Firebase Hosting.
+
 ## Plantilla para entradas futuras
 
 ```text
