@@ -9,7 +9,7 @@ Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, a
 - **Trazabilidad:** la skill del proyecto ahora exige registrar fórmulas, daño, controles de poderes y elegibilidad cada vez que se añada una técnica o personaje.
 - **Archivos:** `public/src/config/gameplay-settings.js`, `public/src/game/arena.js`, `public/src/services/firebase/arena-cloud.js`, `public/index.html`, `public/styles/arena.css`, `docs/PROJECT_SPEC.md`, `docs/ARCHITECTURE.md`, `docs/FIRESTORE.md`, `.agents/skills/ki-arena-project/SKILL.md`.
 - **Verificación:** pasaron las comprobaciones de sintaxis ES module para los seis módulos, `git diff --check` y el cálculo de atributos en N=1, 2, 50 y 100, así como la interpolación N=1→100 de los multiplicadores Freezer. No se escribieron documentos reales de Firestore.
-- **Rama/commit:** publicación en rama Twitch pendiente.
+- **Rama/commit:** rama `Twitch`, commit `af962174869d3f93c04a373b02d2f76285aa03a5` (implementación); este registro se completa en el commit siguiente. Sin despliegue de Firebase Hosting.
 
 ## 2026-10-01 — especificación persistente y contexto descargable
 
