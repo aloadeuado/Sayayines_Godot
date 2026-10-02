@@ -95,7 +95,7 @@ Estos datos están codificados en `FREEZER_POWER_PROGRESSION` dentro de `public/
 ## 8. Interfaz
 
 - Encabezado Ki Arena y selector de entorno.
-- Canvas del escenario y leyenda de razas.
+- Canvas del escenario y leyenda de razas. El botón **Mostrar hitboxes** activa y desactiva un overlay: cian = radio del cuerpo usado por los rayos (12 px), coral = radio usado por proyectiles (21 px), ámbar = radio por luchador para visualizar el contacto cuerpo a cuerpo (29 px cada uno; se activa al tocarse, 58 px entre centros). Desactivado inicialmente.
 - Chat de arena colocado debajo del juego; incluye campo de usuario, campo de mensaje y botones de prueba para `E/K/M/V`.
 - Panel de luchadores con nivel, bajas, XP, KO e ingreso individual; control para agregar pendientes.
 - Panel de atributos del jugador seleccionado y registro de combate.
