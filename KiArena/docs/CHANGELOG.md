@@ -61,7 +61,7 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - **Implementación:** control en la leyenda del mapa para mostrar/ocultar hitboxes. Cian marca el radio 12 usado por rayos, coral el radio 21 de proyectiles dirigidos, y ámbar el radio 29 por luchador para el umbral melee de 58 entre centros. Overlay apagado por defecto; no cambia la lógica de colisiones.
 - **Archivos:** public/index.html, public/styles/arena.css, public/src/game/arena.js, docs/PROJECT_SPEC.md.
 - **Verificación:** pasó la sintaxis ES module de los cuatro módulos y el smoke test HTTP: index, CSS, módulos y sprite respondieron 200. Sin escritura de datos de Firebase.
-- **Rama/commit:** Twitch; commit pendiente. Sin despliegue de Firebase Hosting.
+- **Rama/commit:** rama Twitch; implementación publicada en dc2705e6cb628dc79242cdd4773665619b8a563c. Sin despliegue de Firebase Hosting.
 
 ## Plantilla para entradas futuras
 
