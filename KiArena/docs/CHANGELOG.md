@@ -69,7 +69,7 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - **Implementación:** la HP máxima crece 8 puntos por nivel (100 en nivel 1 y 892 en nivel 100); se aplica al crear perfiles, subir niveles y reingresar. Los perfiles guardados se migran una sola vez según su porcentaje de HP previo, mediante `hpFormulaVersion: 2`.
 - **Archivos:** public/src/game/arena.js, public/src/services/firebase/arena-cloud.js y docs/PROJECT_SPEC.md.
 - **Verificación:** pasaron las comprobaciones de sintaxis de los módulos de arena y Firestore; el cálculo da 100, 108, 172 y 892 HP en niveles 1, 2, 10 y 100. Index y ambos módulos respondieron HTTP 200. No se mutaron datos de Firebase durante la verificación.
-- **Rama/commit:** Twitch; commit pendiente. Sin despliegue de Firebase Hosting.
+- **Rama/commit:** rama Twitch; implementación publicada en 6a13ca7f0737acc2cdd4f2776276a0dbe1598f89. Sin despliegue de Firebase Hosting.
 
 ## Plantilla para entradas futuras
 
