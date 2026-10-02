@@ -45,7 +45,7 @@ Estas entradas recogen decisiones y cambios solicitados durante el prototipado, 
 - **Implementación:** cada luchador ahora tiene un botón **Elegir** que rellena el usuario del chat y resalta el remitente seleccionado, sin cambiar el panel de inspección. El Rayo Mortal entra en el mismo ciclo de avance y colisión que los rayos, y calcula su propio daño y radio de impacto en vez de pasar por la ruta de proyectiles dirigida a un objetivo. Su dibujo es magenta, delgado y luminoso; conserva la dirección horizontal del eje X.
 - **Archivos:** public/src/game/arena.js, public/styles/arena.css, docs/PROJECT_SPEC.md.
 - **Verificación:** pasó la comprobación de sintaxis de los módulos JavaScript y un smoke test HTTP local: página, CSS, módulos y sprite de poses respondieron 200. No se probó contra Firestore ni se desplegó Hosting.
-- **Rama/commit:** rama Twitch; commit pendiente de publicación. Sin despliegue a Firebase Hosting.
+- **Rama/commit:** rama Twitch; implementación publicada en c37e6c7b3d80405272d638b00ab840f6fd4e3143. Sin despliegue a Firebase Hosting.
 
 ## Plantilla para entradas futuras
 
