@@ -2,6 +2,43 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-02 — corregir inicialización de la arena raíz
+
+- **Solicitud:** reparar la arena vacía; la captura mostraba `setSettingsStatus is not defined` al cargar desde Firebase.
+- **Causa:** la arena raíz intentaba actualizar el estado de Settings aunque el formulario de ajustes ya está en la ruta `/settings` y no existe en `/`.
+- **Implementación:** la carga de configuración en arena ya no llama a la función del formulario separado; ante fallo de lectura usa los ajustes iniciales y continúa el arranque.
+- **Archivos:** `public/src/game/arena.js`, este registro.
+- **Verificación:** `node --check` pasó para `arena.js`; búsqueda confirmó que `loadGameSettings` ya no referencia `setSettingsStatus`; `git diff --check` pasó. No se abrió el navegador del usuario ni se modificó/desplegó Firebase.
+- **Rama/commit:** rama `separate`, sin commit.
+
+## 2026-10-02 — desbloqueo por nivel para Makankosappo y Kamehameha
+
+- **Solicitud:** impedir que `Freezer3` en nivel 6 use Makankosappo y definir claramente los bloqueos de `M` y `K`.
+- **Hallazgo:** el perfil Firestore `Freezer3` tiene `race: 0` (Saiyajin), `level: 6`; antes los requisitos 10/20 solo aplicaban a raza Freezer. El nombre de usuario no determina su raza.
+- **Implementación:** `M` requiere nivel 10 y `K` nivel 20 para todas las razas; `V` sigue exclusivo de Freezer desde nivel 1. El requisito se valida en `/bot`, en el chat de la arena y nuevamente al ejecutar comandos. Los comandos bloqueados no se guardan ni se muestran como enviados. Settings muestra los requisitos junto a cada curva de daño; la inspección del luchador lista solo poderes desbloqueados.
+- **Archivos:** `public/src/config/gameplay-settings.js`, `public/src/game/arena.js`, `public/src/app/bot-app.js`, `public/src/app/settings-app.js`, `docs/PROJECT_SPEC.md`, este registro.
+- **Datos:** solo consulta de Firestore para comprobar la raza/nivel de `Freezer3`; no se modificó el perfil ni otros datos.
+- **Verificación:** pasaron 10 aserciones de desbloqueo (niveles justo debajo y en el umbral, ambas razas), `node --check` en todos los módulos JS y `git diff --check`. No se abrió el navegador del usuario ni se desplegó Hosting.
+- **Rama/commit:** rama `separate`, sin commit.
+
+## 2026-10-02 — estado de conexión visible en /bot
+
+- **Solicitud:** revisar el feedback mostrado en la captura del panel de Bot.
+- **Hallazgo:** `#bot-status` quedaba permanentemente en «Conectando con Firestore…» aunque las cargas iniciales terminaban correctamente; el indicador global de Firebase era independiente.
+- **Implementación:** al cargar correctamente chat, roster y métricas, la barra ahora confirma Firestore y el entorno seleccionado. Los comandos `K/M/V` de la captura corresponden a mensajes independientes guardados con segundos de diferencia, no a duplicaciones creadas por refrescar el chat.
+- **Archivos:** `public/src/app/bot-app.js`, este registro.
+- **Verificación:** comprobación de sintaxis y `git diff --check`; no se abrió el navegador ni se modificó Firestore.
+- **Rama/commit:** rama `separate`, sin commit.
+
+## 2026-10-02 — correcciones de chat, niveles y Settings en rama separate
+
+- **Solicitud:** continuar en la rama `separate` y corregir las anotaciones: entradas E que se repiten, niveles reales de Firestore, caracteres dañados y el poder Makankosappo en Settings.
+- **Implementación:** `joinPlayer` ya no vuelve a escribir `E`; rechaza duplicados antes de acceder a Firestore y bloquea entradas simultáneas del mismo nombre. La arena registra el mensaje una vez en el envío manual y marca su ID como visto en la pestaña actual. `/bot` resume mensajes históricos `E` del mismo usuario para evitar que el spam persistido vuelva a llenar el chat. La arena conserva `level` y `xp` leídos desde Firestore y dejó de guardar perfiles como efecto de la carga inicial. Makankosappo queda rotulado explícitamente para otras razas y para Freezer. Se repararon textos visibles y la animación del canvas comienza mientras carga Firebase, con timeout de red.
+- **Datos:** no se hicieron escrituras manuales, estimaciones ni migraciones a Firestore; el juego seguirá mostrando el valor que exista en `level` de cada perfil.
+- **Archivos:** `public/src/game/arena.js`, `public/src/services/firebase/arena-cloud.js`, `public/src/app/bot-app.js`, `public/src/app/settings-app.js`, `docs/PROJECT_SPEC.md`, este registro.
+- **Verificación:** pasaron `node --check` en todos los módulos, `git diff --check`, aserciones de fórmulas en niveles 1, 2, 18 y 100, y comprobaciones estáticas de rutas/separación y conexión de niveles/poderes. Lectura GET de solo consulta confirmó que `Lordviril` en DEV tiene ahora `level: 6`, `xp: 32`; los otros perfiles consultados muestran los valores de Firestore, sin escritura o estimación. No se abrió el navegador del usuario ni se usó la arena DEV; sin despliegue a Firebase Hosting.
+- **Rama/commit:** rama `separate`, todavía sin commit.
+
 ## 2026-10-02 — separación de vistas en rutas /, /settings y /bot en rama separate
 
 - **Solicitud:** crear una nueva rama `separate`; hacer que la ventana del juego (la arena con los luchadores) esté en la raíz `/` para verse de inmediato al entrar a la URL; mover todos los ajustes a `/settings`; y ubicar en `/bot` el chat, el roster y las métricas.

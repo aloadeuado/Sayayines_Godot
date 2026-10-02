@@ -1,4 +1,4 @@
-import { CHARACTER_OPTIONS, DEFAULT_GAME_SETTINGS, enabledCharacterRaces, normalizeGameSettings } from '../config/gameplay-settings.js';
+import { CHARACTER_OPTIONS, DEFAULT_GAME_SETTINGS, enabledCharacterRaces, normalizeGameSettings, POWER_UNLOCK_LEVELS } from '../config/gameplay-settings.js';
 
 const $ = selector => document.querySelector(selector);
 let settings = normalizeGameSettings(DEFAULT_GAME_SETTINGS);
@@ -14,12 +14,13 @@ function render() {
     input.value = settings.stats[input.dataset.statMultiplier];
   });
   const groups = [
-    { scope: 'generic', title: 'Razas distintas de Freezer', powers: [['kamehameha', 'Kamehameha'], ['makankosappo', 'Makankosappo']] },
-    { scope: 'freezer', title: 'Freezer', powers: [['deathRay', 'Rayo Mortal'], ['makankosappo', 'Makankosappo'], ['kamehameha', 'Kamehameha']] }
+    { scope: 'generic', title: 'Razas distintas de Freezer', powers: [['kamehameha', 'Kamehameha'], ['makankosappo', 'Makankosappo · otras razas']] },
+    { scope: 'freezer', title: 'Freezer', powers: [['deathRay', 'Rayo Mortal'], ['makankosappo', 'Makankosappo · Freezer'], ['kamehameha', 'Kamehameha · Freezer']] }
   ];
   $('#power-settings').innerHTML = groups.map(group => `<section class="power-settings-group"><h3>${group.title}</h3>${group.powers.map(([key, name]) => {
     const curve = settings.powers[group.scope][key];
-    return `<div class="power-setting"><strong>${name}</strong><small>Multiplicador de Ataque de Ki desde N=1 hasta N=100</small><div class="power-setting-pair"><label>Nivel 1<input type="number" min="0" max="100" step="0.1" data-power-scope="${group.scope}" data-power-key="${key}" data-bound="start" value="${curve.start}"></label><label>Nivel 100<input type="number" min="0" max="100" step="0.1" data-power-scope="${group.scope}" data-power-key="${key}" data-bound="end" value="${curve.end}"></label></div></div>`;
+    const unlock = key === 'deathRay' ? `Desbloqueo: Freezer, nivel ${POWER_UNLOCK_LEVELS.V}` : `Desbloqueo: nivel ${POWER_UNLOCK_LEVELS[key === 'makankosappo' ? 'M' : 'K']} para todas las razas`;
+    return `<div class="power-setting"><strong>${name}</strong><small>${unlock}</small><small>Multiplicador de Ataque de Ki desde N=1 hasta N=100</small><div class="power-setting-pair"><label>Nivel 1<input type="number" min="0" max="100" step="0.1" data-power-scope="${group.scope}" data-power-key="${key}" data-bound="start" value="${curve.start}"></label><label>Nivel 100<input type="number" min="0" max="100" step="0.1" data-power-scope="${group.scope}" data-power-key="${key}" data-bound="end" value="${curve.end}"></label></div></div>`;
   }).join('')}</section>`).join('');
   $('#pending-power-settings').innerHTML = [['Golpe de ki', 'kiBlast'], ['Destello final', 'finalFlash'], ['Mafuba', 'mafuba'], ['Bola mortal', 'deathBall']].map(([name]) => `<div class="pending-power"><strong>${name}</strong><span>Aún no implementado en combate</span></div>`).join('');
   $('#character-settings').innerHTML = CHARACTER_OPTIONS.map(character => `<label class="character-setting"><span>${character.name} · ${character.label}</span><input type="checkbox" data-character-key="${character.id}" ${settings.characters[character.id] ? 'checked' : ''}></label>`).join('');

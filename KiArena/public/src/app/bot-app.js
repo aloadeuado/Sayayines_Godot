@@ -1,4 +1,4 @@
-import { calculateLevelStats, DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../config/gameplay-settings.js';
+import { calculateLevelStats, DEFAULT_GAME_SETTINGS, normalizeGameSettings, powerBlockReason } from '../config/gameplay-settings.js';
 
 const $ = selector => document.querySelector(selector);
 const normalize = value => String(value || '').trim().toLowerCase();
@@ -181,7 +181,15 @@ async function refreshChat() {
   const messages = await window.kiArenaCloud.listMessages();
   const log = $('#chat-log');
   if (!log) return;
-  log.innerHTML = messages.map(message => {
+  const seenEntries = new Set();
+  const visibleMessages = [...messages].reverse().filter(message => {
+    if (String(message.text || '').trim().toUpperCase() !== 'E') return true;
+    const key = normalize(message.username);
+    if (seenEntries.has(key)) return false;
+    seenEntries.add(key);
+    return true;
+  }).reverse();
+  log.innerHTML = visibleMessages.map(message => {
     const isCmd = /^[EKMV]$/i.test(String(message.text || ''));
     return `
       <div class="chat-line ${isCmd ? 'cmd-line' : ''}">
@@ -220,6 +228,13 @@ async function sendCommand(username, text) {
   }
   if (!message) return;
   try {
+    const command = message.toUpperCase();
+    if (/^[KMV]$/.test(command)) {
+      const profile = await window.kiArenaCloud.get(name);
+      if (!profile) return showStatus(`@${name} debe ingresar con E antes de usar poderes.`, true);
+      const restriction = powerBlockReason(profile.race, profile.level, command);
+      if (restriction) return showStatus(restriction, true);
+    }
     await window.kiArenaCloud.addMessage(name, message);
     if ($('#chat-user')) $('#chat-user').value = name;
     if ($('#chat-message')) $('#chat-message').value = '';
@@ -278,9 +293,12 @@ export async function startBot() {
     });
   }
 
-  await Promise.all([loadRoster(), refreshChat(), refreshCombatFeed()]).catch(error => {
+  try {
+    await Promise.all([loadRoster(), refreshChat(), refreshCombatFeed()]);
+    showStatus(`Conectado con Firestore · ${window.KI_ARENA_FIREBASE.environment.toUpperCase()} · chat, roster y métricas listos.`);
+  } catch (error) {
     showStatus(`Firebase no disponible: ${error.message}`, true);
-  });
+  }
 
   setInterval(() => loadRoster().catch(e => console.warn('Roster sync error:', e)), 4000);
   setInterval(() => refreshChat().catch(e => console.warn('Chat sync error:', e)), 2500);

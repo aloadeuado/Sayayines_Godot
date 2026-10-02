@@ -33,7 +33,8 @@ Razas disponibles: **Saiyajin**, **Namekuseijin**, **Humano** y **Freezer**. La 
 
 El nombre normalizado en minúsculas es la clave única del jugador. Se aceptan entre 3 y 24 caracteres: letras ASCII, números, punto, guion y guion bajo. No se crea un segundo perfil para el mismo nombre ignorando mayúsculas/minúsculas.
 
-- `E` crea el perfil nuevo en nivel 1 o agrega a la arena el perfil guardado.
+- `E` crea el perfil nuevo en nivel 1 o agrega a la arena el perfil guardado. El comando entrante se registra una sola vez en Firestore; el consumidor de la arena no vuelve a publicar `E` al procesarlo. Si el nombre ya está vivo o una entrada está en curso, no crea otro luchador ni otro mensaje.
+- Al abrir la arena, los mensajes históricos se muestran como historial y no vuelven a ejecutar sus comandos. La vista de chat resume las entradas `E` repetidas del mismo usuario para que el ciclo anterior no llene la pantalla.
 - Si ya está vivo, el intento se rechaza como duplicado.
 - Si el perfil estaba eliminado, vuelve a la arena con su raza, nivel, XP y bajas conservadas; su HP se restaura según el nivel.
 - La lista muestra jugadores cargados desde Firestore, botón individual de ingreso y **Agregar todos** para perfiles pendientes. El control **Elegir** de cada fila copia ese nombre al campo de usuario del chat; el resaltado indica quién enviará los próximos comandos. Elegir identidad para el chat es independiente de inspeccionar atributos.
@@ -69,7 +70,7 @@ El nivel está limitado a **1–100**. Los atributos se derivan del nivel `L` (`
 
 Los perfiles anteriores a la versión 2 de HP conservan su porcentaje de vida actual al migrar una sola vez desde la escala antigua (`100 + 4g`) a la nueva (`100 + 8g`). Una baja da al atacante `100 + round(nivel del rival × 4)` XP. Para avanzar desde el nivel `L` se requieren `round(100 + 24L + 1.3L²)` XP. El excedente se consume en una subida y puede permitir más de un nivel si alcanza. Al llegar a nivel 100, la XP se fija en cero.
 
-La interfaz muestra una barra de XP inmediatamente debajo de la barra de vida sobre el luchador, más el nivel, las bajas y las estadísticas al seleccionar un perfil.
+La interfaz muestra una barra de XP inmediatamente debajo de la barra de vida sobre el luchador, más el nivel, las bajas y las estadísticas al seleccionar un perfil. El nivel y la XP se leen de los campos `level` y `xp` del documento Firestore; la arena no infiere niveles a partir de bajas ni reescribe perfiles al cargar.
 
 ## 7. Técnicas y comandos
 
@@ -77,10 +78,10 @@ La interfaz muestra una barra de XP inmediatamente debajo de la barra de vida so
 |---|---|---|
 | `E` | Entrar | Crea o reingresa a un perfil con nombre único. |
 | `V` | Rayo Mortal | Solo Freezer; se desbloquea desde nivel 1; apunta y dispara con un dedo. |
-| `M` | Makankosappo | Freezer lo desbloquea en nivel 10. Para los demás, sigue la disponibilidad actual del juego. |
-| `K` | Kamehameha | Freezer lo desbloquea en nivel 20. Para los demás, sigue la disponibilidad actual del juego. |
+| `M` | Makankosappo | Todas las razas lo desbloquean en nivel 10. |
+| `K` | Kamehameha | Todas las razas lo desbloquean en nivel 20. |
 
-Los poderes se envían desde el campo de chat o desde botones de simulación. El mensaje se registra y se valida que el usuario haya ingresado antes de activar una técnica. Existe enfriamiento entre lanzamientos.
+Los poderes se envían desde el campo de chat o desde botones de simulación. Antes de guardar el comando, el panel valida el nivel y la raza del perfil en Firestore; un poder bloqueado se rechaza con un mensaje claro y no aparece como comando aceptado. La arena repite la validación al ejecutar comandos remotos. `M` requiere nivel 10 y `K` nivel 20 para todas las razas; `V` es exclusivo de Freezer desde nivel 1. También se valida que el usuario haya ingresado antes de activar una técnica. Existe enfriamiento entre lanzamientos.
 
 ### Perfiles Freezer (nivel normalizado `t = (clamp(L,1,100) − 1)/99`)
 

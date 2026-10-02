@@ -22,6 +22,20 @@ export const DEFAULT_GAME_SETTINGS = {
   characters: { goku: true, piccolo: true, gohan: true, freezer: true }
 };
 
+export const POWER_UNLOCK_LEVELS = Object.freeze({ V: 1, M: 10, K: 20 });
+
+export function powerBlockReason(race, level, command) {
+  const cmd = String(command || '').trim().toUpperCase();
+  const currentLevel = Math.max(1, Math.min(100, Math.floor(Number(level) || 1)));
+  const names = { V: 'Rayo Mortal', M: 'Makankosappo', K: 'Kamehameha' };
+  if (!Object.hasOwn(POWER_UNLOCK_LEVELS, cmd)) return '';
+  if (cmd === 'V' && Number(race) !== 3) return 'Rayo Mortal solo está disponible para la raza Freezer.';
+  const required = POWER_UNLOCK_LEVELS[cmd];
+  return currentLevel < required
+    ? `${names[cmd]} requiere nivel ${required}; tu nivel actual es ${currentLevel}.`
+    : '';
+}
+
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const number = (value, fallback) => Number.isFinite(Number(value)) ? clamp(Number(value), 0, 100) : fallback;
 
