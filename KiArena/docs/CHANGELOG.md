@@ -2,6 +2,15 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-02 — hacer observable la secuencia de golpes cuerpo a cuerpo
+
+- **Solicitud:** revisar la iteración de duelo al observar que el nivel 9 no quitó HP al nivel 14, aunque el nivel 14 sí dañó al nivel 9.
+- **Hallazgo:** el duelo recorre cuatro turnos en orden atacante A, B, A, B. Una acción no se omite por iteración regular: a cada turno le corresponde una sola tirada de evasión y, si conecta, se aplica daño. Antes, los golpes conectados no se registraban y solo el 35% de las esquivas se anunciaban, haciendo imposible distinguir un paso perdido de una esquiva.
+- **Implementación:** se conserva la secuencia y el balance. Ahora el registro de combate indica cada esquiva y cada golpe físico conectado, con atacante, objetivo, HP descontado y HP restante.
+- **Archivos:** `public/src/game/arena.js`, este registro.
+- **Verificación:** `node --check` pasó; la comprobación estática confirmó el orden A/B/A/B y el registro de impactos; `git diff --check` pasó. El cálculo base de nivel 9 contra defensa de nivel 14 da 12.465–15.465 de daño al conectar. No se abrió el navegador ni se modificó Firebase.
+- **Rama/commit:** rama `separate`, sin commit.
+
 ## 2026-10-02 — corregir inicialización de la arena raíz
 
 - **Solicitud:** reparar la arena vacía; la captura mostraba `setSettingsStatus is not defined` al cargar desde Firebase.
