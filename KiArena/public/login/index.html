@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&display=swap">
+  <link rel="stylesheet" href="/styles/login.css">
+</head>
+<body class="dbz-auth">
+  <div class="dbz-sky" aria-hidden="true">
+    <div class="dbz-rays"></div>
+    <div class="dbz-aura"></div>
+  </div>
+
+  <main class="auth-shell">
+    <header class="auth-brand">
+      <div class="dragon-ball" aria-hidden="true"><i>★</i><i>★</i><i>★</i><i>★</i></div>
+      <div>
+        <h1>KI <span>ARENA</span></h1>
+        <p class="auth-tagline">Entra a la arena y sube tu poder de pelea</p>
+      </div>
+      <label class="env-badge">
+        <span>Entorno</span>
+        <select id="env-switch" aria-label="Entorno"></select>
+      </label>
+    </header>
+
+    <div id="auth-alert" class="auth-alert" role="alert" hidden></div>
+
+    <section id="login-panel" class="auth-card" aria-labelledby="login-title" hidden>
+      <h2 id="login-title" class="visually-hidden">Entrar o crear cuenta</h2>
+      <div class="auth-tabs" role="tablist">
+        <button id="tab-login" type="button" role="tab" aria-selected="true" aria-controls="login-form">Entrar</button>
+        <button id="tab-register" type="button" role="tab" aria-selected="false" aria-controls="register-form">Crear guerrero</button>
+      </div>
+
+      <form id="login-form" class="auth-form" role="tabpanel" aria-labelledby="tab-login">
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" minlength="6" required></label>
+        <button type="submit" class="dbz-btn primary">¡Entrar a la arena!</button>
+        <button type="button" id="forgot-password" class="link-btn">¿Olvidaste tu contraseña?</button>
+      </form>
+
+      <form id="register-form" class="auth-form" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <label>Nombre de guerrero<input name="displayName" type="text" maxlength="40" autocomplete="nickname" required></label>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button type="submit" class="dbz-btn primary">Crear guerrero</button>
+      </form>
+
+      <div class="auth-divider"><span>o entra con</span></div>
+      <div id="provider-buttons" class="provider-grid"></div>
+    </section>
+
+    <section id="account-panel" class="auth-card" aria-labelledby="account-title" hidden>
+      <div class="scouter">
+        <div id="account-avatar" class="scouter-avatar" aria-hidden="true"></div>
+        <div class="scouter-info">
+          <span class="scouter-label">Guerrero</span>
+          <h2 id="account-title"></h2>
+          <span id="account-email" class="scouter-sub"></span>
+        </div>
+      </div>
+
+      <form id="name-form" class="inline-form">
+        <label>Cambiar nombre<input name="displayName" type="text" maxlength="40" required></label>
+        <button type="submit" class="dbz-btn small">Guardar</button>
+      </form>
+
+      <h3>Cuentas vinculadas</h3>
+      <p class="hint">Entra con cualquiera de estas cuentas y llegarás siempre a este guerrero.</p>
+      <ul id="linked-list" class="linked-list"></ul>
+
+      <h3>Vincular otra cuenta</h3>
+      <div id="link-buttons" class="provider-grid"></div>
+      <form id="link-password-form" class="auth-form compact" hidden>
+        <p class="hint">Agrega email y contraseña como otra forma de entrar.</p>
+        <label>Email<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button type="submit" class="dbz-btn small">Vincular email</button>
+      </form>
+
+      <div class="account-actions">
+        <a id="arena-link" href="/" class="dbz-btn primary">Ir a la arena</a>
+        <button id="logout" type="button" class="dbz-btn ghost">Salir</button>
+      </div>
+    </section>
+
+    <div id="auth-loading" class="ki-loading" role="status" aria-live="polite">
+      <div class="ki-charge"><span></span></div>
+      <p id="auth-loading-text">Reuniendo ki…</p>
+    </div>
+
+    <p id="auth-status" class="auth-status" role="status" aria-live="polite"></p>
+  </main>
+
+  <script src="/env.js"></script>
+  <script type="module" src="/src/app/login-app.js"></script>
+</body>
+</html>

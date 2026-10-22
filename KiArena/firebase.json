@@ -4,12 +4,27 @@
     "cleanUrls": true,
     "rewrites": [
       {
+        "source": "/api/auth/**",
+        "function": {
+          "functionId": "authApi",
+          "region": "us-central1"
+        }
+      },
+      {
         "source": "/settings",
         "destination": "/settings/index.html"
       },
       {
         "source": "/bot",
         "destination": "/bot/index.html"
+      },
+      {
+        "source": "/login",
+        "destination": "/login/index.html"
+      },
+      {
+        "source": "/cuenta",
+        "destination": "/login/index.html"
       }
     ],
     "ignore": [
@@ -17,5 +32,18 @@
       "**/.*",
       "**/node_modules/**"
     ]
-  }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "ki-arena-auth",
+      "runtime": "nodejs20",
+      "ignore": [
+        "node_modules",
+        "test",
+        ".git",
+        "*.log"
+      ]
+    }
+  ]
 }

@@ -51,6 +51,25 @@ El adaptador normaliza límites al guardar. No usa transacciones: dos sesiones s
 - La lista de mensajes solicita los últimos 50 por fecha descendente y los muestra en orden ascendente.
 - La app consulta mensajes cada 2.5 s y vuelve a cargar roster cada 8 s; no usa listeners Firestore en tiempo real.
 
+## Usuarios y cuentas vinculadas (login)
+
+Escritas solo por la función `authApi` (Admin SDK). Todo bajo `environments/{APP_ENV}/` con `APP_ENV` en `dev`, `qa` o `prd`. Cada documento lleva `id`, `reference` (su propia referencia completa) e `isActive`; nada se borra.
+
+| Colección | ID | Contenido |
+| --- | --- | --- |
+| `kiArenaProviderTypes` | `password`, `google`, `apple`, `twitch`, `kick`, `tiktok` | Catálogo y configuración pública de cada plataforma: `authMethod`, `scopes`, `clientId`, `redirectUri`, `allowLogin`, `allowLink`. Los secretos van en Secret Manager. |
+| `kiArenaProviders` | `{tipo}:{idExterno}` | Datos de la cuenta externa (todos opcionales) y `providerTypeRef`. |
+| `kiArenaUsers` | uid de Firebase Auth | Usuario: nombre, avatar, email, `userProviderRefs`, `primaryUserProviderRef`, `providerTypeRefs`, `roles`. |
+| `kiArenaUserProviders` | `{uid}:{providerId}` | Tabla intermedia: `userRef`, `providerRef`, `providerTypeRef`, `isPrimary`, `linkedAt`, `unlinkedAt`. |
+| `kiArenaUserProviderEvents` | auto | Historial `link`, `unlink`, `relink`, `conflict`. |
+| `kiArenaOAuthStates` | `{env}.{aleatorio}` | `state` anti-CSRF de un solo uso (10 min) con el `code_verifier` de PKCE; se marca `isActive=false` al usarse. |
+
+Las relaciones (`…Ref`) son `referenceValue` con la ruta completa `projects/sayayin-c0dfe/databases/(default)/documents/environments/{APP_ENV}/…`. `arena-cloud.js` ya las lee como ruta `environments/…`.
+
+Reglas: una cuenta externa solo puede estar activa en un usuario (la transacción revisa `kiArenaUserProviders` por `providerRef` antes de vincular). No se une por email. No se puede desvincular la última cuenta. Los tokens OAuth no se guardan. Las reglas de seguridad de Firestore para estas colecciones (escritura solo servidor, lectura del propio usuario) siguen pendientes.
+
+Firebase Authentication guarda la sesión del navegador en IndexedDB. Es la sesión de login, no progreso de juego.
+
 ## Datos locales y memoria
 
 No guardar progreso en `localStorage` ni `sessionStorage`. La velocidad, posición, partículas, estados de animación y proyectiles viven en memoria de la pestaña. Firestore mantiene identidad/progreso y registros de chat/eventos.

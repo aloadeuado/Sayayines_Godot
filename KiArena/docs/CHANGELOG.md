@@ -2,6 +2,21 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-22 — login con email, Google, Apple, TikTok, Twitch y Kick, y cuentas vinculadas
+
+- **Solicitud:** Pedro aprobó el modelo de datos de login y pidió empezar el desarrollo: pantalla con diseño Dragon Ball Z, usuario y contraseña con Firebase Auth además de los proveedores, y cuentas vinculadas a un mismo usuario. También pidió que las relaciones se guarden como referencias completas ligadas al entorno, y dejar lo acordado en specs.
+- **Decisiones:** cuatro colecciones bajo `environments/{APP_ENV}/` (`kiArenaProviderTypes`, `kiArenaProviders`, `kiArenaUsers`, `kiArenaUserProviders`) más el historial `kiArenaUserProviderEvents` y los `state` OAuth `kiArenaOAuthStates`. Relaciones y `reference` como referencias completas de Firestore. Una cuenta externa solo puede estar activa en un usuario; no se une por email; la última cuenta no se desvincula; todo borrado es `isActive=false`. Email y contraseña usan como llave el uid de Firebase. Apple queda apagado (`allowLogin: false`) hasta tener la cuenta de Apple Developer.
+- **Implementación:**
+  - `functions/`: función `authApi` (`/api/auth/**`) con el modelo de cuentas en transacciones, sesión para email/Google/Apple, OAuth de servidor para Twitch, Kick (PKCE S256) y TikTok con custom token, vincular, desvincular (también en Firebase Auth) y script de siembra del catálogo en modo simulación.
+  - `public/login/index.html`, `styles/login.css`, `src/app/login-app.js`, `src/services/firebase/auth-client.js`: pantalla `/login` y `/cuenta` con estética DBZ (Kame House, esfera de 4 estrellas, barra de ki), registro, recuperar contraseña, botones por proveedor y gestión de cuentas vinculadas.
+  - `src/config/environment.js` y `public/env.js`: `APP_ENV` con `dev`, `qa`, `prd` para los módulos nuevos. Las vistas antiguas siguen con `?env=dev|qa|prod` hasta la migración `prod → prd`, que requiere aprobación.
+  - `arena-cloud.js` lee `referenceValue`, arrays y mapas. `firebase.json` agrega las rutas `/login`, `/cuenta` y `/api/auth/**` y la configuración de `functions`. Enlace «Entrar / Mi cuenta» en la arena.
+  - `.kiro/` y `.claude/skills/` copiados del hilo de arquitectura Kiro; tareas de `autenticacion-usuarios` marcadas.
+- **Archivos:** `functions/**`, `firebase.json`, `public/login/index.html`, `public/styles/login.css`, `public/src/app/login-app.js`, `public/src/services/firebase/auth-client.js`, `public/src/config/environment.js`, `public/env.js`, `public/assets/providers/*.svg`, `public/index.html`, `public/src/services/firebase/arena-cloud.js`, `docs/PROJECT_SPEC.md`, `docs/FIRESTORE.md`, este registro.
+- **Verificación:** `node --check` en todos los módulos nuevos y modificados; 13 pruebas de `node --test` pasan contra un Firestore en memoria (alta, mismo usuario por cualquier proveedor, conflicto, borrado suave, cambio de principal, última cuenta, relink, PKCE y `state` de un solo uso en Kick, `returnTo` externo ignorado); la función carga con las dependencias reales; capturas de `/login` y `/cuenta` en 390 px y 1280 px con Firebase simulado; `git diff --check`. No se escribió en Firestore real, no se desplegó Hosting ni Functions y no se abrió el navegador de Pedro.
+- **Pendiente:** activar métodos en Firebase Authentication, apps OAuth y secretos por entorno, sembrar el catálogo en `dev` (con aprobación), plan Blaze, reglas de Firestore para estas colecciones, enlace usuario ↔ jugador, nombre de Apple en web.
+- **Rama/commit:** rama `claude/project-thread-mzpblo` creada desde `feature/migrationclaud`.
+
 ## 2026-10-02 — hacer observable la secuencia de golpes cuerpo a cuerpo
 
 - **Solicitud:** revisar la iteración de duelo al observar que el nivel 9 no quitó HP al nivel 14, aunque el nivel 14 sí dañó al nivel 9.

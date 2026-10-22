@@ -1,0 +1,49 @@
+# Diseño — Poderes de ki
+
+## Flujo de un comando
+
+```text
+/bot sendCommand ── powerBlockReason(race, level, cmd) ── addMessage
+        │                                                    │
+        ▼                                                    ▼
+   rechaza con motivo                       arena refreshMessages (2.5 s)
+                                                     │
+                                       executePower(player, cmd)
+                                         ├─ powerBlockReason → chat «Sistema»
+                                         ├─ cooldown/estado → «no disponible ahora»
+                                         └─ launchDeathRay | launchMaka | launchKame
+                                                     │  (interrumpe duelo, fija cooldown)
+                                         update(): máquina de fases → fire*() → bolts.push
+                                         update(): bolt crece, prueba colisión, hit(..., ki=true)
+```
+
+## Fuente única de reglas
+
+| Qué | Dónde |
+|---|---|
+| Niveles de desbloqueo | `POWER_UNLOCK_LEVELS = { V: 1, M: 10, K: 20 }` en `config/gameplay-settings.js` |
+| Motivo de bloqueo | `powerBlockReason(race, level, cmd)` (usado por arena y Bot) |
+| Multiplicador por nivel | `powerMultiplierAtLevel(power, race, level, settings)` |
+| Anchuras Freezer | `FREEZER_POWER_PROGRESSION` en `game/arena.js` |
+| Anchuras genéricas | `beamWidth(f, maka)` en `game/arena.js` |
+| Radios de impacto | `beamHitRadius`, `deathRayHitRadius` |
+| Daño | `beamDamage`, `deathRayDamage` → `hit()` |
+
+## Colisión de rayo
+
+Para cada objetivo: `along = (target − origen) · dir`, `side = |(target − origen) × dir|`. Impacta si `0 ≤ along ≤ dist + 18` y `side < radio`. `b.hit` (un `Set`) evita repetir daño.
+
+| Poder | Radio lateral |
+|---|---|
+| `V` | `anchoV × 0.5 + 12` |
+| `M` | `ancho × 0.5 + min(5, dist × 0.009) + 12` |
+| `K` | `ancho × 0.675 + 12 + 12` (el trazo exterior dibuja `ancho × 1.35`) |
+
+## Cómo añadir un poder (checklist obligatoria)
+
+1. Letra y nivel en `POWER_UNLOCK_LEVELS` y nombre en `powerBlockReason`.
+2. Curva por defecto en `DEFAULT_GAME_SETTINGS.powers` y en `normalizeGameSettings`.
+3. Estado, cooldown, `launch*`, `fire*`, dibujo y radio en `game/arena.js`; conectar a `executePower` y a `refreshMessages`.
+4. Regex de comandos en `arena-cloud.js` (`/^[EKMV]$/`) y en `bot-app.js` (`/^[KMV]$/`) + botón de atajo en `bot/index.html`.
+5. Controles en `settings-app.js`; quitarlo de «pendientes» si estaba allí.
+6. `PROJECT_SPEC.md`, esta spec y `CHANGELOG.md`.

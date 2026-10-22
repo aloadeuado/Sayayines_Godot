@@ -125,12 +125,19 @@ El sistema se organiza en tres vistas independientes accesibles mediante navegac
 
 El juego no tiene botón de reinicio de partida: la arena es continua.
 
+4. **`/login` y `/cuenta` (Login y cuentas vinculadas, en desarrollo):**
+   - Pantalla con estética Dragon Ball Z: entrar o crear guerrero con email y contraseña, y botones de Google, Apple, Twitch, Kick y TikTok según el catálogo `kiArenaProviderTypes` del entorno. Un proveedor sin `clientId`/`redirectUri` se muestra como «pronto» y no se puede usar.
+   - `/cuenta` muestra el guerrero, sus cuentas vinculadas, vincular otra cuenta y desvincular (nunca la última).
+   - Google, Apple y email usan Firebase Authentication nativo. TikTok, Twitch y Kick pasan por la función `authApi` (`/api/auth/**`), que hace OAuth en el servidor y entrega un custom token.
+   - El navegador no escribe usuarios ni vínculos: todo lo escribe `authApi` con Admin SDK. Modelo y reglas en `FIRESTORE.md` y `.kiro/specs/autenticacion-usuarios/`.
+   - Entorno con `APP_ENV` (`dev`, `qa`, `prd`) desde `/env.js` o `?env=`.
+
 ## 9. Límites y estado pendiente
 
 - La integración con Twitch no lee chats reales todavía; existe solamente el punto de arquitectura y su plan.
 - Usuarios se identifican por nombre normalizado, no por Twitch OAuth o ID externo todavía.
 - Dev, QA y prod son namespaces de colecciones en el mismo Firebase; no separan reglas, cuotas o facturación.
 - La simulación y la asignación de daño corren en el navegador; un cliente manipulado podría falsificar progreso mientras las reglas actuales lo permitan.
-- No hay autenticación ni lógica autoritativa de XP/KO en Cloud Functions implementada.
+- El login (`/login`, `authApi`) está escrito y probado con pruebas locales, pero no se ha desplegado ni probado contra Firebase real. La lógica de XP/KO todavía no es autoritativa en el servidor.
 - No se ha verificado un despliegue de la nueva estructura a Firebase Hosting.
 - La física es arcade de movimiento lineal/rebote, no una colisión física realista.
