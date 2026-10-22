@@ -10,6 +10,7 @@ import { createAccounts, AccountError } from './accounts.js';
 import { FIREBASE_PROVIDER_TO_TYPE } from './catalog.js';
 import { parseEnvironment, ENVIRONMENTS, collectionPath } from './environment.js';
 import { OAUTH_PROVIDERS, randomToken, pkceChallenge } from './oauth-providers.js';
+import { fakeConsentPage } from './fake-oauth.js';
 
 const STATE_TTL_MS = 10 * 60 * 1000;
 const TYPE_TO_FIREBASE_PROVIDER = Object.fromEntries(Object.entries(FIREBASE_PROVIDER_TO_TYPE).map(([k, v]) => [v, k]));
@@ -19,7 +20,8 @@ function safeReturnPath(value, fallback = '/login') {
   return path.startsWith('/') && !path.startsWith('//') && !path.includes('\\') ? path.slice(0, 300) : fallback;
 }
 
-export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now = () => Date.now() }) {
+// oauthProviders y fakeOAuth permiten usar el OAuth simulado en el emulador.
+export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now = () => Date.now(), oauthProviders = OAUTH_PROVIDERS, fakeOAuth = false }) {
   const accountsFor = env => createAccounts({ db, env, now: () => new Date(now()).toISOString() });
 
   async function requireUser(req) {
@@ -123,7 +125,7 @@ export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now =
       const env = parseEnvironment(req.body?.env);
       const accounts = accountsFor(env);
       const provider = String(req.body?.provider || '');
-      const adapter = OAUTH_PROVIDERS[provider];
+      const adapter = oauthProviders[provider];
       if (!adapter) throw new AccountError('provider_unsupported', 'Proveedor no soportado.');
       const mode = req.body?.mode === 'link' ? 'link' : 'login';
       const decoded = mode === 'link' ? await requireUser(req) : null;
@@ -174,10 +176,11 @@ export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now =
       if (req.query?.error) return redirect({ status: 'cancelled', message: String(req.query.error_description || req.query.error).slice(0, 200) });
 
       const type = await accounts.getProviderType(provider);
-      const clientSecret = secrets[provider]?.();
+      const clientSecret = fakeOAuth ? 'simulado' : secrets[provider]?.();
       if (!clientSecret) return redirect({ status: 'error', message: `Falta el secreto de ${type?.name || provider}.` });
-      const profile = await OAUTH_PROVIDERS[provider].fetchProfile({
-        code: String(req.query?.code || ''), clientId: type.clientId, clientSecret, redirectUri: type.redirectUri,
+      const code = fakeOAuth && req.query?.fake ? `fake:${req.query.fake_id}:${req.query.fake_username}` : String(req.query?.code || '');
+      const profile = await oauthProviders[provider].fetchProfile({
+        code, clientId: type.clientId, clientSecret, redirectUri: type.redirectUri,
         codeVerifier: saved.codeVerifier, fetchImpl
       });
 
@@ -208,6 +211,10 @@ export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now =
   return async function handle(req, res) {
     const path = String(req.path || req.url || '').split('?')[0].replace(/^\/api\/auth/, '').replace(/\/$/, '') || '/';
     const callback = path.match(/^\/oauth\/callback\/([a-z]+)$/);
+    const fake = fakeOAuth && path.match(/^\/oauth\/fake\/([a-z]+)$/);
+    if (fake && oauthProviders[fake[1]]) {
+      return res.status(200).set('Content-Type', 'text/html; charset=utf-8').send(fakeConsentPage(fake[1], req.query || {}));
+    }
     const key = callback ? 'GET /oauth/callback' : `${req.method} ${path}`;
     const route = routes[key];
     res.set('Cache-Control', 'no-store');

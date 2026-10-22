@@ -156,7 +156,8 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
         isActive: true,
         displayName: current?.displayName || seed.displayName || profile.displayName || profile.username,
         avatarUrl: current?.avatarUrl || profile.avatarUrl,
-        email: current?.email || (profile.emailVerified !== false ? profile.email : undefined),
+        // El email de la cuenta propia se guarda aunque falte verificarlo (emailVerified=false).
+        email: current?.email || (profile.emailVerified !== false || profile.providerTypeId === 'password' ? profile.email : undefined),
         emailVerified: current?.emailVerified ?? (profile.email ? profile.emailVerified === true : undefined),
         userProviderRefs: [...activeRefs, upRef],
         primaryUserProviderRef: isPrimary ? upRef : current?.primaryUserProviderRef,

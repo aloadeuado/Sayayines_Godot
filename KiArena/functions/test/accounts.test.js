@@ -126,3 +126,16 @@ test('getAccount devuelve el usuario y sus cuentas activas', async () => {
   assert.equal(account.user.displayName, 'Pedro Bem');
   assert.deepEqual(account.links.map(l => [l.providerTypeId, l.isPrimary]), [['google', true], ['twitch', false]]);
 });
+
+test('el usuario de email y contraseña guarda su email aunque falte verificarlo', async () => {
+  const { db, accounts } = setup();
+  const password = { providerTypeId: 'password', providerUserId: 'U1', email: 'goku@kiarena.test', emailVerified: false };
+  await accounts.signIn({ profile: password, preferredUid: 'U1', seed: { displayName: 'Goku' } });
+  const user = db.read(`${base}/kiArenaUsers/U1`);
+  assert.equal(user.email, 'goku@kiarena.test');
+  assert.equal(user.emailVerified, false);
+  // Un email sin verificar de otro proveedor no se toma como contacto.
+  await accounts.signIn({ profile: { ...twitch, email: 'otro@twitch.test', emailVerified: false } });
+  const other = db.list(`${base}/kiArenaUsers/`).find(u => u.id !== 'U1');
+  assert.equal(other.email, undefined);
+});

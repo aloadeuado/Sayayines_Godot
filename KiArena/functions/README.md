@@ -11,6 +11,23 @@ npm run check   # node --check de todos los módulos
 npm test        # modelo de cuentas y API contra un Firestore en memoria
 ```
 
+## Probar todo en local con el Emulator Suite
+
+Necesita Node 20+ y Java 11+. No toca el proyecto real: usa el proyecto de prueba `demo-ki-arena`.
+
+```bash
+cd KiArena
+npm install
+npm run emulators
+```
+
+El script instala lo que falte, levanta Auth, Firestore, Functions y Hosting, siembra el catálogo en `dev` y `qa` y muestra las URL:
+
+- Login: `http://localhost:5000/login?env=dev&emulators=1`
+- Emulator UI (usuarios de Auth y datos de Firestore): `http://localhost:4000`
+
+En el emulador, Twitch, Kick y TikTok se reemplazan por una pantalla local donde se escribe el ID y el usuario de la cuenta simulada. Google y Apple usan el popup de cuentas falsas del emulador de Auth. Los datos se borran al cerrar con Ctrl+C. La función se recarga sola al editar `functions/`.
+
 ## Lo que hay que configurar antes de desplegar (por entorno)
 
 1. **Firebase Authentication › Métodos de acceso**: activar *Correo electrónico/contraseña*, *Google* y, cuando haya cuenta, *Apple*. En *Configuración › Vinculación de cuentas de usuario* elegir «Crear varias cuentas para cada proveedor de identidad», para que un email repetido no bloquee el login: Ki Arena vincula cuentas solo desde `/cuenta`.

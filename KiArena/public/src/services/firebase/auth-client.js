@@ -3,7 +3,7 @@
 // eso lo hace el servidor.
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
-  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  getAuth, connectAuthEmulator, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendEmailVerification, sendPasswordResetEmail, updateProfile, signInWithPopup, linkWithPopup,
   linkWithCredential, EmailAuthProvider, GoogleAuthProvider, OAuthProvider, signInWithCustomToken, signOut
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -52,9 +52,13 @@ function nativeProvider(code) {
   throw new Error(`Proveedor nativo desconocido: ${code}`);
 }
 
-export function createAuthClient({ env, apiBase = '/api/auth' }) {
-  const app = initializeApp(FIREBASE_WEB_CONFIG);
+// Proyecto de prueba del Emulator Suite: nunca toca el proyecto real.
+const EMULATOR_WEB_CONFIG = Object.freeze({ apiKey: 'demo-key', authDomain: 'demo-ki-arena.firebaseapp.com', projectId: 'demo-ki-arena' });
+
+export function createAuthClient({ env, emulator = false, apiBase = '/api/auth' }) {
+  const app = initializeApp(emulator ? EMULATOR_WEB_CONFIG : FIREBASE_WEB_CONFIG);
   const auth = getAuth(app);
+  if (emulator) connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
   auth.languageCode = 'es';
 
   async function api(path, { method = 'GET', body, authenticated = true } = {}) {

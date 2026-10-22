@@ -2,6 +2,18 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-22 — probar y depurar el login en local con Firebase Emulator Suite
+
+- **Solicitud:** Pedro preguntó cómo probar y depurar sin desplegar.
+- **Implementación:**
+  - `KiArena/package.json` con `npm run emulators` (`scripts/emulators.js`): levanta Auth, Firestore, Functions y Hosting con el proyecto de prueba `demo-ki-arena`, crea secretos de prueba en `functions/.secret.local` (ignorado por Git) y siembra el catálogo en `dev` y `qa`. Bloque `emulators` en `firebase.json`.
+  - `functions/src/fake-oauth.js`: en el emulador, Twitch, Kick y TikTok se reemplazan por una pantalla de permiso local; la API no contacta a ninguna plataforma.
+  - `seed-provider-types.js --emulator`: siembra con `clientId` y `redirectUri` de prueba y todos los proveedores activos, solo con `FIRESTORE_EMULATOR_HOST`.
+  - Web: `?emulators=1` en `localhost` conecta Auth al emulador y Firestore a `127.0.0.1:8080`, y lo indica en la pantalla.
+  - Bug corregido: el usuario creado con email y contraseña no guardaba su email (solo se aceptaban emails verificados). Ahora se guarda con `emailVerified: false`; prueba nueva.
+- **Verificación:** prueba de punta a punta con Playwright contra los emuladores, 15 de 15 pasos bien (registro, vincular Twitch y Kick, cancelar TikTok, entrar con Twitch y con email al mismo usuario, contraseña incorrecta, Google como otro usuario, conflicto, desvincular con borrado suave, cuenta desvinculada que ya no entra al usuario, última cuenta bloqueada, revincular sin duplicar). Datos revisados en el emulador de Firestore. 14 pruebas de `node --test`. Capturas en los archivos del proyecto (`ki-arena/login/emulador/`). En el contenedor el popup de Google no abre porque `apis.google.com` está bloqueado; se usó la misma credencial de Google del emulador. Nada se escribió en Firebase real.
+- **Rama/commit:** rama `claude/project-thread-mzpblo`.
+
 ## 2026-10-22 — app de escritorio con Electron para probar el login
 
 - **Solicitud:** Pedro pidió un ejecutable creado desde la copia local del proyecto. La app Electron del paquete de contexto no está en GitHub, así que se creó una nueva y mínima.

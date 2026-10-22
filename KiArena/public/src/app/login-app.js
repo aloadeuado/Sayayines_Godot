@@ -1,5 +1,5 @@
 // Pantalla /login (y /cuenta): entrar, crear guerrero y administrar cuentas vinculadas.
-import { resolveAppEnv, APP_ENVIRONMENTS, ENVIRONMENT_LABELS } from '../config/environment.js';
+import { resolveAppEnv, usesEmulators, APP_ENVIRONMENTS, ENVIRONMENT_LABELS } from '../config/environment.js';
 import { createAuthClient, describeError } from '../services/firebase/auth-client.js';
 
 const $ = selector => document.querySelector(selector);
@@ -296,7 +296,8 @@ async function start() {
   bindForms();
   if (window.location.pathname.replace(/\/$/, '') === '/cuenta') document.title = 'Ki Arena · Mi cuenta';
 
-  state.client = createAuthClient({ env });
+  const emulator = usesEmulators();
+  state.client = createAuthClient({ env, emulator });
   try {
     state.types = (await state.client.listProviderTypes()).providerTypes;
   } catch (err) {
@@ -330,7 +331,7 @@ async function start() {
   if (oauth && oauth.status !== 'ok' && !state.client.auth.currentUser) {
     alertBox(oauth.message || `No se pudo entrar con ${typeName(oauth.provider)}.`, oauth.status === 'cancelled' ? 'info' : 'error');
   }
-  setStatus(`Entorno: ${ENVIRONMENT_LABELS[env]}`);
+  setStatus(`Entorno: ${ENVIRONMENT_LABELS[env]}${emulator ? ' · Emuladores locales (datos de prueba)' : ''}`);
 }
 
 start();

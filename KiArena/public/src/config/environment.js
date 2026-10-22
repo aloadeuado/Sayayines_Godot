@@ -33,3 +33,9 @@ export function collectionPaths(env) {
 export function fullReference(path) {
   return `${FIRESTORE_ROOT}/${path}`;
 }
+
+// ?emulators=1 en localhost: usar el Firebase Emulator Suite (proyecto demo-ki-arena).
+export function usesEmulators({ search = globalThis.location?.search || '', hostname = globalThis.location?.hostname || '' } = {}) {
+  const local = hostname === 'localhost' || hostname === '127.0.0.1';
+  return local && new URLSearchParams(search).get('emulators') === '1';
+}

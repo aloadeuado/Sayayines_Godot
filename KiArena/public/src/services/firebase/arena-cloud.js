@@ -1,4 +1,4 @@
-export function createArenaCloud(cfg){const docs=`https://firestore.googleapis.com/v1/projects/${cfg.projectId}/databases/${encodeURIComponent(cfg.databaseId)}/documents`;
+export function createArenaCloud(cfg){const docs=`${cfg.firestoreOrigin||'https://firestore.googleapis.com'}/v1/projects/${cfg.projectId}/databases/${encodeURIComponent(cfg.databaseId)}/documents`;
   const paths={players:cfg.collectionPath,messages:`${cfg.environmentPath}Messages`,events:`${cfg.environmentPath}Events`,settings:`environments/${cfg.environment}/kiArenaSettings`};
   const status=document.querySelector('#firebase-status');
   const setStatus=(text,ok=false)=>{if(status){status.textContent=text;status.dataset.ok=ok?'true':'false'}};
