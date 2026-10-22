@@ -2,6 +2,15 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-22 — app de escritorio con Electron para probar el login
+
+- **Solicitud:** Pedro pidió un ejecutable creado desde la copia local del proyecto. La app Electron del paquete de contexto no está en GitHub, así que se creó una nueva y mínima.
+- **Implementación:** `desktop/` con `main.js` (ventana, menú Arena/Login/Bot/Settings, ventanas emergentes de Firebase Auth permitidas y enlaces externos al navegador), `server.js` (sirve `public/` en `localhost` con las rutas de Hosting y reenvía `/api/auth/**` a `authApi`) y `scripts/` para copiar la web y empaquetar con `@electron/packager` (Electron 33.4.11).
+- **Builds:** macOS Apple Silicon, macOS Intel y Windows x64 sin firmar, en los archivos del proyecto (`ki-arena/builds/`). No se suben a Git.
+- **Verificación:** `node --check`; el servidor local respondió 200 en `/`, `/login`, `/cuenta`, `/bot`, `/settings` y archivos estáticos, 404 en una ruta fuera de la carpeta y 502 controlado en `/api/auth` sin la función; el `app.asar` contiene la web. No se abrió la app en macOS ni Windows.
+- **Pendiente:** firma y notarización; volver a la app después del login con Twitch, Kick o TikTok.
+- **Rama/commit:** rama `claude/project-thread-mzpblo`.
+
 ## 2026-10-22 — login con email, Google, Apple, TikTok, Twitch y Kick, y cuentas vinculadas
 
 - **Solicitud:** Pedro aprobó el modelo de datos de login y pidió empezar el desarrollo: pantalla con diseño Dragon Ball Z, usuario y contraseña con Firebase Auth además de los proveedores, y cuentas vinculadas a un mismo usuario. También pidió que las relaciones se guarden como referencias completas ligadas al entorno, y dejar lo acordado en specs.
