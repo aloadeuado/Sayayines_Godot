@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — estructura de rutas por entorno en Firestore
+
+- **Solicitud:** Pedro aclaró que el entorno lo define la ruta: colección raíz `environments`, un documento por entorno (`dev`, `qa`, `prd`) y dentro de cada uno todas las colecciones. Cada documento de entorno es una base de datos completa.
+- **Implementación:** documentado en `.kiro/steering/reglas-datos.md` (árbol de rutas) y en las skills `reglas-desarrollo` y `persistencia-firestore`. Se sincronizó también la Regla 3 (ejecución y depuración por entorno), que faltaba en esta copia. Sin cambios de código: las rutas actuales ya siguen esta forma; queda pendiente pasar `prod` a `prd` en la web.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-22 — probar y depurar el login en local con Firebase Emulator Suite
 
 - **Solicitud:** Pedro preguntó cómo probar y depurar sin desplegar.

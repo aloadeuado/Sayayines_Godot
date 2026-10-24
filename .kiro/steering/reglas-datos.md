@@ -43,8 +43,34 @@ Además se mantienen `createdAt` y `updatedAt` donde ya existen.
 ## Regla 2 — Entorno por variable: `dev`, `qa`, `prd`
 
 - El entorno sale de **una sola variable**, `APP_ENV`, con exactamente tres valores: `dev` (desarrollo), `qa` (QA) y `prd` (producción). No se usa `prod`.
+- **Estructura de rutas (Pedro, 2026-10-24).** En la raíz de Firestore hay una colección `environments`; dentro, un documento por entorno (`dev`, `qa`, `prd`); y dentro de cada documento van todas las colecciones de la app. Cada entorno es una base de datos completa y separada:
+
+  ```
+  (raíz)
+  └── environments                 ← colección raíz
+      ├── dev                      ← documento del entorno = base de datos de desarrollo
+      │   ├── kiArenaPlayers/{id}
+      │   ├── kiArenaUsers/{uid}
+      │   ├── kiArenaMessages/{id}
+      │   └── …                    ← todas las demás colecciones
+      ├── qa                       ← base de datos de QA (mismas colecciones)
+      └── prd                      ← base de datos de producción (mismas colecciones)
+  ```
+
+  Cambiar de entorno = cambiar el segmento que va justo después de `environments/` en la ruta. Ninguna colección de la app vive fuera de `environments/{APP_ENV}/`.
 - Toda ruta a Firestore se construye a partir de `APP_ENV` en un único módulo (`public/src/config/environment.js` propuesto): `environments/{APP_ENV}/kiArenaPlayers`, `…/kiArenaMessages`, `…/kiArenaEvents`, `…/kiArenaSettings/gameplay`.
 - Ningún otro archivo escribe rutas, prefijos ni nombres de entorno a mano.
 - Como es un sitio estático, `APP_ENV` se fija en el despliegue (un `env.js` generado por destino de Hosting o equivalente). Un valor ausente o inválido DEBE mostrar un error visible; solo en local se permite caer a `dev`.
 - Si se mantiene el selector `?env=` en la URL, solo acepta `dev|qa|prd` (decisión pendiente con Pedro).
 - Los datos que hoy viven en `environments/prod/…` necesitan migrarse a `environments/prd/…` (copia, sin borrar el origen; requiere aprobación de Pedro).
+
+## Regla 3 — Ejecución y depuración por entorno (Pedro, 2026-10-22)
+
+Toda pieza que se ejecuta o depura (web/Hosting, Cloud Functions, Electron y las que vengan) DEBE tener configuración de ejecución y depuración para **cada** entorno: `dev`, `qa` y `prd`.
+
+- **El entorno sale de una fuente de configuración, nunca del código ni de cada launch.** Un archivo por entorno (p. ej. `config/env/.env.dev`, `.env.qa`, `.env.prd`) fija `APP_ENV`, el proyecto Firebase y si se usan emuladores. Cambiar de entorno = elegir otro archivo o valor, no editar código.
+- **VS Code:** `launch.json` y `tasks.json` reciben el entorno por un selector (`inputs` con `pickString` dev/qa/prd) o por configuraciones por entorno que leen su `envFile`. Las configuraciones existentes (Login en Chrome, Functions, Electron proceso principal/ventana, compuestas «login + functions» y «Electron completo») DEBEN existir para los tres entornos.
+- **Multiplataforma:** Windows y macOS. Usar scripts Node en lugar de comandos de shell propios de un sistema; si hace falta, bloques `windows`/`osx` en las tareas.
+- **Protección de `prd`:** `dev` es el valor por defecto. Ejecutar contra `prd` pide confirmación explícita; nunca se siembran datos ni se escriben datos reales de `prd` desde una sesión de depuración sin aprobación de Pedro.
+- **Secretos:** los archivos de entorno versionados solo llevan valores públicos (`APP_ENV`, `projectId`, `clientId`); los secretos van en `.env.*.local` ignorados por Git o en Secret Manager, con un `.env.example` documentado.
+- Referencia de implementación: hilo «Depurar Ki Arena en Windows» (`.vscode/launch.json`, `.vscode/tasks.json`, `scripts/emulators.js`).

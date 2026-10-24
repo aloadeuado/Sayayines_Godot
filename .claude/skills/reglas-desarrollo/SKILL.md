@@ -1,6 +1,6 @@
 ---
 name: reglas-desarrollo
-description: Reglas obligatorias de Ki Arena para cualquier modelo o ruta de Firestore - campos id, reference e isActive con borrado suave, y entorno APP_ENV dev, qa o prd. Usar en todo desarrollo que lea o escriba datos.
+description: Reglas obligatorias de Ki Arena - campos id, reference e isActive con borrado suave, referencias completas por entorno, APP_ENV dev, qa o prd, y configuraciones de ejecución y depuración por entorno. Usar en todo desarrollo.
 ---
 
 # Ki Arena · reglas obligatorias de desarrollo
@@ -22,16 +22,22 @@ Fuente: `.kiro/steering/reglas-datos.md` (léelo completo). Resumen:
 
 ## 2. Rutas Firestore desde `APP_ENV` (`dev` | `qa` | `prd`)
 
+- Estructura: colección raíz `environments` → documento `dev` | `qa` | `prd` → todas las colecciones de la app. Ej.: `environments/qa/kiArenaPlayers/{id}`, `environments/prd/kiArenaUsers/{uid}`. Cada documento de entorno es una base de datos completa; el entorno se cambia solo con el segmento que va después de `environments/`. Nada vive fuera de `environments/{APP_ENV}/`.
 - Un solo módulo construye las rutas desde `APP_ENV`; nadie más escribe `environments/...` a mano.
 - Valores válidos: `dev`, `qa`, `prd`. `prod` ya no es válido.
 - Valor ausente o inválido: error visible (en local, `dev`).
+
+## 3. Ejecutar y depurar en los tres entornos
+
+- Web, Functions, Electron y toda pieza nueva tienen configuración de ejecución/depuración para `dev`, `qa` y `prd`.
+- El entorno se elige desde una fuente de configuración (`config/env/.env.{dev|qa|prd}` o selector `pickString` en VS Code), nunca escrito en el código ni fijo en un launch.
+- `launch.json`/`tasks.json` multiplataforma (Windows y macOS): scripts Node, bloques `windows`/`osx` si hace falta.
+- `dev` por defecto; `prd` pide confirmación y nunca recibe datos sembrados ni escrituras sin aprobación de Pedro.
+- Secretos fuera de los archivos versionados (`.env.*.local` ignorado o Secret Manager).
 
 ## Checklist para cada cambio
 
 - [ ] ¿Las escrituras nuevas llenan `id`, `reference`, `isActive`, y el código tolera que falten al leer?
 - [ ] ¿`reference` y las relaciones son referencias completas del entorno actual, no IDs sueltos?
 - [ ] ¿Las lecturas ignoran `isActive === false` y tratan el ausente como activo?
-- [ ] ¿Algún flujo borra? Debe ser borrado suave.
-- [ ] ¿Las rutas salen del módulo de entorno con `APP_ENV`?
-- [ ] ¿El `design.md` de la spec muestra el modelo con los tres campos?
-- [ ] Sin escrituras ni migraciones sobre datos reales sin aprobación de Pedro.
+- [ ] ¿Algún flujo borra

@@ -7,7 +7,7 @@ description: Trabajar en la capa de datos de Ki Arena: entornos dev/qa/prd, adap
 
 ## Reglas obligatorias (siempre)
 
-Antes de tocar datos o rutas, aplica la skill `reglas-desarrollo` (`.kiro/steering/reglas-datos.md`): todo modelo Firestore lleva `id`, `reference` e `isActive` con borrado suave (nunca `DELETE`), y las rutas salen de `APP_ENV` = `dev` | `qa` | `prd`.
+Antes de tocar datos o rutas, aplica la skill `reglas-desarrollo` (`.kiro/steering/reglas-datos.md`): todo modelo Firestore lleva `id`, `reference` e `isActive` con borrado suave (nunca `DELETE`), y las rutas salen de `APP_ENV` = `dev` | `qa` | `prd` con la forma `environments/{APP_ENV}/{colección}/{id}` (colección raíz `environments`, un documento por entorno y dentro todas las colecciones).
 
 ## Antes de empezar
 
