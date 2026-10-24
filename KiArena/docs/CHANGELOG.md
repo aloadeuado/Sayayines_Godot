@@ -2,6 +2,13 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — tamaño en X, poderes que faltaban y todo sembrado en dev
+
+- **Solicitud:** Pedro pidió que el poder crezca también en el eje X (no en los rayos, que tienen izquierda y derecha; sí en la Genkidama o la explosión de Vegeta), crear los poderes que faltaban y dejar todo en dev.
+- **Implementación:** `baseSize`/`multipliers.size` pasan a `baseSizeY`/`multipliers.sizeY`; nuevo `baseSizeX`/`multipliers.sizeX` en áreas, explosiones, físicos y control (32 de 57). `powerSizeAt(power, N, 'x'|'y')`; los documentos viejos siguen leyéndose. 12 poderes nuevos (Explosión Final, Burning Attack, Súper Saiyajin, Teletransportación, Granada de Luz, Makosen, Rayo de los Ojos, Rayo Dodon, Sokidan, Multiforma, Zanzoken ×4, Nova Strike): 57 en total, pendientes de mecánica salvo los 3 motores existentes. Settings muestra el eje X solo donde aplica.
+- **Datos:** `--rest` en la migración (API REST con la apiKey web). Respaldo previo en `ki-arena/backups/dev-2026-10-24/`. Aplicado en `environments/dev`: 4 razas, 4 tipos, 57 poderes, 15 jugadores (mismos niveles y XP), 56 filas de poderes por jugador, 2154 mensajes y 576 eventos con campos base y referencias. Segunda pasada: 0 cambios. qa y prod sin tocar.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — tamaño de los poderes en el eje Y
 
 - **Solicitud:** Pedro pidió una variable para que el poder crezca en el eje Y con el nivel, como multiplicador.

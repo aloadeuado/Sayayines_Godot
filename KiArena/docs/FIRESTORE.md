@@ -83,7 +83,9 @@ Todo bajo `environments/{env}/`. Valores de fábrica en `public/src/config/game-
 | `kiArenaPlayers` | `usernameKey` | `playerTypeRef`, `userRef` (opcional) | Progreso; `race` se conserva como legado; `utilityState` |
 | `kiArenaEvents` | auto | `killerRef`, `victimRef`, `powerRef` | `power` (`K`, `M`, `V` o `physical`), `xpGained` |
 
-Migración y siembra (sin borrar, mismos niveles): `cd functions && npm run migrate:characters -- dev` (simulación) y luego con `--apply`. `prd`/`prod` piden `--confirm-prd`. `npm run emulators` lo hace solo en dev y qa del emulador.
+Migración y siembra (sin borrar, mismos niveles): `cd functions && npm run migrate:characters -- dev` (simulación) y luego con `--apply`. `prd`/`prod` piden `--confirm-prd`. `npm run emulators` lo hace solo en dev y qa del emulador. Sin credenciales de servicio: `--rest` usa la API REST con la apiKey web (mismas reglas que la app), p. ej. `npm run migrate:characters -- dev --rest --apply`.
+
+Tamaño de los poderes: `baseSizeY × multipliers.sizeY(N)` (alto, todos) y `baseSizeX × multipliers.sizeX(N)` (ancho, solo áreas, explosiones, físicos y control; los rayos no tienen X). Los documentos viejos con `baseSize`/`multipliers.size` se siguen leyendo como eje Y.
 
 ## Datos locales y memoria
 

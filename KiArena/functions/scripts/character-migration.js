@@ -17,6 +17,10 @@ export const MIGRATION_COLLECTIONS = Object.freeze({
 const normalize = value => String(value || '').trim().toLowerCase();
 const missingOnly = (existing, wanted) => Object.fromEntries(Object.entries(wanted).filter(([key, value]) => value !== undefined && !(key in (existing || {}))));
 
+async function inChunks(items, task, size = 20) {
+  for (let i = 0; i < items.length; i += size) await Promise.all(items.slice(i, i + size).map(task));
+}
+
 // Curvas de ki que el operador pudo haber cambiado en settingsJson.powers: se
 // copian a los poderes nuevos para no perder ese balance.
 function legacyCurve(settings, power) {
@@ -110,17 +114,18 @@ export async function migrateCharacterModel({ db, env, apply = false, now = new 
 
   // 4. Mensajes y eventos: campos base y referencias a los jugadores que existen.
   const playerRef = name => (playerKeys.has(normalize(name)) ? ref('players', normalize(name)) : undefined);
-  for (const doc of (await db.collection(path('messages')).get()).docs) {
+  // Son muchos documentos: se escriben de a 20 en paralelo.
+  await inChunks((await db.collection(path('messages')).get()).docs, doc => {
     const data = doc.data();
-    await write('messages', doc.ref, missingOnly(data, { id: doc.id, reference: doc.ref, isActive: true, playerRef: playerRef(data.username) }));
-  }
-  for (const doc of (await db.collection(path('events')).get()).docs) {
+    return write('messages', doc.ref, missingOnly(data, { id: doc.id, reference: doc.ref, isActive: true, playerRef: playerRef(data.username) }));
+  });
+  await inChunks((await db.collection(path('events')).get()).docs, doc => {
     const data = doc.data();
-    await write('events', doc.ref, missingOnly(data, {
+    return write('events', doc.ref, missingOnly(data, {
       id: doc.id, reference: doc.ref, isActive: true,
       killerRef: playerRef(data.killer), victimRef: playerRef(data.victim)
     }));
-  }
+  });
 
   // 5. Ajustes: campos base.
   if (settingsSnap.exists) {

@@ -6,7 +6,7 @@ let settings = normalizeGameSettings(DEFAULT_GAME_SETTINGS);
 let catalog = DEFAULT_CATALOG;
 
 const STAT_LABELS = [['ki', 'Ki'], ['physicalAttack', 'Daño físico'], ['physicalDefense', 'Defensa física'], ['kiDefense', 'Defensa de ki']];
-const MULTIPLIER_LABELS = [['ki', 'Ki'], ['physicalAttack', 'Daño físico'], ['kiDefense', 'Defensa de ki'], ['physicalDefense', 'Defensa física'], ['size', 'Tamaño eje Y']];
+const MULTIPLIER_LABELS = [['ki', 'Ki'], ['physicalAttack', 'Daño físico'], ['kiDefense', 'Defensa de ki'], ['physicalDefense', 'Defensa física'], ['sizeY', 'Tamaño eje Y'], ['sizeX', 'Tamaño eje X']];
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const num = (attrs, value, step = '0.01') => `<input type="number" min="0" max="100" step="${step}" ${attrs} value="${escape(value)}">`;
 
@@ -36,9 +36,10 @@ function powerCard(power) {
     <div class="power-setting-pair">
       <label>Nivel de desbloqueo${num('data-power-field="unlockLevel"', power.unlockLevel, '1')}</label>
       <label>Enfriamiento (s)${num('data-power-field="cooldownSeconds"', power.cooldownSeconds, '0.1')}</label>
-      <label>Tamaño base eje Y (px)${num('data-power-field="baseSize"', power.baseSize ?? 0, '1')}</label>
+      <label>Tamaño base eje Y (px)${num('data-power-field="baseSizeY"', power.baseSizeY ?? power.baseSize ?? 0, '1')}</label>
+      ${power.baseSizeX !== undefined ? `<label>Tamaño base eje X (px)${num('data-power-field="baseSizeX"', power.baseSizeX, '1')}</label>` : ''}
     </div>
-    ${MULTIPLIER_LABELS.map(([key, label]) => `<div class="power-setting-pair"><label>${label} · N=1${num(`data-power-mult="${key}" data-bound="start"`, m[key]?.start ?? 1)}</label><label>${label} · N=100${num(`data-power-mult="${key}" data-bound="end"`, m[key]?.end ?? 1)}</label></div>`).join('')}
+    ${MULTIPLIER_LABELS.filter(([key]) => key !== 'sizeX' || power.baseSizeX !== undefined).map(([key, label]) => `<div class="power-setting-pair"><label>${label} · N=1${num(`data-power-mult="${key}" data-bound="start"`, (m[key] ?? (key === 'sizeY' ? m.size : null))?.start ?? 1)}</label><label>${label} · N=100${num(`data-power-mult="${key}" data-bound="end"`, (m[key] ?? (key === 'sizeY' ? m.size : null))?.end ?? 1)}</label></div>`).join('')}
     ${params.hitboxMode ? `<div class="power-setting-pair">
       <label>Hitbox<select data-power-param="hitboxMode"><option value="front" ${params.hitboxMode === 'front' ? 'selected' : ''}>Solo el frente</option><option value="full" ${params.hitboxMode === 'full' ? 'selected' : ''}>Toda la onda</option></select></label>
       ${['tickDamage', 'tickSeconds', 'lingerSeconds'].map(key => `<label>${key}${num(`data-power-param="${key}"`, params[key] ?? 0, '0.01')}</label>`).join('')}
@@ -87,7 +88,8 @@ function readForm() {
     const params = { ...(power.utility?.params || {}) };
     box.querySelectorAll('[data-power-param]').forEach(input => { params[input.dataset.powerParam] = input.tagName === 'SELECT' ? input.value : Number(input.value); });
     const field = name => Number(box.querySelector(`[data-power-field="${name}"]`).value);
-    return { id: power.id, data: { unlockLevel: Math.round(field('unlockLevel')), cooldownSeconds: field('cooldownSeconds'), baseSize: field('baseSize'), multipliers, ...(power.utility ? { utility: { ...power.utility, params } } : {}) } };
+    const sizeX = box.querySelector('[data-power-field="baseSizeX"]') ? { baseSizeX: field('baseSizeX') } : {};
+    return { id: power.id, data: { unlockLevel: Math.round(field('unlockLevel')), cooldownSeconds: field('cooldownSeconds'), baseSizeY: field('baseSizeY'), ...sizeX, multipliers, ...(power.utility ? { utility: { ...power.utility, params } } : {}) } };
   });
   const playerTypes = catalog.playerTypes.map(type => ({ id: type.code, data: { isEligible: document.querySelector(`[data-player-type="${type.code}"]`).checked } }));
   return { settings: normalizeGameSettings(nextSettings), races, powers, playerTypes };
@@ -170,7 +172,7 @@ export async function startSettings() {
       await window.kiArenaCloud.saveSettings(normalizeGameSettings(DEFAULT_GAME_SETTINGS));
       await Promise.all([
         ...DEFAULT_RACES.map(r => window.kiArenaCloud.saveCatalogDoc('races', r.code, { stats: r.stats, utility: r.utility }, r)),
-        ...DEFAULT_POWERS.map(p => window.kiArenaCloud.saveCatalogDoc('powers', p.id, { unlockLevel: p.unlockLevel, cooldownSeconds: p.cooldownSeconds, baseSize: p.baseSize, multipliers: p.multipliers, ...(p.utility ? { utility: p.utility } : {}) }, p)),
+        ...DEFAULT_POWERS.map(p => window.kiArenaCloud.saveCatalogDoc('powers', p.id, { unlockLevel: p.unlockLevel, cooldownSeconds: p.cooldownSeconds, baseSizeY: p.baseSizeY, ...(p.baseSizeX !== undefined ? { baseSizeX: p.baseSizeX } : {}), multipliers: p.multipliers, ...(p.utility ? { utility: p.utility } : {}) }, p)),
         ...DEFAULT_PLAYER_TYPES.map(t => window.kiArenaCloud.saveCatalogDoc('playerTypes', t.code, { isEligible: t.isEligible }, t))
       ]);
       await load();

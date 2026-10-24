@@ -16,11 +16,23 @@ test('las curvas de poder escalan de forma lineal del nivel 1 al 100', () => {
   assert.equal(curveAt(kame.multipliers.ki, 1), 1.9);
   assert.equal(curveAt(kame.multipliers.ki, 100), 4.4);
   assert.ok(Math.abs(curveAt(kame.multipliers.ki, 50.5) - 3.15) < 0.02);
-  assert.deepEqual(powerMultipliersAt(kame, 1), { ki: 1.9, physicalAttack: 1, kiDefense: 0.9, physicalDefense: 0.9, size: 1 });
-  // Tamaño en el eje Y: baseSize × multiplicador de tamaño (30 px en N=1, ~86 px en N=100).
+  assert.deepEqual(powerMultipliersAt(kame, 1), { ki: 1.9, physicalAttack: 1, kiDefense: 0.9, physicalDefense: 0.9, sizeY: 1, sizeX: 1 });
+  // Tamaño en el eje Y: baseSizeY × sizeY(N) (30 px en N=1, ~86 px en N=100). Los rayos no tienen eje X.
   assert.equal(powerSizeAt(kame, 1), 30);
   assert.ok(Math.abs(powerSizeAt(kame, 100) - 86.1) < 0.01);
+  assert.equal(powerSizeAt(kame, 100, 'x'), null);
+  assert.equal(powerSizeAt({ baseSize: 10, multipliers: { size: { start: 1, end: 2 } } }, 100), 20);
   assert.equal(powerSizeAt({ width: { start: 10, end: 7 } }, 100), 7);
+});
+
+test('las áreas y explosiones crecen en X y en Y', () => {
+  const bomb = DEFAULT_POWERS.find(p => p.id === 'saiyajin_spiritBomb');
+  assert.deepEqual(powerMultipliersAt(bomb, 1), { ki: 4, physicalAttack: 1, kiDefense: 0.5, physicalDefense: 0.5, sizeY: 1, sizeX: 1 });
+  assert.equal(powerSizeAt(bomb, 1, 'x'), 80);
+  assert.equal(powerSizeAt(bomb, 100, 'x'), 320);
+  assert.equal(powerSizeAt(bomb, 100, 'y'), 320);
+  assert.ok(DEFAULT_POWERS.find(p => p.id === 'saiyajin_finalExplosion'));
+  assert.ok(DEFAULT_POWERS.filter(p => p.category === 'kiBeam').every(p => p.baseSizeX === undefined && !p.multipliers.sizeX));
 });
 
 test('el race antiguo se resuelve al tipo de personaje y la raza', () => {
@@ -131,6 +143,6 @@ test('la migración agrega el multiplicador de tamaño a poderes ya sembrados si
   await migrateCharacterModel({ db, env: 'qa', apply: true, log: quiet });
   const doc = db.read(`${base}/kiArenaPowers/saiyajin_kamehameha`);
   assert.deepEqual(doc.multipliers.ki, { start: 2, end: 5 });
-  assert.deepEqual(doc.multipliers.size, { start: 1, end: 2.87 });
-  assert.equal(doc.baseSize, 30);
+  assert.deepEqual(doc.multipliers.sizeY, { start: 1, end: 2.87 });
+  assert.equal(doc.baseSizeY, 30);
 });

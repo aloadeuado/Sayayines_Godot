@@ -61,15 +61,15 @@ export const DEFAULT_PLAYER_TYPES = Object.freeze([
 const ALL = ['saiyajin', 'namekuseijin', 'terricola'];
 const POWER_SPECS = [
   // Implementados (valores tomados del juego actual)
-  { code: 'kamehameha', name: 'Kamehameha', races: ALL, category: 'kiBeam', engine: 'kamehameha', command: 'K', unlockLevel: 20, cooldownSeconds: 3.8, chargeSeconds: 0.55, ki: curve(1.9, 4.4), kiDefense: 0.9, physicalDefense: 0.9, baseSize: 30, size: curve(1, 2.87), hitbox: 'full', color: '#65e8ff',
+  { code: 'kamehameha', name: 'Kamehameha', races: ALL, category: 'kiBeam', engine: 'kamehameha', command: 'K', unlockLevel: 20, cooldownSeconds: 3.8, chargeSeconds: 0.55, ki: curve(1.9, 4.4), kiDefense: 0.9, physicalDefense: 0.9, baseSizeY: 30, sizeY: curve(1, 2.87), hitbox: 'full', color: '#65e8ff',
     description: 'Onda de ki horizontal. La onda completa es sólida y daña a quien quede dentro.' },
-  { code: 'kamehameha', name: 'Kamehameha', races: ['freezer'], category: 'kiBeam', engine: 'kamehameha', command: 'K', unlockLevel: 20, cooldownSeconds: 3.8, chargeSeconds: 0.55, ki: curve(5.5, 7), kiDefense: 0.9, physicalDefense: 0.9, baseSize: 6, size: curve(1, 0.5), hitbox: 'full', color: '#65e8ff',
+  { code: 'kamehameha', name: 'Kamehameha', races: ['freezer'], category: 'kiBeam', engine: 'kamehameha', command: 'K', unlockLevel: 20, cooldownSeconds: 3.8, chargeSeconds: 0.55, ki: curve(5.5, 7), kiDefense: 0.9, physicalDefense: 0.9, baseSizeY: 6, sizeY: curve(1, 0.5), hitbox: 'full', color: '#65e8ff',
     description: 'Versión de Freezer: más potente y más fina.' },
-  { code: 'makankosappo', name: 'Makankosappo', races: ALL, category: 'kiBeam', engine: 'makankosappo', command: 'M', unlockLevel: 10, cooldownSeconds: 7, chargeSeconds: 0.62, ki: curve(3.2, 8.5), kiDefense: 0.8, physicalDefense: 0.8, baseSize: 10, size: curve(1, 6.8), hitbox: 'front', color: '#dc9cff',
+  { code: 'makankosappo', name: 'Makankosappo', races: ALL, category: 'kiBeam', engine: 'makankosappo', command: 'M', unlockLevel: 10, cooldownSeconds: 7, chargeSeconds: 0.62, ki: curve(3.2, 8.5), kiDefense: 0.8, physicalDefense: 0.8, baseSizeY: 10, sizeY: curve(1, 6.8), hitbox: 'front', color: '#dc9cff',
     description: 'Rayo perforante en espiral que atraviesa a todos en línea.' },
-  { code: 'makankosappo', name: 'Makankosappo', races: ['freezer'], category: 'kiBeam', engine: 'makankosappo', command: 'M', unlockLevel: 10, cooldownSeconds: 7, chargeSeconds: 0.62, ki: curve(3.2, 4.2), kiDefense: 0.8, physicalDefense: 0.8, baseSize: 8, size: curve(1, 0.625), hitbox: 'front', color: '#dc9cff',
+  { code: 'makankosappo', name: 'Makankosappo', races: ['freezer'], category: 'kiBeam', engine: 'makankosappo', command: 'M', unlockLevel: 10, cooldownSeconds: 7, chargeSeconds: 0.62, ki: curve(3.2, 4.2), kiDefense: 0.8, physicalDefense: 0.8, baseSizeY: 8, sizeY: curve(1, 0.625), hitbox: 'front', color: '#dc9cff',
     description: 'Versión de Freezer del rayo perforante.' },
-  { code: 'deathRay', name: 'Rayo Mortal', races: ['freezer'], category: 'kiBeam', engine: 'deathRay', command: 'V', unlockLevel: 1, cooldownSeconds: 1.8, chargeSeconds: 0.24, ki: curve(2.6, 3.4), baseSize: 10, size: curve(1, 0.7), hitbox: 'front', color: '#ff48d7',
+  { code: 'deathRay', name: 'Rayo Mortal', races: ['freezer'], category: 'kiBeam', engine: 'deathRay', command: 'V', unlockLevel: 1, cooldownSeconds: 1.8, chargeSeconds: 0.24, ki: curve(2.6, 3.4), baseSizeY: 10, sizeY: curve(1, 0.7), hitbox: 'front', color: '#ff48d7',
     description: 'Rayo rápido desde un dedo, con enfriamiento corto.' },
   // Pendientes de mecánica: físicos y combos
   { code: 'dragonFist', name: 'Golpe Dragón (Ryūken)', races: ['saiyajin'], category: 'physical', unlockLevel: 35, cooldownSeconds: 9, physicalAttack: curve(2.5, 6), physicalDefense: 0.9, hitbox: 'front', description: 'Puñetazo que atraviesa a varios en línea.' },
@@ -81,15 +81,15 @@ const POWER_SPECS = [
   { code: 'rush', name: 'Embestida', races: [...ALL, 'freezer'], category: 'physical', unlockLevel: 3, cooldownSeconds: 4, physicalAttack: curve(1.4, 3), physicalDefense: 1.2, hitbox: 'contact', description: 'Entra a un duelo cuerpo a cuerpo de inmediato.' },
   // Pendientes: ki en rayo
   { code: 'galickGun', name: 'Galick Gun', races: ['saiyajin'], category: 'kiBeam', unlockLevel: 25, cooldownSeconds: 5, ki: curve(2.2, 5), kiDefense: 0.9, physicalDefense: 0.9, hitbox: 'full', color: '#b46bff', description: 'Onda de ki ancha y violeta.' },
-  { code: 'finalFlash', name: 'Final Flash', races: ['saiyajin'], category: 'kiBeam', unlockLevel: 60, cooldownSeconds: 14, chargeSeconds: 1.8, ki: curve(3.5, 9), kiDefense: 0.6, physicalDefense: 0.6, baseSize: 40, size: curve(1, 3.5), hitbox: 'full', color: '#fff27a', description: 'Carga larga y muy expuesta; onda enorme.' },
+  { code: 'finalFlash', name: 'Final Flash', races: ['saiyajin'], category: 'kiBeam', unlockLevel: 60, cooldownSeconds: 14, chargeSeconds: 1.8, ki: curve(3.5, 9), kiDefense: 0.6, physicalDefense: 0.6, baseSizeY: 40, sizeY: curve(1, 3.5), hitbox: 'full', color: '#fff27a', description: 'Carga larga y muy expuesta; onda enorme.' },
   { code: 'masenko', name: 'Masenko', races: ['terricola'], category: 'kiBeam', unlockLevel: 18, cooldownSeconds: 4.5, ki: curve(2, 4.6), hitbox: 'front', color: '#ffe066', description: 'Rayo de carga corta desde la frente.' },
   { code: 'triBeam', name: 'Kikōhō (Tri-Beam)', races: ['terricola'], category: 'kiArea', unlockLevel: 40, cooldownSeconds: 10, ki: curve(3, 7), kiDefense: 0.8, physicalDefense: 0.8, hitbox: 'area', color: '#ffd23f', description: 'Golpe de área que cuesta un porcentaje de su propia vida.',
     utility: { code: 'selfDamage', name: 'Sacrificio', description: 'Pierde parte de su vida al lanzarlo.', params: { selfHpCost: 0.1 } } },
   // Pendientes: ki en área y esferas
-  { code: 'spiritBomb', name: 'Genkidama', races: ['saiyajin'], category: 'kiArea', unlockLevel: 80, cooldownSeconds: 30, chargeSeconds: 4, ki: curve(4, 10), kiDefense: 0.5, physicalDefense: 0.5, baseSize: 80, size: curve(1, 4), hitbox: 'area', color: '#7fe3ff', description: 'Carga muy larga; crece con la energía del chat.',
+  { code: 'spiritBomb', name: 'Genkidama', races: ['saiyajin'], category: 'kiArea', unlockLevel: 80, cooldownSeconds: 30, chargeSeconds: 4, ki: curve(4, 10), kiDefense: 0.5, physicalDefense: 0.5, baseSizeY: 80, sizeY: curve(1, 4), baseSizeX: 80, sizeX: curve(1, 4), hitbox: 'area', color: '#7fe3ff', description: 'Carga muy larga; crece con la energía del chat.',
     utility: { code: 'chatCharge', name: 'Energía del chat', description: 'Cada mensaje del chat durante la carga suma poder.', params: { bonusPerMessage: 0.02, maxBonus: 1 } } },
   { code: 'bigBangAttack', name: 'Big Bang Attack', races: ['saiyajin'], category: 'kiArea', unlockLevel: 45, cooldownSeconds: 9, ki: curve(2.8, 6.5), kiDefense: 0.9, physicalDefense: 0.9, hitbox: 'area', color: '#8fd8ff', description: 'Esfera que explota al impactar.' },
-  { code: 'deathBall', name: 'Bola Mortal (Supernova)', races: ['freezer'], category: 'kiArea', unlockLevel: 70, cooldownSeconds: 25, chargeSeconds: 3, ki: curve(3.8, 9.5), kiDefense: 0.6, physicalDefense: 0.6, baseSize: 70, size: curve(1, 4), hitbox: 'area', color: '#ff6b3d', description: 'Esfera gigante, lenta y aplastante.' },
+  { code: 'deathBall', name: 'Bola Mortal (Supernova)', races: ['freezer'], category: 'kiArea', unlockLevel: 70, cooldownSeconds: 25, chargeSeconds: 3, ki: curve(3.8, 9.5), kiDefense: 0.6, physicalDefense: 0.6, baseSizeY: 70, sizeY: curve(1, 4), baseSizeX: 70, sizeX: curve(1, 4), hitbox: 'area', color: '#ff6b3d', description: 'Esfera gigante, lenta y aplastante.' },
   { code: 'hellzoneGrenade', name: 'Granada Infernal', races: ['namekuseijin'], category: 'kiArea', unlockLevel: 30, cooldownSeconds: 10, ki: curve(2.4, 5.8), hitbox: 'area', color: '#9dff6b', description: 'Esferas que rodean al rival y se cierran.' },
   { code: 'kiBlast', name: 'Ráfaga de Ki', races: [...ALL, 'freezer'], category: 'kiBeam', command: 'B', unlockLevel: 1, cooldownSeconds: 2.5, ki: curve(1.2, 2.6), hitbox: 'front', color: '#ffe9a3', description: 'Muchos disparos pequeños seguidos.' },
   { code: 'explosiveWave', name: 'Onda Explosiva', races: [...ALL, 'freezer'], category: 'kiArea', unlockLevel: 22, cooldownSeconds: 8, ki: curve(1.5, 3.2), kiDefense: 1.2, physicalDefense: 1.2, hitbox: 'area', color: '#fff6d6', description: 'Aleja a todos alrededor.' },
@@ -104,14 +104,37 @@ const POWER_SPECS = [
   { code: 'telekinesis', name: 'Telequinesis', races: ['freezer'], category: 'control', unlockLevel: 15, cooldownSeconds: 10, ki: curve(0.8, 1.8), hitbox: 'front', color: '#d9a6ff', description: 'Inmoviliza al rival y lo lanza.',
     utility: { code: 'stun', name: 'Inmovilizar', description: 'El rival no se mueve durante unos segundos.', params: { durationSeconds: 1.5 } } },
   { code: 'kaioken', name: 'Kaiōken', races: ['saiyajin', 'terricola'], category: 'buff', unlockLevel: 30, cooldownSeconds: 20, ki: curve(1.3, 2), physicalAttack: curve(1.3, 2), kiDefense: 0.8, physicalDefense: 0.8, hitbox: 'none', color: '#ff3b3b', description: 'Mejora temporal de stats que cuesta vida por segundo.',
-    utility: { code: 'buff', name: 'Aumento', description: 'Multiplica las stats mientras dura y quema vida.', params: { durationSeconds: 8, hpCostPerSecond: 0.02 } } }
+    utility: { code: 'buff', name: 'Aumento', description: 'Multiplica las stats mientras dura y quema vida.', params: { durationSeconds: 8, hpCostPerSecond: 0.02 } } },
+  // Agregados (Pedro, 2026-10-24)
+  { code: 'finalExplosion', name: 'Explosión Final', races: ['saiyajin'], category: 'kiArea', unlockLevel: 85, cooldownSeconds: 60, chargeSeconds: 2, ki: curve(5, 12), kiDefense: 0.3, physicalDefense: 0.3, baseSizeY: 120, sizeY: curve(1, 4), baseSizeX: 120, sizeX: curve(1, 4), hitbox: 'area', color: '#fff3b0', description: 'Explosión que cubre casi toda la pantalla a costa de casi toda su vida.',
+    utility: { code: 'selfDamage', name: 'Sacrificio', description: 'Pierde gran parte de su vida al lanzarlo.', params: { selfHpCost: 0.8 } } },
+  { code: 'burningAttack', name: 'Burning Attack', races: ['saiyajin'], category: 'kiArea', unlockLevel: 32, cooldownSeconds: 8, ki: curve(2.4, 5.5), baseSizeY: 50, sizeY: curve(1, 2.5), baseSizeX: 50, sizeX: curve(1, 2.5), hitbox: 'area', color: '#ffb347', description: 'Esfera de fuego que explota al impactar.' },
+  { code: 'superSaiyan', name: 'Super Saiyajin', races: ['saiyajin'], category: 'buff', unlockLevel: 50, cooldownSeconds: 60, ki: curve(1.5, 2.5), physicalAttack: curve(1.5, 2.5), kiDefense: 1.2, physicalDefense: 1.2, hitbox: 'none', color: '#ffe14d', description: 'Transformación dorada: multiplica sus stats un tiempo.',
+    utility: { code: 'buff', name: 'Aumento', description: 'Multiplica las stats mientras dura.', params: { durationSeconds: 15, hpCostPerSecond: 0 } } },
+  { code: 'instantTransmission', name: 'Teletransportación', races: ['saiyajin'], category: 'control', unlockLevel: 40, cooldownSeconds: 12, ki: curve(0, 0), hitbox: 'none', color: '#bfe9ff', description: 'Aparece junto al rival y lo golpea por sorpresa.',
+    utility: { code: 'teleport', name: 'Teletransporte', description: 'Se mueve al lado del objetivo al instante.', params: { range: 400 } } },
+  { code: 'lightGrenade', name: 'Granada de Luz', races: ['namekuseijin'], category: 'kiArea', unlockLevel: 45, cooldownSeconds: 12, ki: curve(2.6, 6), baseSizeY: 70, sizeY: curve(1, 2.5), baseSizeX: 70, sizeX: curve(1, 2.5), hitbox: 'area', color: '#c6ff8a', description: 'Esfera de luz que estalla en un área grande.' },
+  { code: 'makosen', name: 'Onda Demoníaca (Makōsen)', races: ['namekuseijin'], category: 'kiBeam', unlockLevel: 14, cooldownSeconds: 5, ki: curve(1.8, 4.2), hitbox: 'front', color: '#ffd84d', description: 'Ráfaga de ki ancha lanzada con ambas manos.' },
+  { code: 'eyeLaser', name: 'Rayo de los Ojos', races: ['namekuseijin'], category: 'kiBeam', unlockLevel: 4, cooldownSeconds: 3, ki: curve(1.1, 2.4), baseSizeY: 6, sizeY: curve(1, 2), hitbox: 'front', color: '#ff6b6b', description: 'Dos rayos finos y rápidos desde los ojos.' },
+  { code: 'dodonRay', name: 'Rayo Dodon', races: ['terricola'], category: 'kiBeam', unlockLevel: 16, cooldownSeconds: 4, ki: curve(2, 4.5), baseSizeY: 8, sizeY: curve(1, 2), hitbox: 'front', color: '#ffe680', description: 'Rayo fino y perforante desde un dedo.' },
+  { code: 'sokidan', name: 'Sōkidan', races: ['terricola'], category: 'kiBeam', unlockLevel: 20, cooldownSeconds: 7, ki: curve(2, 4.8), hitbox: 'front', color: '#9fe8ff', description: 'Esfera de ki que se guía hacia el objetivo.',
+    utility: { code: 'homing', name: 'Guiado', description: 'Persigue al objetivo más cercano.', params: { turnRate: 3 } } },
+  { code: 'multiForm', name: 'Multiforma', races: ['terricola'], category: 'control', unlockLevel: 55, cooldownSeconds: 30, ki: curve(0, 0), hitbox: 'none', color: '#ffd9a8', description: 'Se divide en varias copias que atacan a la vez.',
+    utility: { code: 'clones', name: 'Copias', description: 'Crea copias que reparten el daño.', params: { copies: 3, damageShare: 0.33, durationSeconds: 8 } } },
+  { code: 'zanzoken', name: 'Zanzōken (imagen residual)', races: [...ALL, 'freezer'], category: 'control', unlockLevel: 8, cooldownSeconds: 10, ki: curve(0, 0), hitbox: 'none', color: '#e6eefc', description: 'Deja una imagen residual y esquiva el siguiente ataque.',
+    utility: { code: 'dodge', name: 'Esquiva', description: 'Alta probabilidad de esquivar durante un instante.', params: { dodgeChance: 0.5, durationSeconds: 1.5 } } },
+  { code: 'novaStrike', name: 'Nova Strike', races: ['freezer'], category: 'physical', unlockLevel: 40, cooldownSeconds: 9, physicalAttack: curve(2.4, 5.8), physicalDefense: 1.2, baseSizeY: 50, sizeY: curve(1, 2), baseSizeX: 50, sizeX: curve(1, 2), hitbox: 'contact', color: '#e0a3ff', description: 'Embestida envuelta en ki que arrasa con todo a su paso.' }
 ];
 
-// Tamaño en el eje Y (grosor del rayo o diámetro del área) por categoría:
-// tamaño(N) = baseSize × multipliers.size(N).
+// Tamaño por categoría. Eje Y: grosor del rayo o alto del área. Eje X: ancho
+// del área o alcance del golpe. Los rayos (kiBeam) no usan X: su largo lo da
+// el recorrido de izquierda a derecha. tamaño(N) = base × multiplicador(N).
 const DEFAULT_SIZE = {
-  kiBeam: { baseSize: 24, size: curve(1, 2.5) }, kiArea: { baseSize: 60, size: curve(1, 2.5) },
-  physical: { baseSize: 30, size: curve(1, 1.5) }, control: { baseSize: 40, size: curve(1, 1.5) }, buff: { baseSize: 0, size: curve(1) }
+  kiBeam: { baseSizeY: 24, sizeY: curve(1, 2.5) },
+  kiArea: { baseSizeY: 60, sizeY: curve(1, 2.5), baseSizeX: 60, sizeX: curve(1, 2.5) },
+  physical: { baseSizeY: 30, sizeY: curve(1, 1.5), baseSizeX: 30, sizeX: curve(1, 1.5) },
+  control: { baseSizeY: 40, sizeY: curve(1, 1.5), baseSizeX: 40, sizeX: curve(1, 1.5) },
+  buff: { baseSizeY: 0, sizeY: curve(1) }
 };
 
 const HITBOX_UTILITY = {
@@ -122,6 +145,8 @@ const HITBOX_UTILITY = {
 function buildPower(spec, raceCode, order) {
   const asCurve = value => value === undefined ? { ...NEUTRAL } : typeof value === 'number' ? curve(value) : { ...value };
   const utility = spec.utility || (HITBOX_UTILITY[spec.hitbox] ? HITBOX_UTILITY[spec.hitbox]() : undefined);
+  const size = DEFAULT_SIZE[spec.category];
+  const usesX = spec.category !== 'kiBeam' && (spec.baseSizeX ?? size.baseSizeX) !== undefined;
   return {
     id: `${raceCode}_${spec.code}`,
     code: spec.code,
@@ -135,13 +160,15 @@ function buildPower(spec, raceCode, order) {
     unlockLevel: spec.unlockLevel,
     cooldownSeconds: spec.cooldownSeconds,
     chargeSeconds: spec.chargeSeconds ?? 0.5,
-    baseSize: spec.baseSize ?? DEFAULT_SIZE[spec.category].baseSize,
+    baseSizeY: spec.baseSizeY ?? size.baseSizeY,
+    ...(usesX ? { baseSizeX: spec.baseSizeX ?? size.baseSizeX ?? spec.baseSizeY } : {}),
     multipliers: {
       ki: asCurve(spec.ki),
       physicalAttack: asCurve(spec.physicalAttack),
       kiDefense: asCurve(spec.kiDefense),
       physicalDefense: asCurve(spec.physicalDefense),
-      size: asCurve(spec.size ?? DEFAULT_SIZE[spec.category].size)
+      sizeY: asCurve(spec.sizeY ?? size.sizeY),
+      ...(usesX ? { sizeX: asCurve(spec.sizeX ?? size.sizeX ?? spec.sizeY) } : {})
     },
     ...(utility ? { utility } : {}),
     hitbox: spec.hitbox || 'front',
@@ -236,14 +263,21 @@ export function powerMultipliersAt(power, level) {
     physicalAttack: curveAt(m.physicalAttack ?? NEUTRAL, level),
     kiDefense: curveAt(m.kiDefense ?? NEUTRAL, level),
     physicalDefense: curveAt(m.physicalDefense ?? NEUTRAL, level),
-    size: curveAt(m.size ?? NEUTRAL, level)
+    sizeY: curveAt(m.sizeY ?? m.size ?? NEUTRAL, level),
+    sizeX: curveAt(m.sizeX ?? NEUTRAL, level)
   };
 }
 
-// Tamaño del poder en el eje Y (px) en un nivel: baseSize × multipliers.size(N).
-// Documentos antiguos con width {start, end} en px siguen funcionando.
-export function powerSizeAt(power, level) {
-  if (Number(power?.baseSize) > 0) return Number(power.baseSize) * curveAt(power.multipliers?.size ?? NEUTRAL, level);
+// Tamaño del poder (px) en un nivel y un eje: base × multiplicador(N).
+// axis 'y' = grosor o alto; 'x' = ancho del área (null en los rayos).
+// Documentos antiguos con baseSize/size o width {start, end} siguen funcionando.
+export function powerSizeAt(power, level, axis = 'y') {
+  const m = power?.multipliers || {};
+  if (axis === 'x') {
+    return Number(power?.baseSizeX) > 0 ? Number(power.baseSizeX) * curveAt(m.sizeX ?? NEUTRAL, level) : null;
+  }
+  const base = Number(power?.baseSizeY ?? power?.baseSize);
+  if (base > 0) return base * curveAt(m.sizeY ?? m.size ?? NEUTRAL, level);
   if (power?.width) return curveAt(power.width, level);
   return null;
 }
