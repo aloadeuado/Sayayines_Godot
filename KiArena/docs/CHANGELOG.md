@@ -6,6 +6,7 @@ Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, a
 
 - **Solicitud:** Pedro aclaró que el entorno lo define la ruta: colección raíz `environments`, un documento por entorno (`dev`, `qa`, `prd`) y dentro de cada uno todas las colecciones. Cada documento de entorno es una base de datos completa.
 - **Implementación:** documentado en `.kiro/steering/reglas-datos.md` (árbol de rutas) y en las skills `reglas-desarrollo` y `persistencia-firestore`. Se sincronizó también la Regla 3 (ejecución y depuración por entorno), que faltaba en esta copia. Sin cambios de código: las rutas actuales ya siguen esta forma; queda pendiente pasar `prod` a `prd` en la web.
+- **Alcance (Pedro):** aplica a todos los modelos. Cada `design.md` de `.kiro/specs/` y cada skill de `.claude/skills/` lleva al inicio la nota «Rutas Firestore (obligatorio)»; las rutas abreviadas (`kiArenaX/{id}`) cuelgan siempre de `environments/{APP_ENV}/`. HU-SET-04 pasa de `prod` a `prd`.
 - **Rama/commit:** rama `claude/project-thread-osowq6`.
 
 ## 2026-10-22 — probar y depurar el login en local con Firebase Emulator Suite

@@ -1,5 +1,7 @@
 # Diseño — Autenticación de usuarios y cuentas vinculadas
 
+> **Rutas Firestore (obligatorio):** todo modelo de este módulo vive en `environments/{APP_ENV}/{colección}/{id}`: colección raíz `environments`, un documento por entorno (`dev`, `qa`, `prd`) y dentro todas las colecciones. Cualquier ruta abreviada en este archivo (`kiArenaX/{id}`) cuelga de ese prefijo. Ver `.kiro/steering/reglas-datos.md`.
+
 Fuente completa: [Datos de usuario por proveedor de login](https://claude.ai/artifact/Py4V8nWMmAZAqCqtNB2dC6). Regla general: el único dato que sirve como llave es el **ID estable** de cada proveedor; email y nombre son perfil, pueden faltar o cambiar.
 
 ## Comparativa por proveedor

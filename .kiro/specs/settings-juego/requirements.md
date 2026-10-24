@@ -32,7 +32,7 @@ Pantalla de administración separada del stream para editar multiplicadores de a
 3. Desactivar una raza NO DEBE modificar perfiles existentes; solo afecta al sorteo de perfiles nuevos.
 
 ### HU-SET-04 — Persistencia por entorno
-**Historia de usuario:** Como administrador, quiero que `dev`, `qa` y `prod` tengan ajustes separados, para probar sin afectar producción.
+**Historia de usuario:** Como administrador, quiero que `dev`, `qa` y `prd` tengan ajustes separados (`environments/{APP_ENV}/kiArenaSettings/gameplay`), para probar sin afectar producción.
 
 **Criterios de aceptación**
 1. El sistema DEBE leer y escribir solo `environments/{APP_ENV}/kiArenaSettings/gameplay`, con `APP_ENV` = `dev|qa|prd`.

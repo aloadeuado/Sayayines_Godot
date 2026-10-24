@@ -5,6 +5,8 @@ description: Trabajar en el login de Ki Arena - email y contraseña, Google, App
 
 # Ki Arena · autenticacion-usuarios
 
+> **Rutas Firestore (obligatorio):** todo modelo de este módulo vive en `environments/{APP_ENV}/{colección}/{id}`: colección raíz `environments`, un documento por entorno (`dev`, `qa`, `prd`) y dentro todas las colecciones. Cualquier ruta abreviada en este archivo (`kiArenaX/{id}`) cuelga de ese prefijo. Ver `.kiro/steering/reglas-datos.md`.
+
 ## Reglas obligatorias (siempre)
 
 Antes de tocar datos o rutas, aplica la skill `reglas-desarrollo` (`.kiro/steering/reglas-datos.md`): todo modelo Firestore lleva `id`, `reference` e `isActive` opcionales con borrado suave (nunca `DELETE`), las relaciones son referencias completas del mismo entorno y las rutas salen de `APP_ENV` = `dev` | `qa` | `prd`.
