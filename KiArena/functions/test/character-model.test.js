@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { FakeFirestore } from './fake-firestore.js';
 import { migrateCharacterModel } from '../scripts/character-migration.js';
 import {
-  DEFAULT_CATALOG, DEFAULT_POWERS, buildCatalog, curveAt, powerMultipliersAt, resolvePlayerType,
+  DEFAULT_CATALOG, DEFAULT_POWERS, buildCatalog, curveAt, powerMultipliersAt, powerSizeAt, resolvePlayerType,
   availablePowers, powerForCommand, powerBlockReasonFor
 } from '../../public/src/config/game-catalog.js';
 import { calculateLevelStats, normalizeGameSettings, DEFAULT_GAME_SETTINGS } from '../../public/src/config/gameplay-settings.js';
@@ -16,7 +16,11 @@ test('las curvas de poder escalan de forma lineal del nivel 1 al 100', () => {
   assert.equal(curveAt(kame.multipliers.ki, 1), 1.9);
   assert.equal(curveAt(kame.multipliers.ki, 100), 4.4);
   assert.ok(Math.abs(curveAt(kame.multipliers.ki, 50.5) - 3.15) < 0.02);
-  assert.deepEqual(powerMultipliersAt(kame, 1), { ki: 1.9, physicalAttack: 1, kiDefense: 0.9, physicalDefense: 0.9 });
+  assert.deepEqual(powerMultipliersAt(kame, 1), { ki: 1.9, physicalAttack: 1, kiDefense: 0.9, physicalDefense: 0.9, size: 1 });
+  // Tamaño en el eje Y: baseSize × multiplicador de tamaño (30 px en N=1, ~86 px en N=100).
+  assert.equal(powerSizeAt(kame, 1), 30);
+  assert.ok(Math.abs(powerSizeAt(kame, 100) - 86.1) < 0.01);
+  assert.equal(powerSizeAt({ width: { start: 10, end: 7 } }, 100), 7);
 });
 
 test('el race antiguo se resuelve al tipo de personaje y la raza', () => {
@@ -119,4 +123,14 @@ test('la migración es idempotente y respeta isActive=false', async () => {
   assert.equal(db.list(`${base}/kiArenaPlayerPowers/retirado:`).length, 0);
   const second = await migrateCharacterModel({ db, env: 'qa', apply: true, log: quiet });
   assert.deepEqual(Object.values(second).reduce((a, b) => a + b, 0), 0);
+});
+
+test('la migración agrega el multiplicador de tamaño a poderes ya sembrados sin pisar los demás', async () => {
+  const db = new FakeFirestore();
+  db.write(`${base}/kiArenaPowers/saiyajin_kamehameha`, { id: 'saiyajin_kamehameha', multipliers: { ki: { start: 2, end: 5 } } });
+  await migrateCharacterModel({ db, env: 'qa', apply: true, log: quiet });
+  const doc = db.read(`${base}/kiArenaPowers/saiyajin_kamehameha`);
+  assert.deepEqual(doc.multipliers.ki, { start: 2, end: 5 });
+  assert.deepEqual(doc.multipliers.size, { start: 1, end: 2.87 });
+  assert.equal(doc.baseSize, 30);
 });

@@ -79,7 +79,8 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 
 **Criterios de aceptación**
 1. El sistema DEBE guardar cada poder en `environments/{APP_ENV}/kiArenaPowers/{raceCode}_{powerCode}` con los campos base, `code`, `name`, `description`, `command`, `raceRef` (referencia completa a `kiArenaRaces`), `unlockLevel` y `cooldownSeconds`.
-2. Cada poder DEBE tener `multipliers.ki`, `multipliers.physicalAttack`, `multipliers.kiDefense` y `multipliers.physicalDefense`, cada uno con `start` (nivel 1) y `end` (nivel 100); los que falten valen 1.
+2. Cada poder DEBE tener `multipliers.ki`, `multipliers.physicalAttack`, `multipliers.kiDefense`, `multipliers.physicalDefense` y `multipliers.size`, cada uno con `start` (nivel 1) y `end` (nivel 100); los que falten valen 1.
+2b. (Pedro, 2026-10-24) El tamaño en el eje Y DEBE ser `baseSize × multipliers.size(N)` y crecer con el nivel; la hitbox (incluida la onda sólida `full`) DEBE usar ese tamaño.
 3. Un personaje DEBE poder usar solo los poderes activos de su raza con `unlockLevel ≤ level`; `powerBlockReason` DEBE leer este catálogo en lugar de `POWER_UNLOCK_LEVELS` y `race === 3`.
 4. `settingsJson.powers` y `powers.pending` DEBEN migrarse a este catálogo (copia, sin borrar, con aprobación de Pedro).
 

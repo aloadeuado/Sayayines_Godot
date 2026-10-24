@@ -49,9 +49,13 @@ export async function migrateCharacterModel({ db, env, apply = false, now = new 
       const docRef = ref(kind, kind === 'powers' ? item.id : item.code);
       const snap = await docRef.get();
       const doc = catalogDocument(kind, snap.exists ? item : adjust(item), ref);
-      await write(kind, docRef, snap.exists
-        ? missingOnly(snap.data(), { ...doc, isActive: true })
-        : { ...doc, isActive: true, createdAt: now, updatedAt: now });
+      let patch = snap.exists ? missingOnly(snap.data(), { ...doc, isActive: true }) : { ...doc, isActive: true, createdAt: now, updatedAt: now };
+      // Poderes ya sembrados: agrega los multiplicadores nuevos (p. ej. size) sin tocar los existentes.
+      const stored = snap.exists ? snap.data().multipliers : null;
+      if (stored && doc.multipliers && Object.keys(doc.multipliers).some(key => !(key in stored))) {
+        patch = { ...patch, multipliers: { ...doc.multipliers, ...stored } };
+      }
+      await write(kind, docRef, patch);
     }
   };
   await seed('races', DEFAULT_RACES);

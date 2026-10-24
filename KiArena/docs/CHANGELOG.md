@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — tamaño de los poderes en el eje Y
+
+- **Solicitud:** Pedro pidió una variable para que el poder crezca en el eje Y con el nivel, como multiplicador.
+- **Implementación:** `baseSize` (px) y `multipliers.size {start, end}` en cada poder; grosor(N) = `baseSize × size(N)` (`powerSizeAt`), usado por el dibujo y la hitbox. Reemplaza `width` (que sigue leyéndose en documentos viejos). Editable en settings. La migración agrega `size` a poderes ya sembrados sin tocar sus otros multiplicadores. 23 pruebas; probado en el emulador.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — implementar razas, personajes y poderes
 
 - **Solicitud:** Pedro pidió crear los registros de poderes, ajustar las HUs, corregir el juego para que use los modelos nuevos y migrar usuarios y jugadores existentes sin borrar nada y conservando los niveles.
