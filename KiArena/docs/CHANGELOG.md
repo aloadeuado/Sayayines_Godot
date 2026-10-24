@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — nombres de los poderes en latino
+
+- **Solicitud:** Pedro pidió los nombres del doblaje latino (Genkidama, no Onda Vital).
+- **Implementación:** 15 nombres cambiados en `game-catalog.js` (p. ej. Galick Gun → Galick Ho, Final Flash → Resplandor Final, Big Bang Attack → Ataque Big Bang, Bola Mortal → Supernova, Burning Attack → Ataque Ardiente, sin macrones: Kaioken, Taiyoken, Mafuba, Zanzoken). En dev solo se actualizó el campo `name` de 19 documentos de `kiArenaPowers`. Tabla de specs regenerada; HU-POD-09.2e.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — diagrama completo, arreglos y datos mínimos en dev
 
 - **Solicitud:** Pedro pidió el diagrama completo con los arreglos, ajustar las HUs, arreglar el código que haga falta y crear los datos que el código necesita para no fallar.

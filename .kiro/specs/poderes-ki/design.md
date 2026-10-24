@@ -139,23 +139,23 @@ Los rayos (`kiBeam`) solo crecen en Y: tienen izquierda y derecha, su largo lo d
 | `terricola_makankosappo` | Makankosappo | terricola | Ki · rayo | activo | M | 10 | 7 | 3.2→8.5 | 1 | 0.8 | 0.8 | 10 × 1→6.8 = 10→68 px | — | front |
 | `freezer_makankosappo` | Makankosappo | freezer | Ki · rayo | activo | M | 10 | 7 | 3.2→4.2 | 1 | 0.8 | 0.8 | 8 × 1→0.625 = 8→5 px | — | front |
 | `freezer_deathRay` | Rayo Mortal | freezer | Ki · rayo | activo | V | 1 | 1.8 | 2.6→3.4 | 1 | 1 | 1 | 10 × 1→0.7 = 10→7 px | — | front |
-| `saiyajin_dragonFist` | Golpe Dragón (Ryūken) | saiyajin | Físico y combos | pendiente | — | 35 | 9 | 1 | 2.5→6 | 1 | 0.9 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | front |
+| `saiyajin_dragonFist` | Puño del Dragón | saiyajin | Físico y combos | pendiente | — | 35 | 9 | 1 | 2.5→6 | 1 | 0.9 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | front |
 | `saiyajin_meteorCombo` | Combo Meteoro | saiyajin | Físico y combos | pendiente | — | 15 | 6 | 1 | 2→5 | 1 | 1.1 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
 | `terricola_janKen` | Jan Ken | terricola | Físico y combos | pendiente | — | 5 | 4 | 1 | 1.6→3.5 | 1 | 1 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
-| `terricola_wolfFangFist` | Puño Lobo (Rōga Fūfūken) | terricola | Físico y combos | pendiente | — | 12 | 6 | 1 | 1.8→4.2 | 1 | 0.9 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
+| `terricola_wolfFangFist` | Puño del Lobo | terricola | Físico y combos | pendiente | — | 12 | 6 | 1 | 1.8→4.2 | 1 | 0.9 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
 | `namekuseijin_elasticArm` | Brazo Elástico | namekuseijin | Físico y combos | pendiente | — | 8 | 5 | 1 | 1.5→3.8 | 1 | 1.1 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | front |
 | `freezer_tailWhip` | Latigazo de Cola | freezer | Físico y combos | pendiente | — | 6 | 4 | 1 | 1.7→4 | 1 | 1 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | area |
 | `saiyajin_rush` | Embestida | saiyajin | Físico y combos | pendiente | — | 3 | 4 | 1 | 1.4→3 | 1 | 1.2 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
 | `namekuseijin_rush` | Embestida | namekuseijin | Físico y combos | pendiente | — | 3 | 4 | 1 | 1.4→3 | 1 | 1.2 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
 | `terricola_rush` | Embestida | terricola | Físico y combos | pendiente | — | 3 | 4 | 1 | 1.4→3 | 1 | 1.2 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
 | `freezer_rush` | Embestida | freezer | Físico y combos | pendiente | — | 3 | 4 | 1 | 1.4→3 | 1 | 1.2 | 30 × 1→1.5 = 30→45 px | 30 × 1→1.5 = 30→45 px | contact |
-| `saiyajin_galickGun` | Galick Gun | saiyajin | Ki · rayo | pendiente | — | 25 | 5 | 2.2→5 | 1 | 0.9 | 0.9 | 24 × 1→2.5 = 24→60 px | — | **sólido** (tick 0.15 c/0.25 s, +0.6 s) |
-| `saiyajin_finalFlash` | Final Flash | saiyajin | Ki · rayo | pendiente | — | 60 | 14 | 3.5→9 | 1 | 0.6 | 0.6 | 40 × 1→3.5 = 40→140 px | — | **sólido** (tick 0.15 c/0.25 s, +0.6 s) |
+| `saiyajin_galickGun` | Galick Ho | saiyajin | Ki · rayo | pendiente | — | 25 | 5 | 2.2→5 | 1 | 0.9 | 0.9 | 24 × 1→2.5 = 24→60 px | — | **sólido** (tick 0.15 c/0.25 s, +0.6 s) |
+| `saiyajin_finalFlash` | Resplandor Final | saiyajin | Ki · rayo | pendiente | — | 60 | 14 | 3.5→9 | 1 | 0.6 | 0.6 | 40 × 1→3.5 = 40→140 px | — | **sólido** (tick 0.15 c/0.25 s, +0.6 s) |
 | `terricola_masenko` | Masenko | terricola | Ki · rayo | pendiente | — | 18 | 4.5 | 2→4.6 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
-| `terricola_triBeam` | Kikōhō (Tri-Beam) | terricola | Ki · área | pendiente | — | 40 | 10 | 3→7 | 1 | 0.8 | 0.8 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | Sacrificio selfHpCost:0.1 |
+| `terricola_triBeam` | Kikoho | terricola | Ki · área | pendiente | — | 40 | 10 | 3→7 | 1 | 0.8 | 0.8 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | Sacrificio selfHpCost:0.1 |
 | `saiyajin_spiritBomb` | Genkidama | saiyajin | Ki · área | pendiente | — | 80 | 30 | 4→10 | 1 | 0.5 | 0.5 | 80 × 1→4 = 80→320 px | 80 × 1→4 = 80→320 px | Energía del chat bonusPerMessage:0.02, maxBonus:1 |
-| `saiyajin_bigBangAttack` | Big Bang Attack | saiyajin | Ki · área | pendiente | — | 45 | 9 | 2.8→6.5 | 1 | 0.9 | 0.9 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | area |
-| `freezer_deathBall` | Bola Mortal (Supernova) | freezer | Ki · área | pendiente | — | 70 | 25 | 3.8→9.5 | 1 | 0.6 | 0.6 | 70 × 1→4 = 70→280 px | 70 × 1→4 = 70→280 px | area |
+| `saiyajin_bigBangAttack` | Ataque Big Bang | saiyajin | Ki · área | pendiente | — | 45 | 9 | 2.8→6.5 | 1 | 0.9 | 0.9 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | area |
+| `freezer_deathBall` | Supernova | freezer | Ki · área | pendiente | — | 70 | 25 | 3.8→9.5 | 1 | 0.6 | 0.6 | 70 × 1→4 = 70→280 px | 70 × 1→4 = 70→280 px | area |
 | `namekuseijin_hellzoneGrenade` | Granada Infernal | namekuseijin | Ki · área | pendiente | — | 30 | 10 | 2.4→5.8 | 1 | 1 | 1 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | area |
 | `saiyajin_kiBlast` | Ráfaga de Ki | saiyajin | Ki · rayo | pendiente | B | 1 | 2.5 | 1.2→2.6 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
 | `namekuseijin_kiBlast` | Ráfaga de Ki | namekuseijin | Ki · rayo | pendiente | B | 1 | 2.5 | 1.2→2.6 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
@@ -167,25 +167,25 @@ Los rayos (`kiBeam`) solo crecen en Y: tienen izquierda y derecha, su largo lo d
 | `freezer_explosiveWave` | Onda Explosiva | freezer | Ki · área | pendiente | — | 22 | 8 | 1.5→3.2 | 1 | 1.2 | 1.2 | 60 × 1→2.5 = 60→150 px | 60 × 1→2.5 = 60→150 px | area |
 | `terricola_destructoDisc` | Kienzan | terricola | Ki · rayo | pendiente | — | 28 | 8 | 2.5→6 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | Corte ignorePhysicalDefense:1 |
 | `freezer_deathSaucer` | Disco Mortal | freezer | Ki · rayo | pendiente | — | 35 | 9 | 2.2→5.2 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
-| `terricola_solarFlare` | Taiyōken | terricola | Control | pendiente | — | 10 | 15 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Ceguera durationSeconds:2, radius:160 |
-| `terricola_mafuba` | Mafūba | terricola | Control | pendiente | — | 75 | 40 | 0 | 1 | 0.5 | 0.5 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Sello durationSeconds:5, selfHpCost:0.35 |
+| `terricola_solarFlare` | Taiyoken | terricola | Control | pendiente | — | 10 | 15 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Ceguera durationSeconds:2, radius:160 |
+| `terricola_mafuba` | Mafuba | terricola | Control | pendiente | — | 75 | 40 | 0 | 1 | 0.5 | 0.5 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Sello durationSeconds:5, selfHpCost:0.35 |
 | `freezer_telekinesis` | Telequinesis | freezer | Control | pendiente | — | 15 | 10 | 0.8→1.8 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Inmovilizar durationSeconds:1.5 |
-| `saiyajin_kaioken` | Kaiōken | saiyajin | Mejora | pendiente | — | 30 | 20 | 1.3→2 | 1.3→2 | 0.8 | 0.8 | — | — | Aumento durationSeconds:8, hpCostPerSecond:0.02 |
-| `terricola_kaioken` | Kaiōken | terricola | Mejora | pendiente | — | 30 | 20 | 1.3→2 | 1.3→2 | 0.8 | 0.8 | — | — | Aumento durationSeconds:8, hpCostPerSecond:0.02 |
+| `saiyajin_kaioken` | Kaioken | saiyajin | Mejora | pendiente | — | 30 | 20 | 1.3→2 | 1.3→2 | 0.8 | 0.8 | — | — | Aumento durationSeconds:8, hpCostPerSecond:0.02 |
+| `terricola_kaioken` | Kaioken | terricola | Mejora | pendiente | — | 30 | 20 | 1.3→2 | 1.3→2 | 0.8 | 0.8 | — | — | Aumento durationSeconds:8, hpCostPerSecond:0.02 |
 | `saiyajin_finalExplosion` | Explosión Final | saiyajin | Ki · área | pendiente | — | 85 | 60 | 5→12 | 1 | 0.3 | 0.3 | 120 × 1→4 = 120→480 px | 120 × 1→4 = 120→480 px | Sacrificio selfHpCost:0.8 |
-| `saiyajin_burningAttack` | Burning Attack | saiyajin | Ki · área | pendiente | — | 32 | 8 | 2.4→5.5 | 1 | 1 | 1 | 50 × 1→2.5 = 50→125 px | 50 × 1→2.5 = 50→125 px | area |
-| `saiyajin_superSaiyan` | Super Saiyajin | saiyajin | Mejora | pendiente | — | 50 | 60 | 1.5→2.5 | 1.5→2.5 | 1.2 | 1.2 | — | — | Aumento durationSeconds:15, hpCostPerSecond:0 |
+| `saiyajin_burningAttack` | Ataque Ardiente | saiyajin | Ki · área | pendiente | — | 32 | 8 | 2.4→5.5 | 1 | 1 | 1 | 50 × 1→2.5 = 50→125 px | 50 × 1→2.5 = 50→125 px | area |
+| `saiyajin_superSaiyan` | Súper Saiyajin | saiyajin | Mejora | pendiente | — | 50 | 60 | 1.5→2.5 | 1.5→2.5 | 1.2 | 1.2 | — | — | Aumento durationSeconds:15, hpCostPerSecond:0 |
 | `saiyajin_instantTransmission` | Teletransportación | saiyajin | Control | pendiente | — | 40 | 12 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Teletransporte range:400 |
 | `namekuseijin_lightGrenade` | Granada de Luz | namekuseijin | Ki · área | pendiente | — | 45 | 12 | 2.6→6 | 1 | 1 | 1 | 70 × 1→2.5 = 70→175 px | 70 × 1→2.5 = 70→175 px | area |
-| `namekuseijin_makosen` | Onda Demoníaca (Makōsen) | namekuseijin | Ki · rayo | pendiente | — | 14 | 5 | 1.8→4.2 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
+| `namekuseijin_makosen` | Makosen | namekuseijin | Ki · rayo | pendiente | — | 14 | 5 | 1.8→4.2 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | front |
 | `namekuseijin_eyeLaser` | Rayo de los Ojos | namekuseijin | Ki · rayo | pendiente | — | 4 | 3 | 1.1→2.4 | 1 | 1 | 1 | 6 × 1→2 = 6→12 px | — | front |
 | `terricola_dodonRay` | Rayo Dodon | terricola | Ki · rayo | pendiente | — | 16 | 4 | 2→4.5 | 1 | 1 | 1 | 8 × 1→2 = 8→16 px | — | front |
-| `terricola_sokidan` | Sōkidan | terricola | Ki · rayo | pendiente | — | 20 | 7 | 2→4.8 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | Guiado turnRate:3 |
+| `terricola_sokidan` | Sokidan | terricola | Ki · rayo | pendiente | — | 20 | 7 | 2→4.8 | 1 | 1 | 1 | 24 × 1→2.5 = 24→60 px | — | Guiado turnRate:3 |
 | `terricola_multiForm` | Multiforma | terricola | Control | pendiente | — | 55 | 30 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Copias copies:3, damageShare:0.33, durationSeconds:8 |
-| `saiyajin_zanzoken` | Zanzōken (imagen residual) | saiyajin | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
-| `namekuseijin_zanzoken` | Zanzōken (imagen residual) | namekuseijin | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
-| `terricola_zanzoken` | Zanzōken (imagen residual) | terricola | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
-| `freezer_zanzoken` | Zanzōken (imagen residual) | freezer | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
+| `saiyajin_zanzoken` | Zanzoken | saiyajin | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
+| `namekuseijin_zanzoken` | Zanzoken | namekuseijin | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
+| `terricola_zanzoken` | Zanzoken | terricola | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
+| `freezer_zanzoken` | Zanzoken | freezer | Control | pendiente | — | 8 | 10 | 0 | 1 | 1 | 1 | 40 × 1→1.5 = 40→60 px | 40 × 1→1.5 = 40→60 px | Esquiva dodgeChance:0.5, durationSeconds:1.5 |
 | `freezer_novaStrike` | Nova Strike | freezer | Físico y combos | pendiente | — | 40 | 9 | 1 | 2.4→5.8 | 1 | 1.2 | 50 × 1→2 = 50→100 px | 50 × 1→2 = 50→100 px | contact |
 
 ### `environments/{APP_ENV}/kiArenaPlayerPowers/{playerId}:{powerId}` — poderes de cada personaje (tabla intermedia)
