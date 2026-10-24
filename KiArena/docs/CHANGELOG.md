@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — catálogo de tipos de personaje (`kiArenaPlayerTypes`) · PROPUESTA
+
+- **Solicitud:** Pedro pidió una colección de tipos de personaje (Saiyajin, Namekuseijin…) y que `kiArenaPlayers` la referencie.
+- **Diseño:** `environments/{APP_ENV}/kiArenaPlayerTypes/{code}` (goku, piccolo, gohan, freezer) y `playerTypeRef` en `kiArenaPlayers`; `race` queda como legado de lectura. Documentado en `.kiro/specs/persistencia-firestore/design.md`, `reglas-datos.md` y la tarea 3.11. Sin cambios de código.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — estructura de rutas por entorno en Firestore
 
 - **Solicitud:** Pedro aclaró que el entorno lo define la ruta: colección raíz `environments`, un documento por entorno (`dev`, `qa`, `prd`) y dentro de cada uno todas las colecciones. Cada documento de entorno es una base de datos completa.

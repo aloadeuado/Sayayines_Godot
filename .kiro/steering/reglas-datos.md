@@ -33,7 +33,8 @@ Además se mantienen `createdAt` y `updatedAt` donde ya existen.
 
 | Modelo | Colección | `id` | `reference` | Relaciones (referencias completas) |
 |---|---|---|---|---|
-| Jugador | `kiArenaPlayers` | `usernameKey` (con Twitch/TikTok: `{plataforma}_{idExterno}`) | `…/environments/{APP_ENV}/kiArenaPlayers/{id}` | — |
+| Tipo de personaje | `kiArenaPlayerTypes` | `code` (`goku`, `piccolo`, `gohan`, `freezer`) | `…/environments/{APP_ENV}/kiArenaPlayerTypes/{code}` | — |
+| Jugador | `kiArenaPlayers` | `usernameKey` (con Twitch/TikTok: `{plataforma}_{idExterno}`) | `…/environments/{APP_ENV}/kiArenaPlayers/{id}` | `playerTypeRef` → tipo de personaje; `userRef` → usuario (opcional) |
 | Mensaje | `kiArenaMessages` | auto-ID (o `{fuente}_{idOrigen}` para deduplicar) | `…/environments/{APP_ENV}/kiArenaMessages/{id}` | `playerRef` → jugador que lo envía (si existe) |
 | Evento | `kiArenaEvents` | auto-ID | `…/environments/{APP_ENV}/kiArenaEvents/{id}` | `victimRef`, `killerRef` → jugadores |
 | Ajustes | `kiArenaSettings` | `gameplay` | `…/environments/{APP_ENV}/kiArenaSettings/gameplay` | — |

@@ -95,6 +95,63 @@ erDiagram
 
 Referencia ampliada: `KiArena/docs/FIRESTORE.md`.
 
+## Propuesta: tipos de personaje y jugadores (Pedro, 2026-10-24) · PENDIENTE
+
+Mismo patrón que el login (`kiArenaProviderTypes` → `kiArenaProviders`): un catálogo de tipos de personaje y los jugadores apuntando a él con una referencia completa. Reemplaza el número `race` y la lista fija `CHARACTER_OPTIONS`.
+
+### `environments/{APP_ENV}/kiArenaPlayerTypes/{code}` — catálogo
+
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `id` | string | Opcional | = `code` (`goku`, `piccolo`, `gohan`, `freezer`) |
+| `reference` | referencia | Opcional | Referencia completa a sí mismo |
+| `isActive` | boolean | Opcional | `false` = retirado (borrado suave); ausente = activo |
+| `code` | string | Sí | Llave estable del tipo |
+| `name` | string | Sí | Personaje: Goku, Piccolo, Gohan, Freezer |
+| `raceName` | string | Sí | Raza: Saiyajin, Namekuseijin, Humano, Freezer |
+| `legacyRace` | number | Opcional | Número `race` antiguo (0–3) para leer jugadores viejos |
+| `color` | string | Opcional | Color del aura/roster (`#ff9d3d`…) |
+| `isEligible` | boolean | Opcional | Si sale al crear un jugador nuevo (hoy `settings.characters`) |
+| `order` | number | Opcional | Orden en settings y roster |
+| `createdAt` / `updatedAt` | string ISO | Opcional | Fechas |
+
+Datos iniciales:
+
+| `code` | `name` | `raceName` | `legacyRace` | `color` |
+|---|---|---|---|---|
+| `goku` | Goku | Saiyajin | 0 | `#ff9d3d` |
+| `piccolo` | Piccolo | Namekuseijin | 1 | `#68e47b` |
+| `gohan` | Gohan | Humano | 2 | `#68b9ff` |
+| `freezer` | Freezer | Freezer | 3 | `#c487ff` |
+
+### `environments/{APP_ENV}/kiArenaPlayers/{id}` — jugador
+
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `id` | string | Opcional | `usernameKey` (con Twitch/TikTok: `{plataforma}_{idExterno}`) |
+| `reference` | referencia | Opcional | Referencia completa a sí mismo |
+| `isActive` | boolean | Opcional | Borrado suave; ausente = activo |
+| `playerTypeRef` | referencia | Opcional* | → `kiArenaPlayerTypes/{code}`. *Obligatorio en escrituras nuevas |
+| `userRef` | referencia | Opcional | → `kiArenaUsers/{uid}` (HU-AUT-09) |
+| `race` | number | Opcional | Legado; solo se lee si falta `playerTypeRef` (se mapea por `legacyRace`) |
+| `username`, `usernameKey` | string | Sí | Nombre visible y normalizado |
+| `level`, `xp`, `kills`, `deaths` | number | Sí | Progreso |
+| `alive`, `hp`, `maxHp`, `hpFormulaVersion` | boolean / number | Sí | Estado en arena (no es `isActive`) |
+| `schemaVersion` | number | Sí | Sube a `3` con `playerTypeRef` |
+| `createdAt` / `updatedAt` | string ISO | Opcional / Sí | Fechas |
+
+### Relaciones
+
+| Desde | Campo | Hacia | Cardinalidad |
+|---|---|---|---|
+| `kiArenaPlayers` | `playerTypeRef` | `kiArenaPlayerTypes` | N jugadores → 1 tipo |
+| `kiArenaPlayers` | `userRef` | `kiArenaUsers` | N jugadores → 1 usuario (por definir) |
+| `kiArenaUsers` | `playerRef` | `kiArenaPlayers` | jugador principal |
+| `kiArenaMessages` | `playerRef` | `kiArenaPlayers` | — |
+| `kiArenaEvents` | `victimRef`, `killerRef` | `kiArenaPlayers` | — |
+
+Compatibilidad: un jugador sin `playerTypeRef` se lee por `race` → tipo con ese `legacyRace`; al volver a guardarlo se completa `playerTypeRef` sin borrar `race`.
+
 ## Riesgos
 
 - Sin transacciones: dos pestañas pueden pisarse el progreso.

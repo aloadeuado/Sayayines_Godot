@@ -28,3 +28,4 @@
 - [ ] 3.8 `softDelete(kind, id)` en el adaptador; prohibido `DELETE` — _HU-FS-08.1, 08.2_
 - [ ] 3.9 (Opcional, solo si Pedro lo pide) backfill de `id`/`reference`/`isActive=true` en documentos existentes — _HU-FS-07.3_
 - [ ] 3.10 Actualizar `KiArena/docs/FIRESTORE.md`, `FIREBASE.md`, `PROJECT_SPEC.md` y `README.md` con `dev|qa|prd` y los campos base
+- [ ] 3.11 Catálogo `kiArenaPlayerTypes` (sembrar goku/piccolo/gohan/freezer en dev y qa) y `playerTypeRef` en `kiArenaPlayers`; leer `race` legado; `CHARACTER_OPTIONS`/`settings.characters` pasan a leer el catálogo — _propuesta 2026-10-24, pendiente de aprobación_
