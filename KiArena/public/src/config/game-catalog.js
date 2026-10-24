@@ -207,7 +207,10 @@ export function buildCatalog(stored = {}) {
   };
   const races = merge(DEFAULT_RACES, stored.races, r => r.code).map(r => ({ ...r, id: r.id || r.code }));
   const playerTypes = merge(DEFAULT_PLAYER_TYPES, stored.playerTypes, t => t.code).map(t => ({ ...t, id: t.id || t.code, raceCode: refCode(t.raceRef) || t.raceCode }));
-  const powers = merge(DEFAULT_POWERS, stored.powers, p => p.id).map(p => ({ ...p, raceCode: refCode(p.raceRef) || p.raceCode }));
+  // engine y status los decide el código (si la mecánica existe o no), no el documento:
+  // así un poder sembrado como pendiente se activa solo cuando su mecánica se publica.
+  const engines = new Map(DEFAULT_POWERS.map(p => [p.id, { engine: p.engine, status: p.status }]));
+  const powers = merge(DEFAULT_POWERS, stored.powers, p => p.id).map(p => ({ ...p, ...(engines.get(p.id) || {}), raceCode: refCode(p.raceRef) || p.raceCode }));
   const raceCodes = new Set(races.map(r => r.code));
   return {
     races: races.sort((a, b) => (a.order || 99) - (b.order || 99)),

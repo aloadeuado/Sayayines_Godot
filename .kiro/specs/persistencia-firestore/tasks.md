@@ -38,3 +38,4 @@
 - [x] 4.3 Sembrar `kiArenaPlayerTypes` (goku, piccolo, gohan, freezer) con `raceRef` — _HU-FS-10_ (ver tarea 3.11)
 - [x] 4.4 `kiArenaPlayers` con `userRef`, `playerTypeRef`, `name`, `utilityState`; lectura de `race` legado — _HU-FS-11_
 - [x] 4.5 `kiArenaEvents` con `killerRef`, `victimRef`, campos base y error visible al fallar — _HU-FS-12_
+- [x] 4.6 Datos mínimos por entorno (ajustes de fábrica, catálogo de proveedores) y siembra `--rest` en dev — _HU-FS-13_

@@ -108,3 +108,14 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 4. Los eventos NO DEBEN usarse como fuente de `kills`/`deaths`: la verdad está en el personaje.
 5. Un fallo al guardar un evento NO DEBE ser silencioso: DEBE registrarse en el estado de Firebase.
 6. **Pendiente de decidir:** la colección crece sin límite (no se borra nada); definir resumen o archivo de eventos viejos.
+
+### HU-FS-13 — Datos mínimos por entorno para que el juego no falle · IMPLEMENTADO (2026-10-24)
+**Historia de usuario:** Como operador, quiero que cada entorno tenga los documentos que el código necesita, para que la arena, el bot, settings y el login no fallen ni dependan de un 404.
+
+**Criterios de aceptación**
+1. Cada entorno DEBE tener: `kiArenaRaces` (4), `kiArenaPlayerTypes` (4), `kiArenaPowers` (57), `kiArenaSettings/gameplay` y `kiArenaProviderTypes` (6). Los usuarios, proveedores y vínculos se crean al iniciar sesión.
+2. Si `kiArenaSettings/gameplay` falta, la migración DEBE crearlo con los valores de fábrica (`normalizeGameSettings(DEFAULT_GAME_SETTINGS)`), con `id`, `reference`, `isActive` y `environment`.
+3. La siembra DEBE poder correrse sin credenciales de servicio con `--rest` (API REST con la apiKey web): `npm run migrate:characters -- dev --rest --apply` y `npm run seed:provider-types -- dev --rest --apply`. prd sigue exigiendo `--confirm-prd`.
+4. La siembra DEBE ser idempotente: una segunda pasada no cambia nada.
+5. Antes de escribir en un entorno real DEBE guardarse un respaldo en JSON (dev: `ki-arena/backups/dev-2026-10-24/`).
+6. **Estado (2026-10-24):** dev sembrado y verificado; qa y prod sin tocar.

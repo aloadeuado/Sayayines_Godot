@@ -85,6 +85,7 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 2d. (Pedro, 2026-10-24) El catálogo DEBE incluir los poderes de la saga que faltaban (Explosión Final, Burning Attack, Súper Saiyajin, Teletransportación, Granada de Luz, Makosen, Rayo de los Ojos, Rayo Dodon, Sokidan, Multiforma, Zanzoken, Nova Strike): 57 registros, sembrados en dev.
 3. Un personaje DEBE poder usar solo los poderes activos de su raza con `unlockLevel ≤ level`; `powerBlockReason` DEBE leer este catálogo en lugar de `POWER_UNLOCK_LEVELS` y `race === 3`.
 4. `settingsJson.powers` y `powers.pending` DEBEN migrarse a este catálogo (copia, sin borrar, con aprobación de Pedro).
+5. (2026-10-24) `engine` y `status` (si el poder tiene mecánica) DEBEN venir del código y no del documento guardado, para que un poder sembrado como pendiente se active solo cuando su mecánica se publique.
 
 ### HU-POD-10 — Utilidad de daño persistente (onda expansiva) · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador, quiero que la onda de un poder como el Kamehameha sea un objeto sólido que dañe a quien quede dentro, para que los poderes grandes dominen la pantalla.

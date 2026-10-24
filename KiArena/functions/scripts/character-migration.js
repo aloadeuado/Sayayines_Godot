@@ -8,6 +8,7 @@ import {
   DEFAULT_RACES, DEFAULT_PLAYER_TYPES, DEFAULT_POWERS, DEFAULT_CATALOG,
   catalogDocument, resolvePlayerType, powersUnlockedByLevel
 } from '../../public/src/config/game-catalog.js';
+import { DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../../public/src/config/gameplay-settings.js';
 
 export const MIGRATION_COLLECTIONS = Object.freeze({
   races: 'kiArenaRaces', playerTypes: 'kiArenaPlayerTypes', powers: 'kiArenaPowers', playerPowers: 'kiArenaPlayerPowers',
@@ -128,9 +129,16 @@ export async function migrateCharacterModel({ db, env, apply = false, now = new 
   });
 
   // 5. Ajustes: campos base.
+  // 5. Ajustes: campos base. Si el entorno no tiene ajustes, se crean con los de
+  // fábrica para que la arena, el bot y settings no dependan de un 404.
+  const settingsRef = ref('settings', 'gameplay');
   if (settingsSnap.exists) {
-    const docRef = ref('settings', 'gameplay');
-    await write('settings', docRef, missingOnly(settingsDoc, { id: 'gameplay', reference: docRef, isActive: true }));
+    await write('settings', settingsRef, missingOnly(settingsDoc, { id: 'gameplay', reference: settingsRef, isActive: true }));
+  } else {
+    await write('settings', settingsRef, {
+      id: 'gameplay', reference: settingsRef, isActive: true, environment: env,
+      settingsJson: JSON.stringify(normalizeGameSettings(DEFAULT_GAME_SETTINGS)), createdAt: now, updatedAt: now
+    });
   }
 
   for (const [kind, count] of Object.entries(summary)) log(`${path(kind)}: ${count} documento(s) ${apply ? 'actualizados' : 'por actualizar'}`);

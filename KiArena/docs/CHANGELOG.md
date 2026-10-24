@@ -2,6 +2,14 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — diagrama completo, arreglos y datos mínimos en dev
+
+- **Solicitud:** Pedro pidió el diagrama completo con los arreglos, ajustar las HUs, arreglar el código que haga falta y crear los datos que el código necesita para no fallar.
+- **Código:** `buildCatalog` toma `engine`/`status` del código y no del documento (un poder sembrado como pendiente se activa cuando se publique su mecánica). La migración crea `kiArenaSettings/gameplay` con valores de fábrica si falta. `seed-provider-types` acepta `--rest`. 26 pruebas.
+- **Datos en dev:** `kiArenaSettings/gameplay` (no existía; la arena y settings daban 404) y `kiArenaProviderTypes` (6, sin clientId). Segunda pasada: 0 cambios. Arena, bot y settings cargan contra dev sin errores; flujo completo probado en el emulador.
+- **Specs:** HU-FS-13 (datos mínimos por entorno), HU-POD-09.5. Diagrama ER completo en el artifact del modelo de personajes.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — tamaño en X, poderes que faltaban y todo sembrado en dev
 
 - **Solicitud:** Pedro pidió que el poder crezca también en el eje X (no en los rayos, que tienen izquierda y derecha; sí en la Genkidama o la explosión de Vegeta), crear los poderes que faltaban y dejar todo en dev.

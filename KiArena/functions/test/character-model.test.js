@@ -146,3 +146,20 @@ test('la migración agrega el multiplicador de tamaño a poderes ya sembrados si
   assert.deepEqual(doc.multipliers.sizeY, { start: 1, end: 2.87 });
   assert.equal(doc.baseSizeY, 30);
 });
+
+test('la mecánica (engine/status) la decide el código aunque el documento diga otra cosa', () => {
+  const catalog = buildCatalog({ powers: [{ id: 'saiyajin_kamehameha', status: 'pending', engine: '' }, { id: 'saiyajin_spiritBomb', status: 'implemented', engine: 'kamehameha' }] });
+  assert.equal(catalog.powers.find(p => p.id === 'saiyajin_kamehameha').status, 'implemented');
+  assert.equal(catalog.powers.find(p => p.id === 'saiyajin_spiritBomb').status, 'pending');
+});
+
+test('la migración crea los ajustes de fábrica si el entorno no los tiene', async () => {
+  const db = new FakeFirestore();
+  await migrateCharacterModel({ db, env: 'qa', apply: true, log: quiet });
+  const doc = db.read(`${base}/kiArenaSettings/gameplay`);
+  assert.equal(doc.isActive, true);
+  assert.equal(doc.reference.path, `${base}/kiArenaSettings/gameplay`);
+  assert.deepEqual(JSON.parse(doc.settingsJson), normalizeGameSettings(DEFAULT_GAME_SETTINGS));
+  const again = await migrateCharacterModel({ db, env: 'qa', apply: true, log: quiet });
+  assert.equal(again.settings, 0);
+});
