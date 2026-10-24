@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — catálogo de poderes por raza y poderes por personaje · PROPUESTA
+
+- **Solicitud:** Pedro pidió que cada poder referencie una raza, con multiplicadores de ki, daño físico, defensa de ki y defensa física, nombre, descripción y una utilidad de daño persistente (hitbox solo del frente o de toda la onda expansiva). Además, relación muchos a muchos entre personajes y poderes.
+- **Diseño:** `kiArenaPowers/{raceCode}_{powerCode}` (HU-POD-09, utilidad `persistentDamage` con `hitboxMode` `front`|`full` en HU-POD-10) y tabla intermedia `kiArenaPlayerPowers/{playerId}:{powerId}` (HU-POD-11). Tablas en `poderes-ki/design.md`, tareas 3.1–3.6. Sin cambios de código.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — formato para mostrar modelos
 
 - **Solicitud:** Pedro pidió que todo objeto o modelo se le muestre siempre como tabla de campos (tipo, obligatorio, descripción), con valores y relaciones.

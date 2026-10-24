@@ -16,3 +16,12 @@
 - [ ] 2.2 Confirmar con Pedro si el margen extra de 12 px del Kamehameha es intencional; si no, igualarlo a `ancho × 0.675 + 12` y verificar con el overlay — _HU-POD-06.4_
 - [ ] 2.3 Llevar `FREEZER_POWER_PROGRESSION` (anchuras) a `gameplay-settings.js` para que también sean configurables — _HU-POD-06_
 - [ ] 2.4 Script Node de aserciones para `powerBlockReason` y `powerMultiplierAtLevel` (niveles 1, 9, 10, 19, 20, 100; Freezer y no Freezer) — _HU-POD-01, 05_
+
+## 3. Catálogo de poderes (Pedro, 2026-10-24) · requieren aprobación de Pedro para tocar código
+
+- [ ] 3.1 Sembrar `kiArenaPowers` (8 documentos: K y M por raza + `freezer_deathRay`) en dev y qa — _HU-POD-09_
+- [ ] 3.2 `powerBlockReason`, `powerMultiplierAtLevel` y `launch*` leen el catálogo — _HU-POD-09.3_
+- [ ] 3.3 Aplicar los cuatro multiplicadores del poder — _HU-POD-09.2_
+- [ ] 3.4 Hitbox `front`/`full` con daño por tick — _HU-POD-10_
+- [ ] 3.5 Settings edita los poderes por raza (reemplaza `settingsJson.powers`) — _HU-POD-09, HU-SET-02_
+- [ ] 3.6 `kiArenaPlayerPowers`: crear fila al desbloquear por nivel, leer filas activas para lanzar, contar `timesUsed`/`kills` — _HU-POD-11_

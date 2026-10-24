@@ -73,3 +73,33 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 2. Nivel de desbloqueo, enfriamiento, anchura del rayo y la restricción «Rayo Mortal solo Freezer» están fijos en código (`POWER_UNLOCK_LEVELS`, `launch*`, `FREEZER_POWER_PROGRESSION`, `race === 3`).
 3. Golpe de ki, Destello final, Mafuba y Bola mortal existen solo como valor `1` en `powers.pending`, sin comando ni acción.
 4. **Próximo paso (pendiente de Pedro):** catálogo `kiArenaPowers` con relación a `kiArenaRaces`, siguiendo el mismo patrón que razas y tipos.
+
+### HU-POD-09 — Catálogo de poderes por raza `kiArenaPowers` · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero que cada poder sea un registro ligado a una raza, con sus multiplicadores, para balancear y añadir poderes sin tocar código.
+
+**Criterios de aceptación**
+1. El sistema DEBE guardar cada poder en `environments/{APP_ENV}/kiArenaPowers/{raceCode}_{powerCode}` con los campos base, `code`, `name`, `description`, `command`, `raceRef` (referencia completa a `kiArenaRaces`), `unlockLevel` y `cooldownSeconds`.
+2. Cada poder DEBE tener `multipliers.ki`, `multipliers.physicalAttack`, `multipliers.kiDefense` y `multipliers.physicalDefense`, cada uno con `start` (nivel 1) y `end` (nivel 100); los que falten valen 1.
+3. Un personaje DEBE poder usar solo los poderes activos de su raza con `unlockLevel ≤ level`; `powerBlockReason` DEBE leer este catálogo en lugar de `POWER_UNLOCK_LEVELS` y `race === 3`.
+4. `settingsJson.powers` y `powers.pending` DEBEN migrarse a este catálogo (copia, sin borrar, con aprobación de Pedro).
+
+### HU-POD-10 — Utilidad de daño persistente (onda expansiva) · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como jugador, quiero que la onda de un poder como el Kamehameha sea un objeto sólido que dañe a quien quede dentro, para que los poderes grandes dominen la pantalla.
+
+**Criterios de aceptación**
+1. El poder PUEDE tener `utility.code = 'persistentDamage'` con `utility.params.hitboxMode` ∈ `front` | `full`.
+2. CON `front`, solo el frente que avanza DEBE hacer daño, una vez por objetivo.
+3. CON `full`, al crecer la onda el sistema DEBE crear una hitbox de toda la onda expansiva; MIENTRAS un luchador esté dentro, DEBE perder `tickDamage × daño del poder` cada `tickSeconds`, hasta `lingerSeconds` después de que la onda llegue al final.
+4. La hitbox visible y la de daño DEBEN coincidir (HU-POD-06).
+5. `tickDamage`, `tickSeconds` y `lingerSeconds` DEBEN ser editables por poder desde settings.
+
+### HU-POD-11 — Poderes de cada personaje `kiArenaPlayerPowers` · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como jugador, quiero que mi personaje tenga su propia lista de poderes, para que los poderes se ganen y se puedan dar o quitar uno por uno.
+
+**Criterios de aceptación**
+1. `kiArenaPlayerPowers` DEBE ser la tabla intermedia muchos a muchos entre `kiArenaPlayers` y `kiArenaPowers`, con id `{playerId}:{powerId}`, `playerRef`, `powerRef`, `unlockedAt` y los campos base.
+2. CUANDO un personaje alcanza el `unlockLevel` de un poder activo de su raza, el sistema DEBE crear su fila con `source: 'level'` (sin duplicar si ya existe).
+3. Un personaje DEBE poder lanzar solo los poderes con fila activa; quitar un poder es `isActive=false`.
+4. Un operador PUEDE dar un poder de otra raza (`source: 'admin'`).
+5. El sistema DEBE sumar `timesUsed` y, en una derrota con ese poder, `kills`, y actualizar `lastUsedAt`.
+6. Personajes antiguos sin filas DEBEN recibirlas al cargar según su nivel y raza (sin backfill masivo obligatorio).
