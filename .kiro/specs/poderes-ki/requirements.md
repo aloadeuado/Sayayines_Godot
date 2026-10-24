@@ -74,7 +74,7 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 3. Golpe de ki, Destello final, Mafuba y Bola mortal existen solo como valor `1` en `powers.pending`, sin comando ni acción.
 4. **Próximo paso (pendiente de Pedro):** catálogo `kiArenaPowers` con relación a `kiArenaRaces`, siguiendo el mismo patrón que razas y tipos.
 
-### HU-POD-09 — Catálogo de poderes por raza `kiArenaPowers` · PROPUESTA (Pedro, 2026-10-24)
+### HU-POD-09 — Catálogo de poderes por raza `kiArenaPowers` · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como administrador, quiero que cada poder sea un registro ligado a una raza, con sus multiplicadores, para balancear y añadir poderes sin tocar código.
 
 **Criterios de aceptación**
@@ -83,7 +83,7 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 3. Un personaje DEBE poder usar solo los poderes activos de su raza con `unlockLevel ≤ level`; `powerBlockReason` DEBE leer este catálogo en lugar de `POWER_UNLOCK_LEVELS` y `race === 3`.
 4. `settingsJson.powers` y `powers.pending` DEBEN migrarse a este catálogo (copia, sin borrar, con aprobación de Pedro).
 
-### HU-POD-10 — Utilidad de daño persistente (onda expansiva) · PROPUESTA (Pedro, 2026-10-24)
+### HU-POD-10 — Utilidad de daño persistente (onda expansiva) · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador, quiero que la onda de un poder como el Kamehameha sea un objeto sólido que dañe a quien quede dentro, para que los poderes grandes dominen la pantalla.
 
 **Criterios de aceptación**
@@ -93,7 +93,7 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 4. La hitbox visible y la de daño DEBEN coincidir (HU-POD-06).
 5. `tickDamage`, `tickSeconds` y `lingerSeconds` DEBEN ser editables por poder desde settings.
 
-### HU-POD-11 — Poderes de cada personaje `kiArenaPlayerPowers` · PROPUESTA (Pedro, 2026-10-24)
+### HU-POD-11 — Poderes de cada personaje `kiArenaPlayerPowers` · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador, quiero que mi personaje tenga su propia lista de poderes, para que los poderes se ganen y se puedan dar o quitar uno por uno.
 
 **Criterios de aceptación**
@@ -103,3 +103,5 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 4. Un operador PUEDE dar un poder de otra raza (`source: 'admin'`).
 5. El sistema DEBE sumar `timesUsed` y, en una derrota con ese poder, `kills`, y actualizar `lastUsedAt`.
 6. Personajes antiguos sin filas DEBEN recibirlas al cargar según su nivel y raza (sin backfill masivo obligatorio).
+
+**Estado (2026-10-24):** HU-POD-09, 10 y 11 implementadas en la rama `claude/project-thread-osowq6` (`public/src/config/game-catalog.js`, `game/arena.js`, `app/settings-app.js`, `functions/scripts/migrate-character-model.js`). 42 registros de poder (28 poderes distintos por raza); solo los de mecánica `kamehameha`, `makankosappo` y `deathRay` están activos en combate, el resto queda con `status: 'pending'` hasta tener su animación y hitbox.

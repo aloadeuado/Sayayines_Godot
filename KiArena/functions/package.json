@@ -9,7 +9,8 @@
   "scripts": {
     "check": "node --check index.js && for f in src/*.js scripts/*.js test/*.js; do node --check \"$f\" || exit 1; done",
     "test": "node --test test/*.test.js",
-    "seed:provider-types": "node scripts/seed-provider-types.js"
+    "seed:provider-types": "node scripts/seed-provider-types.js",
+    "migrate:characters": "node scripts/migrate-character-model.js"
   },
   "dependencies": {
     "firebase-admin": "^12.6.0",

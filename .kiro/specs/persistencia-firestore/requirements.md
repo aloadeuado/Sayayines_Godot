@@ -70,7 +70,7 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 4. Un registro sin `isActive` DEBE tratarse siempre como activo.
 5. `isActive` y `alive` DEBEN tratarse como campos distintos.
 
-### HU-FS-09 — Catálogo de razas `kiArenaRaces` · PROPUESTA (Pedro, 2026-10-24)
+### HU-FS-09 — Catálogo de razas `kiArenaRaces` · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como administrador, quiero las razas en su propia colección con sus características, para balancearlas sin tocar código.
 
 **Criterios de aceptación**
@@ -79,7 +79,7 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 3. Una raza con `isActive === false` NO DEBE asignarse a tipos ni jugadores nuevos; los existentes la siguen leyendo.
 4. Valores iniciales y utilidades: ver `design.md` y HU-RPG-06/07.
 
-### HU-FS-10 — Catálogo de tipos de personaje `kiArenaPlayerTypes` · PROPUESTA (Pedro, 2026-10-24)
+### HU-FS-10 — Catálogo de tipos de personaje `kiArenaPlayerTypes` · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como administrador, quiero un catálogo de personajes (Goku, Piccolo, Gohan, Freezer) ligado a su raza, para añadir personajes nuevos sin cambiar código.
 
 **Criterios de aceptación**
@@ -87,7 +87,7 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 2. `CHARACTER_OPTIONS` y `settings.characters` DEBEN reemplazarse por la lectura de este catálogo.
 3. Relación: una raza tiene N tipos; un tipo tiene una raza.
 
-### HU-FS-11 — Personajes de usuario (`kiArenaPlayers` como tabla intermedia) · PROPUESTA (Pedro, 2026-10-24)
+### HU-FS-11 — Personajes de usuario (`kiArenaPlayers` como tabla intermedia) · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador con cuenta, quiero tener uno o varios personajes con su nombre y progreso, para jugar con distintos personajes.
 
 **Criterios de aceptación**

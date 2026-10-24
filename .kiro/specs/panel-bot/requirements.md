@@ -61,7 +61,7 @@ Ventana separada del stream donde el operador simula el chat, elige el remitente
 2. CUANDO el operador elimina un perfil o mensaje, el sistema DEBE marcar `isActive=false` (nunca `DELETE`) y pedir confirmación en la propia página.
 3. Cada mensaje enviado desde `/bot` DEBE guardarse con `id`, `reference` (referencia completa `…/environments/{APP_ENV}/kiArenaMessages/{id}`), `playerRef` (referencia completa al jugador si existe) e `isActive=true`.
 
-### HU-BOT-07 — Feed de combate con referencias (Pedro, 2026-10-24)
+### HU-BOT-07 — Feed de combate con referencias (Pedro, 2026-10-24) · IMPLEMENTADO (2026-10-24)
 **Criterios de aceptación**
 1. El feed DEBE seguir leyendo los últimos 30 eventos de `kiArenaEvents` y mostrar «killer derrotó a victim».
 2. CUANDO el evento tenga `killerRef`/`victimRef`, el feed PUEDE usarlos para mostrar el personaje y la raza; SI no, usa `killer`/`victim` (texto).

@@ -70,6 +70,21 @@ Reglas: una cuenta externa solo puede estar activa en un usuario (la transacció
 
 Firebase Authentication guarda la sesión del navegador en IndexedDB. Es la sesión de login, no progreso de juego.
 
+## Razas, personajes y poderes (2026-10-24)
+
+Todo bajo `environments/{env}/`. Valores de fábrica en `public/src/config/game-catalog.js`; lo guardado en Firestore gana campo por campo.
+
+| Colección | Id | Relaciones | Qué guarda |
+|---|---|---|---|
+| `kiArenaRaces` | `saiyajin`, `namekuseijin`, `terricola`, `freezer` | — | `stats` (ki, physicalAttack, physicalDefense, kiDefense) y `utility` (Zenkai, Regeneración, Ingenio, Transformación) |
+| `kiArenaPlayerTypes` | `goku`, `piccolo`, `gohan`, `freezer` | `raceRef` | Personaje, `legacyRace` (0–3), `isEligible` |
+| `kiArenaPowers` | `{raza}_{poder}` (42) | `raceRef` | Comando, nivel, enfriamiento, `multipliers.*.{start,end}`, `utility.params.hitboxMode` |
+| `kiArenaPlayerPowers` | `{jugador}:{poder}` | `playerRef`, `powerRef` | Poderes de cada personaje: `source`, `timesUsed`, `kills` |
+| `kiArenaPlayers` | `usernameKey` | `playerTypeRef`, `userRef` (opcional) | Progreso; `race` se conserva como legado; `utilityState` |
+| `kiArenaEvents` | auto | `killerRef`, `victimRef`, `powerRef` | `power` (`K`, `M`, `V` o `physical`), `xpGained` |
+
+Migración y siembra (sin borrar, mismos niveles): `cd functions && npm run migrate:characters -- dev` (simulación) y luego con `--apply`. `prd`/`prod` piden `--confirm-prd`. `npm run emulators` lo hace solo en dev y qa del emulador.
+
 ## Datos locales y memoria
 
 No guardar progreso en `localStorage` ni `sessionStorage`. La velocidad, posición, partículas, estados de animación y proyectiles viven en memoria de la pestaña. Firestore mantiene identidad/progreso y registros de chat/eventos.

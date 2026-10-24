@@ -8,7 +8,14 @@ export const COLLECTIONS = Object.freeze({
   userProviders: 'kiArenaUserProviders',
   userProviderEvents: 'kiArenaUserProviderEvents',
   oauthStates: 'kiArenaOAuthStates',
-  players: 'kiArenaPlayers'
+  players: 'kiArenaPlayers',
+  messages: 'kiArenaMessages',
+  events: 'kiArenaEvents',
+  settings: 'kiArenaSettings',
+  races: 'kiArenaRaces',
+  playerTypes: 'kiArenaPlayerTypes',
+  powers: 'kiArenaPowers',
+  playerPowers: 'kiArenaPlayerPowers'
 });
 
 export function parseEnvironment(value) {

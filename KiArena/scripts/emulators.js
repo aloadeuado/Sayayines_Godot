@@ -1,5 +1,6 @@
 // Levanta el Firebase Emulator Suite con el proyecto de prueba demo-ki-arena,
-// siembra el catálogo de proveedores y muestra la URL para probar el login.
+// siembra el catálogo de proveedores y el de razas, personajes y poderes, y
+// muestra la URL para probar el login y la arena.
 // No toca el proyecto real. Uso: npm run emulators   (Ctrl+C para salir)
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
@@ -43,10 +44,10 @@ async function ready(url) {
   if (!ok) return console.error('Los emuladores no arrancaron a tiempo.');
   await ready(`http://127.0.0.1:5001/${PROJECT}/us-central1/authApi/api/auth/providers?env=dev`);
   for (const env of ['dev', 'qa']) {
-    spawnSync(process.execPath, ['scripts/seed-provider-types.js', env, '--apply', '--emulator'], {
-      cwd: functionsDir, stdio: 'inherit',
-      env: { ...process.env, FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080', GCLOUD_PROJECT: PROJECT }
-    });
+    const seedEnv = { ...process.env, FIRESTORE_EMULATOR_HOST: '127.0.0.1:8080', GCLOUD_PROJECT: PROJECT };
+    spawnSync(process.execPath, ['scripts/seed-provider-types.js', env, '--apply', '--emulator'], { cwd: functionsDir, stdio: 'inherit', env: seedEnv });
+    // Razas, tipos de personaje y poderes (kiArenaRaces, kiArenaPlayerTypes, kiArenaPowers).
+    spawnSync(process.execPath, ['scripts/migrate-character-model.js', env, '--apply', '--emulator'], { cwd: functionsDir, stdio: 'inherit', env: seedEnv });
   }
   console.log('\n  Ki Arena en emuladores (datos de prueba, nada real):');
   console.log('  Login:        http://localhost:5000/login?env=dev&emulators=1');

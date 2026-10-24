@@ -1,3 +1,4 @@
+// Legado: la lista de personajes ahora vive en kiArenaPlayerTypes (config/game-catalog.js).
 export const CHARACTER_OPTIONS = [
   { id: 'goku', name: 'Goku', race: 0, label: 'Saiyajin' },
   { id: 'piccolo', name: 'Piccolo', race: 1, label: 'Namekuseijin' },
@@ -22,6 +23,7 @@ export const DEFAULT_GAME_SETTINGS = {
   characters: { goku: true, piccolo: true, gohan: true, freezer: true }
 };
 
+// Legado: niveles, enfriamientos y curvas de poderes viven ahora en kiArenaPowers.
 export const POWER_UNLOCK_LEVELS = Object.freeze({ V: 1, M: 10, K: 20 });
 
 export function powerBlockReason(race, level, command) {
@@ -84,15 +86,18 @@ export function normalizeGameSettings(raw = {}) {
   return result;
 }
 
-export function calculateLevelStats(level, settings) {
+// raceStats: multiplicadores de la raza (kiArenaRaces.stats); bonus: bono
+// acumulado de la utilidad de la raza (p. ej. Zenkai). La vida no depende de la raza.
+export function calculateLevelStats(level, settings, raceStats = null, bonus = 0) {
   const n = clamp(Math.floor(Number(level) || 1), 1, 100);
   const growth = n - 1;
+  const factor = key => (Number.isFinite(Number(raceStats?.[key])) ? Number(raceStats[key]) : 1) * (1 + (Number(bonus) || 0));
   return {
     maxHp: 100 + settings.stats.hp * growth,
-    ki: 12 + settings.stats.ki * growth,
-    physicalAttack: 9 + settings.stats.physicalAttack * growth,
-    physicalDefense: 5 + settings.stats.physicalDefense * growth,
-    kiDefense: 5 + settings.stats.kiDefense * growth
+    ki: (12 + settings.stats.ki * growth) * factor('ki'),
+    physicalAttack: (9 + settings.stats.physicalAttack * growth) * factor('physicalAttack'),
+    physicalDefense: (5 + settings.stats.physicalDefense * growth) * factor('physicalDefense'),
+    kiDefense: (5 + settings.stats.kiDefense * growth) * factor('kiDefense')
   };
 }
 

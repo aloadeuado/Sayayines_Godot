@@ -1,13 +1,16 @@
-import { calculateLevelStats, DEFAULT_GAME_SETTINGS, normalizeGameSettings, powerBlockReason } from '../config/gameplay-settings.js';
+import { calculateLevelStats, DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../config/gameplay-settings.js';
+import { DEFAULT_CATALOG, buildCatalog, raceByCode, resolvePlayerType, powerBlockReasonFor } from '../config/game-catalog.js';
 
 const $ = selector => document.querySelector(selector);
 const normalize = value => String(value || '').trim().toLowerCase();
-const RACES = [
-  { name: 'Saiyajin', color: '#ff9d3d' },
-  { name: 'Namekuseijin', color: '#68e47b' },
-  { name: 'Humano', color: '#68b9ff' },
-  { name: 'Freezer', color: '#c487ff' }
-];
+let catalog = DEFAULT_CATALOG;
+
+// Raza y tipo de personaje de un jugador según el catálogo (playerTypeRef o race antiguo).
+function raceOfPlayer(player) {
+  const type = resolvePlayerType(catalog, player);
+  const race = raceByCode(catalog, type?.raceCode) || catalog.races[0];
+  return { type, race, name: race?.name || '—', color: race?.color || '#ff9d3d' };
+}
 
 let gameplaySettings = normalizeGameSettings(DEFAULT_GAME_SETTINGS);
 let cachedPlayers = [];
@@ -75,8 +78,7 @@ function renderSelectedPlayer() {
     return;
   }
 
-  const raceIdx = Number(player.race) || 0;
-  const race = RACES[raceIdx] || RACES[0];
+  const race = raceOfPlayer(player);
   const level = Math.max(1, Math.min(100, Number(player.level) || 1));
   const xp = Math.max(0, Number(player.xp) || 0);
   const nextXp = xpForNext(level);
@@ -84,10 +86,11 @@ function renderSelectedPlayer() {
   const deaths = Number(player.deaths) || 0;
   const isAlive = player.alive !== false;
 
-  const stats = calculateLevelStats(level, gameplaySettings);
+  const zenkai = race.race?.utility?.code === 'zenkai' ? Number(player.utilityState?.zenkaiBonus) || 0 : 0;
+  const stats = calculateLevelStats(level, gameplaySettings, race.race?.stats, zenkai);
 
   container.innerHTML = `
-    <b style="color:${race.color}">${escapeHtml(player.username)}</b> · ${race.name} · ${isAlive ? '🟢 En combate' : '💀 KO / En espera'}<br>
+    <b style="color:${race.color}">${escapeHtml(player.username)}</b> · ${escapeHtml(race.type?.name || '')} · ${race.name} · ${isAlive ? '🟢 En combate' : '💀 KO / En espera'}<br>
     Nivel ${level} · ${Math.floor(xp)}/${nextXp} XP · Victorias: ${kills} · KO: ${deaths}
   `;
 
@@ -110,11 +113,10 @@ function renderRoster(players) {
 
   roster.innerHTML = players.map(player => {
     const key = normalize(player.username);
-    const raceIdx = Number(player.race) || 0;
-    const race = RACES[raceIdx] || RACES[0];
+    const race = raceOfPlayer(player);
     const level = Math.max(1, Number(player.level) || 1);
     const xp = Math.max(0, Number(player.xp) || 0);
-    const stats = calculateLevelStats(level, gameplaySettings);
+    const stats = calculateLevelStats(level, gameplaySettings, race.race?.stats);
     const maxHp = stats.maxHp;
     const isAlive = player.alive !== false;
     const hp = isAlive ? Math.max(0, Math.min(maxHp, Number(player.hp) || maxHp)) : 0;
@@ -211,7 +213,9 @@ async function refreshCombatFeed() {
     }
     feed.innerHTML = events.map(evt => {
       if (evt.type === 'knockout') {
-        return `<div>💀 <b style="color:#75d9ff">${escapeHtml(evt.killer || 'Desconocido')}</b> derrotó a <b>${escapeHtml(evt.victim || 'Desconocido')}</b></div>`;
+        const power = catalog.powers.find(p => p.id === evt.powerRef?.id);
+        const how = power ? ` con ${escapeHtml(power.name)}` : evt.power === 'physical' ? ' cuerpo a cuerpo' : '';
+        return `<div>💀 <b style="color:#75d9ff">${escapeHtml(evt.killer || 'Desconocido')}</b> derrotó a <b>${escapeHtml(evt.victim || 'Desconocido')}</b>${how}</div>`;
       }
       return `<div>⚔️ Evento: ${escapeHtml(evt.type || 'combate')}</div>`;
     }).join('');
@@ -229,10 +233,10 @@ async function sendCommand(username, text) {
   if (!message) return;
   try {
     const command = message.toUpperCase();
-    if (/^[KMV]$/.test(command)) {
+    if (/^[A-Z]$/.test(command) && command !== 'E' && catalog.powers.some(p => p.command === command)) {
       const profile = await window.kiArenaCloud.get(name);
-      if (!profile) return showStatus(`@${name} debe ingresar con E antes de usar poderes.`, true);
-      const restriction = powerBlockReason(profile.race, profile.level, command);
+      if (!profile || profile.isActive === false) return showStatus(`@${name} debe ingresar con E antes de usar poderes.`, true);
+      const restriction = powerBlockReasonFor(catalog, { raceCode: raceOfPlayer(profile).type?.raceCode, level: profile.level }, command);
       if (restriction) return showStatus(restriction, true);
     }
     await window.kiArenaCloud.addMessage(name, message);
@@ -253,6 +257,11 @@ export async function startBot() {
     gameplaySettings = normalizeGameSettings(await window.kiArenaCloud.getSettings() || DEFAULT_GAME_SETTINGS);
   } catch (_) {
     gameplaySettings = normalizeGameSettings(DEFAULT_GAME_SETTINGS);
+  }
+  try {
+    catalog = buildCatalog(await window.kiArenaCloud.listCatalog());
+  } catch (error) {
+    console.warn('No se pudo leer el catálogo; se usan los valores de fábrica.', error);
   }
 
   const sendBtn = $('#send-chat');

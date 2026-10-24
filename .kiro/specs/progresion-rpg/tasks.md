@@ -16,6 +16,6 @@
 
 ## 3. Razas (Pedro, 2026-10-24) · requieren aprobación de Pedro para tocar código
 
-- [ ] 3.1 Aplicar `stats.*` de la raza en `calculateLevelStats` — _HU-RPG-06_
-- [ ] 3.2 Implementar Zenkai, Regeneración, Ingenio y Transformación leyendo `utility.params` — _HU-RPG-07_
-- [ ] 3.3 Guardar `utilityState` en el personaje — _HU-RPG-07.2_
+- [x] 3.1 Aplicar `stats.*` de la raza en `calculateLevelStats` — _HU-RPG-06_
+- [x] 3.2 Implementar Zenkai, Regeneración, Ingenio y Transformación leyendo `utility.params` — _HU-RPG-07_
+- [x] 3.3 Guardar `utilityState` en el personaje — _HU-RPG-07.2_

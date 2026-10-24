@@ -32,12 +32,14 @@
           <label><span>Defensa física</span><small>5 + M_DEF_FIS × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="physicalDefense"></label>
           <label><span>Defensa de ki</span><small>5 + M_DEF_KI × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="kiDefense"></label>
         </div>
-        <h3>Multiplicadores de poderes</h3>
-        <p class="settings-help">Daño = Ataque de ki(N) × multiplicador del poder(N) − defensa de ki del rival. La curva crece desde N=1 hasta N=100.</p>
+        <h3>Razas</h3>
+        <p class="settings-help">Multiplicadores de la raza sobre las estadísticas por nivel (1 = sin cambio) y las variables de su utilidad. Se guardan en <code>kiArenaRaces</code>.</p>
+        <div id="race-settings" class="race-settings"></div>
+        <h3>Poderes por raza</h3>
+        <p class="settings-help">Daño = Ataque de ki(N) × multiplicador de ki del poder(N) − defensa del rival. Cada multiplicador crece de forma lineal desde N=1 hasta N=100. Las defensas del poder se aplican a quien lo lanza mientras lo usa. Se guardan en <code>kiArenaPowers</code>.</p>
         <div id="power-settings"></div>
-        <h3>Poderes del catálogo aún no activos</h3><div id="pending-power-settings" class="pending-powers"></div>
         <h3>Personajes elegibles para usuarios nuevos</h3>
-        <p class="settings-help">Deshabilitar una raza la excluye del sorteo de personajes nuevos. Los perfiles existentes conservan su raza y progreso.</p>
+        <p class="settings-help">Deshabilitar un personaje lo excluye del sorteo de usuarios nuevos. Los perfiles existentes conservan su personaje y progreso. Se guarda en <code>kiArenaPlayerTypes</code>.</p>
         <div id="character-settings" class="character-settings"></div>
         <div class="settings-actions"><button type="submit">Guardar ajustes</button><button id="settings-reset" type="button">Restablecer valores iniciales</button></div>
         <div id="settings-status" class="settings-status" role="status" aria-live="polite">Cargando ajustes…</div>

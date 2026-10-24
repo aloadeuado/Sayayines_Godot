@@ -2,6 +2,20 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — implementar razas, personajes y poderes
+
+- **Solicitud:** Pedro pidió crear los registros de poderes, ajustar las HUs, corregir el juego para que use los modelos nuevos y migrar usuarios y jugadores existentes sin borrar nada y conservando los niveles.
+- **Implementación:**
+  - `public/src/config/game-catalog.js`: valores de fábrica de 4 razas, 4 tipos de personaje y 42 registros de poder (28 poderes por raza), mezcla con Firestore y reglas de desbloqueo y escalado.
+  - `services/firebase/arena-cloud.js`: referencias completas (`referenceValue`), mapas y listas; `id`/`reference`/`isActive` en escrituras nuevas con `updateMask`; lecturas que ignoran `isActive === false`; catálogos y `kiArenaPlayerPowers`.
+  - Arena: stats por raza, utilidades (Zenkai, Regeneración, Ingenio, Transformación), poderes desde el catálogo (nivel, enfriamiento, carga, ancho, 4 multiplicadores), hitbox `full` con daño por tick, filas de poderes por personaje con usos y derrotas, eventos con `killerRef`/`victimRef`/`powerRef`, perfiles desactivados no se recrean.
+  - Bot: raza y personaje desde el catálogo, validación de comandos por catálogo, feed con el poder.
+  - Settings: edición de razas, de cada poder por raza y de personajes elegibles (`kiArenaRaces`, `kiArenaPowers`, `kiArenaPlayerTypes`).
+  - `functions/scripts/migrate-character-model.js` (`npm run migrate:characters`): siembra y migración por entorno, simulación por defecto, solo agrega campos; copia las curvas de settings a los poderes; no une usuarios con jugadores.
+- **Verificación:** 22 pruebas de `node --test` (8 nuevas). En el emulador: datos con el esquema viejo migrados sin cambiar niveles; arena, bot y settings sin errores; bloqueos por raza/nivel/pendiente; jugador nuevo con `playerTypeRef`; usos de poderes y eventos con referencias; Zenkai al morir; guardado de settings. Nada se escribió en Firebase real.
+- **Pendiente de Pedro:** correr la migración en dev, qa y prod/prd con credenciales; mecánicas de los 25 poderes pendientes; enlace usuario ↔ jugador.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — catálogo de poderes por raza y poderes por personaje · PROPUESTA
 
 - **Solicitud:** Pedro pidió que cada poder referencie una raza, con multiplicadores de ki, daño físico, defensa de ki y defensa física, nombre, descripción y una utilidad de daño persistente (hitbox solo del frente o de toda la onda expansiva). Además, relación muchos a muchos entre personajes y poderes.

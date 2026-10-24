@@ -674,3 +674,14 @@ canvas {
     width: 48px;
   }
 }
+/* Settings: razas y catálogo de poderes */
+.race-settings { display: grid; gap: 8px; }
+.race-setting h4, .power-settings-group h4 { margin: 4px 0; font-size: 12px; }
+.power-card { cursor: default; }
+.power-card summary { cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; list-style: revert; }
+.power-card summary small { flex-basis: 100%; }
+.power-card code { font-size: 10px; background: #08101d; border: 1px solid #29405e; border-radius: 4px; padding: 0 5px; color: #ffd45c; }
+.power-card[open] { gap: 6px; }
+.power-card select { width: 100%; background: #08101d; border: 1px solid #29405e; border-radius: 6px; color: #fff; padding: 6px; font: inherit; font-size: 11px; margin-top: 3px; }
+.power-badge { font-style: normal; font-size: 9px; padding: 1px 6px; border-radius: 999px; background: #29324a; color: #c2cde0; }
+.power-badge.ok { background: #13402c; color: #71e5a3; }

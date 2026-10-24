@@ -62,10 +62,11 @@ Un espectador entra a la arena con el comando `E`. Su nombre normalizado es su i
 3. La arena y el roster NO DEBEN mostrar perfiles con `isActive=false`.
 4. Reactivar un perfil DEBE ser una acción explícita del operador (`isActive=true`).
 
-### HU-ENT-07 — Crear personaje desde el catálogo · PROPUESTA (Pedro, 2026-10-24)
+### HU-ENT-07 — Crear personaje desde el catálogo · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador, quiero que al entrar se me cree un personaje a partir del catálogo, para que los personajes nuevos aparezcan sin cambiar código.
 
 **Criterios de aceptación**
 1. CUANDO se crea un personaje nuevo, el sistema DEBE elegir al azar un tipo de `kiArenaPlayerTypes` con `isActive !== false` e `isEligible !== false`, y guardar `playerTypeRef`.
 2. SI el usuario tiene cuenta, ENTONCES el personaje DEBE guardar `userRef` y añadirse a `playerRefs` del usuario; si no tiene `primaryPlayerRef`, este pasa a ser el principal.
 3. CUANDO un usuario con varios personajes entra desde el chat, el sistema DEBE usar su `primaryPlayerRef` (pregunta abierta: o elegir con un comando).
+4. **Estado:** el criterio 1 está implementado. Los criterios 2 y 3 esperan el enlace usuario ↔ jugador (HU-AUT-09): la migración no une usuarios con jugadores de chat automáticamente.

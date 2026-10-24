@@ -48,7 +48,7 @@ Cada perfil tiene un nivel `N` entre 1 y 100 guardado en Firestore. Todos los at
 1. CUANDO se selecciona un perfil, el sistema DEBE mostrar nivel, `xp / xpForNext`, victorias, caídas y los cinco atributos derivados.
 2. El sistema DEBE listar solo los poderes desbloqueados para su raza y nivel.
 
-### HU-RPG-06 — Características por raza · PROPUESTA (Pedro, 2026-10-24)
+### HU-RPG-06 — Características por raza · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como administrador, quiero que cada raza tenga sus propios multiplicadores de ki, daño físico, defensa física y defensa de ki, para que las razas se sientan distintas.
 
 **Criterios de aceptación**
@@ -65,7 +65,7 @@ Cada perfil tiene un nivel `N` entre 1 y 100 guardado en Firestore. Todos los at
 3. SI la raza no se puede leer, ENTONCES el sistema DEBE usar 1.0 en todos los multiplicadores.
 4. **Pregunta abierta:** se propone multiplicar sobre los multiplicadores globales de settings, no reemplazarlos.
 
-### HU-RPG-07 — Utilidad por raza · PROPUESTA (Pedro, 2026-10-24)
+### HU-RPG-07 — Utilidad por raza · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como jugador, quiero que mi raza tenga una habilidad especial, para tener una ventaja propia.
 
 **Criterios de aceptación**

@@ -42,7 +42,7 @@ Pantalla de administración separada del stream para editar multiplicadores de a
 5. El sistema DEBE informar éxito o error de carga/guardado en `#settings-status`.
 6. El documento de ajustes DEBE tener `id = gameplay`, `reference` = referencia completa `…/environments/{APP_ENV}/kiArenaSettings/gameplay` e `isActive`; SI `isActive=false`, ENTONCES el sistema DEBE usar los defaults.
 
-### HU-SET-05 — Editar razas y tipos de personaje · PROPUESTA (Pedro, 2026-10-24)
+### HU-SET-05 — Editar razas y tipos de personaje · IMPLEMENTADO (2026-10-24)
 **Historia de usuario:** Como administrador, quiero editar las características y la utilidad de cada raza y qué personajes son elegibles, para balancear por entorno.
 
 **Criterios de aceptación**

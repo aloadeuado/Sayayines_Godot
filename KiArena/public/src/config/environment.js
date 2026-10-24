@@ -25,7 +25,11 @@ export function collectionPaths(env) {
     users: `${base}/kiArenaUsers`,
     userProviders: `${base}/kiArenaUserProviders`,
     userProviderEvents: `${base}/kiArenaUserProviderEvents`,
-    players: `${base}/kiArenaPlayers`
+    players: `${base}/kiArenaPlayers`,
+    races: `${base}/kiArenaRaces`,
+    playerTypes: `${base}/kiArenaPlayerTypes`,
+    powers: `${base}/kiArenaPowers`,
+    playerPowers: `${base}/kiArenaPlayerPowers`
   });
 }
 

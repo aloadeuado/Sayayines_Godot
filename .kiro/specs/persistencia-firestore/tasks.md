@@ -22,19 +22,19 @@
 - [ ] 3.3 Selectores de entorno en `index.html`, `bot/index.html`, `settings/index.html` y `wireEnvironment`: opción `prd` en lugar de `prod` (o quitar el selector si `APP_ENV` lo fija el despliegue) — _HU-FS-01_
 - [ ] 3.4 Inyección de `APP_ENV` por despliegue (destinos de Hosting dev/qa/prd o `env.js` generado) — _HU-FS-01_
 - [ ] 3.5 Migración de datos `environments/prod/…` → `environments/prd/…` por copia, sin borrar origen; plan y respaldo aprobados — _HU-FS-01_
-- [ ] 3.6 `save`, `addRecord`, `saveSettings` escriben `id`, `reference` (referencia completa) e `isActive` — _HU-FS-07_
-- [ ] 3.6b `toFields`/`fromFields` soportan `referenceValue`; helper `docRef(colección, id)` en el módulo de entorno; relaciones `playerRef`, `victimRef`, `killerRef` — _HU-FS-07.1b, 07.1c_
-- [ ] 3.7 Lecturas toleran campos ausentes y filtran `isActive === false` — _HU-FS-07.2, 08.3, 08.4_
+- [x] 3.6 `save`, `addRecord`, `saveSettings` escriben `id`, `reference` (referencia completa) e `isActive` — _HU-FS-07_
+- [x] 3.6b `toFields`/`fromFields` soportan `referenceValue`; helper `docRef(colección, id)` en el módulo de entorno; relaciones `playerRef`, `victimRef`, `killerRef` — _HU-FS-07.1b, 07.1c_
+- [x] 3.7 Lecturas toleran campos ausentes y filtran `isActive === false` — _HU-FS-07.2, 08.3, 08.4_
 - [ ] 3.8 `softDelete(kind, id)` en el adaptador; prohibido `DELETE` — _HU-FS-08.1, 08.2_
 - [ ] 3.9 (Opcional, solo si Pedro lo pide) backfill de `id`/`reference`/`isActive=true` en documentos existentes — _HU-FS-07.3_
 - [ ] 3.10 Actualizar `KiArena/docs/FIRESTORE.md`, `FIREBASE.md`, `PROJECT_SPEC.md` y `README.md` con `dev|qa|prd` y los campos base
-- [ ] 3.11 Catálogo `kiArenaPlayerTypes` (sembrar goku/piccolo/gohan/freezer en dev y qa) y `playerTypeRef` en `kiArenaPlayers`; leer `race` legado; `CHARACTER_OPTIONS`/`settings.characters` pasan a leer el catálogo — _propuesta 2026-10-24, pendiente de aprobación_
-- [ ] 3.12 Catálogo `kiArenaRaces` con `stats` (ki, physicalAttack, physicalDefense, kiDefense) y `utility` editables en settings; aplicar multiplicadores en `calculateLevelStats` y las utilidades Zenkai, Regeneración, Ingenio y Transformación — _propuesta 2026-10-24, pendiente de aprobación_
+- [x] 3.11 Catálogo `kiArenaPlayerTypes` (sembrar goku/piccolo/gohan/freezer en dev y qa) y `playerTypeRef` en `kiArenaPlayers`; leer `race` legado; `CHARACTER_OPTIONS`/`settings.characters` pasan a leer el catálogo — _propuesta 2026-10-24, pendiente de aprobación_
+- [x] 3.12 Catálogo `kiArenaRaces` con `stats` (ki, physicalAttack, physicalDefense, kiDefense) y `utility` editables en settings; aplicar multiplicadores en `calculateLevelStats` y las utilidades Zenkai, Regeneración, Ingenio y Transformación — _propuesta 2026-10-24, pendiente de aprobación_
 
 ## 4. Modelo de personajes y eventos (Pedro, 2026-10-24) · requieren aprobación de Pedro para tocar código
 
 - [ ] 4.1 Documentar en el módulo de entorno la estructura `environments/{APP_ENV}/…` para todas las colecciones — _HU-FS-01.7_
-- [ ] 4.2 Sembrar `kiArenaRaces` (4 razas) en dev y qa — _HU-FS-09_ (ver tarea 3.12)
-- [ ] 4.3 Sembrar `kiArenaPlayerTypes` (goku, piccolo, gohan, freezer) con `raceRef` — _HU-FS-10_ (ver tarea 3.11)
-- [ ] 4.4 `kiArenaPlayers` con `userRef`, `playerTypeRef`, `name`, `utilityState`; lectura de `race` legado — _HU-FS-11_
-- [ ] 4.5 `kiArenaEvents` con `killerRef`, `victimRef`, campos base y error visible al fallar — _HU-FS-12_
+- [x] 4.2 Sembrar `kiArenaRaces` (4 razas) en dev y qa — _HU-FS-09_ (ver tarea 3.12)
+- [x] 4.3 Sembrar `kiArenaPlayerTypes` (goku, piccolo, gohan, freezer) con `raceRef` — _HU-FS-10_ (ver tarea 3.11)
+- [x] 4.4 `kiArenaPlayers` con `userRef`, `playerTypeRef`, `name`, `utilityState`; lectura de `race` legado — _HU-FS-11_
+- [x] 4.5 `kiArenaEvents` con `killerRef`, `victimRef`, campos base y error visible al fallar — _HU-FS-12_

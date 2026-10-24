@@ -17,6 +17,12 @@ export function createFirebaseConfig(search = window.location.search) {
     databaseId: '(default)',
     environment,
     environmentPath: `environments/${environment}/kiArena`,
-    collectionPath: `environments/${environment}/kiArenaPlayers`
+    collectionPath: `environments/${environment}/kiArenaPlayers`,
+    // Todas las colecciones cuelgan de environments/{entorno}/.
+    collections: Object.freeze(Object.fromEntries(Object.entries({
+      players: 'kiArenaPlayers', messages: 'kiArenaMessages', events: 'kiArenaEvents', settings: 'kiArenaSettings',
+      users: 'kiArenaUsers', races: 'kiArenaRaces', playerTypes: 'kiArenaPlayerTypes',
+      powers: 'kiArenaPowers', playerPowers: 'kiArenaPlayerPowers'
+    }).map(([key, name]) => [key, `environments/${environment}/${name}`])))
   });
 }

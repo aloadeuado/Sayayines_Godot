@@ -23,4 +23,4 @@
 
 ## 4. Catálogo de personajes (Pedro, 2026-10-24) · requiere aprobación de Pedro
 
-- [ ] 4.1 `joinPlayer` elige desde `kiArenaPlayerTypes` y guarda `playerTypeRef`/`userRef` — _HU-ENT-07_
+- [x] 4.1 `joinPlayer` elige desde `kiArenaPlayerTypes` y guarda `playerTypeRef`/`userRef` — _HU-ENT-07_
