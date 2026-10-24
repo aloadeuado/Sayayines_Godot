@@ -163,7 +163,9 @@ Utilidades:
 
 El estado de la utilidad que cambia con el juego (p. ej. el Zenkai acumulado) se guarda en el jugador: `kiArenaPlayers.utilityState` (map, opcional; Saiyajin: `{ zenkaiBonus }`).
 
-### `environments/{APP_ENV}/kiArenaPlayers/{id}` — jugador
+### `environments/{APP_ENV}/kiArenaPlayers/{id}` — jugador (tabla intermedia usuario × tipo de personaje)
+
+Relación muchos a muchos: un usuario tiene varios personajes y un tipo lo tienen muchos usuarios. `id` = `{userId}:{code}` para jugadores con cuenta; los de chat sin cuenta conservan `usernameKey`. El nombre (`name`/`nameKey`) y el progreso viven aquí. `kiArenaUsers` gana `playerRefs[]` y `primaryPlayerRef` (reemplaza `playerRef`). Diagrama: `ki-arena/modelo-personajes/modelo-personajes.html` en los archivos del proyecto.
 
 | Campo | Tipo | Obligatorio | Descripción |
 |---|---|---|---|
