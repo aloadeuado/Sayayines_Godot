@@ -35,6 +35,17 @@ Fuente: `.kiro/steering/reglas-datos.md` (léelo completo). Resumen:
 - `dev` por defecto; `prd` pide confirmación y nunca recibe datos sembrados ni escrituras sin aprobación de Pedro.
 - Secretos fuera de los archivos versionados (`.env.*.local` ignorado o Secret Manager).
 
+## 4. Cómo mostrar un modelo u objeto a Pedro (Pedro, 2026-10-24)
+
+Cuando Pedro pida ver un objeto, colección o modelo, entrégalo SIEMPRE así:
+
+1. La ruta completa: `environments/{dev|qa|prd}/{colección}/{id}`.
+2. Una tabla de campos con columnas **Campo | Tipo | Obligatorio | Descripción** (añade **¿Hoy se guarda?** o **Estado** si hay diferencia entre código y spec). Incluye `id`, `reference` e `isActive` como opcionales.
+3. Si hay objetos anidados, una fila por subcampo con notación de punto (`powers.generic.kamehameha.start`).
+4. Una tabla de **valores actuales o iniciales** cuando existan.
+5. Una tabla de **relaciones** (Desde | Campo | Hacia | Cardinalidad) cuando haya referencias.
+6. Nada de listas sueltas en prosa para describir campos.
+
 ## Checklist para cada cambio
 
 - [ ] ¿Las escrituras nuevas llenan `id`, `reference`, `isActive`, y el código tolera que falten al leer?

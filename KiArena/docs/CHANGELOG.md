@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — formato para mostrar modelos
+
+- **Solicitud:** Pedro pidió que todo objeto o modelo se le muestre siempre como tabla de campos (tipo, obligatorio, descripción), con valores y relaciones.
+- **Implementación:** sección 4 de la skill `reglas-desarrollo`.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — HUs del modelo de personajes, eventos y poderes
 
 - **Solicitud:** Pedro pidió dejar categorizado en las HUs de cada spec lo conversado sobre rutas, razas, tipos de personaje, personajes de usuario, eventos y poderes.
