@@ -74,7 +74,7 @@ Ki Arena tendrá usuarios con sesión. Una persona se registra con email y contr
 
 ### HU-AUT-09 — Enlace con el jugador de la arena
 **Criterios de aceptación**
-1. El usuario PUEDE tener `playerRef` a su perfil de `kiArenaPlayers`, y el jugador `userRef` (opcional) a su usuario.
+1. (Pedro, 2026-10-24) El usuario PUEDE tener varios personajes: `playerRefs[]` (referencias a `kiArenaPlayers`) y `primaryPlayerRef` (el que entra por defecto); reemplazan a `playerRef`. Cada personaje guarda `userRef` a su usuario. `kiArenaPlayers` es la tabla intermedia usuario × tipo de personaje (HU-FS-11).
 2. El criterio para enlazar un jugador existente (automático por ID de Twitch o manual) queda como pregunta abierta.
 
 ## Preguntas abiertas (del documento)

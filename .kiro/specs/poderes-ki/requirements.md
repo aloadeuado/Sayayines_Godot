@@ -64,3 +64,12 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 **Criterios de aceptación**
 1. Settings DEBE listar Golpe de ki, Destello final, Mafuba y Bola mortal como «Aún no implementado en combate».
 2. Un poder pendiente NO DEBE tener comando ni participar en daño.
+
+### HU-POD-08 — Modelo de datos actual de los poderes (estado, Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero saber dónde está definido cada dato de los poderes, para decidir qué pasa a Firestore.
+
+**Criterios de aceptación**
+1. **Estado actual:** los poderes NO son una colección. La curva de multiplicador (`start` en nivel 1, `end` en nivel 100) vive en `environments/{APP_ENV}/kiArenaSettings/gameplay` → `settingsJson.powers`, agrupada por raza: `generic` (todas las demás) y `freezer`.
+2. Nivel de desbloqueo, enfriamiento, anchura del rayo y la restricción «Rayo Mortal solo Freezer» están fijos en código (`POWER_UNLOCK_LEVELS`, `launch*`, `FREEZER_POWER_PROGRESSION`, `race === 3`).
+3. Golpe de ki, Destello final, Mafuba y Bola mortal existen solo como valor `1` en `powers.pending`, sin comando ni acción.
+4. **Próximo paso (pendiente de Pedro):** catálogo `kiArenaPowers` con relación a `kiArenaRaces`, siguiendo el mismo patrón que razas y tipos.

@@ -41,3 +41,12 @@ Pantalla de administración separada del stream para editar multiplicadores de a
 4. **Restaurar** DEBE guardar los defaults normalizados en el entorno actual.
 5. El sistema DEBE informar éxito o error de carga/guardado en `#settings-status`.
 6. El documento de ajustes DEBE tener `id = gameplay`, `reference` = referencia completa `…/environments/{APP_ENV}/kiArenaSettings/gameplay` e `isActive`; SI `isActive=false`, ENTONCES el sistema DEBE usar los defaults.
+
+### HU-SET-05 — Editar razas y tipos de personaje · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero editar las características y la utilidad de cada raza y qué personajes son elegibles, para balancear por entorno.
+
+**Criterios de aceptación**
+1. Settings DEBE permitir editar `stats.*` y `utility.params` de cada raza en `kiArenaRaces`.
+2. «Razas elegibles» (HU-SET-03) DEBE pasar a ser `isEligible` de cada tipo en `kiArenaPlayerTypes`.
+3. Settings DEBE validar que al menos un tipo quede elegible.
+4. Los cambios DEBEN guardarse solo en el entorno actual (`environments/{APP_ENV}/…`).

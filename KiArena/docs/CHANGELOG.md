@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — HUs del modelo de personajes, eventos y poderes
+
+- **Solicitud:** Pedro pidió dejar categorizado en las HUs de cada spec lo conversado sobre rutas, razas, tipos de personaje, personajes de usuario, eventos y poderes.
+- **HUs nuevas o cambiadas:** HU-FS-01.7 (estructura `environments/{APP_ENV}`), HU-FS-09 razas, HU-FS-10 tipos de personaje, HU-FS-11 personajes de usuario (tabla intermedia), HU-FS-12 eventos; HU-RPG-06 características por raza, HU-RPG-07 utilidad por raza; HU-ENT-07 crear personaje desde el catálogo; HU-AUT-09.1 `playerRefs`/`primaryPlayerRef`; HU-BOT-07 feed con referencias; HU-SET-05 editar razas y tipos; HU-POD-08 modelo actual de poderes (más tablas en `poderes-ki/design.md`). Tareas en los `tasks.md` correspondientes. Sin cambios de código.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — catálogo de razas (`kiArenaRaces`) con stats y utilidad · PROPUESTA
 
 - **Solicitud:** Pedro pidió separar la raza en su propia colección, con características ki, daño físico, defensa física y defensa de ki, más una variable «utilidad» específica y editable por raza.

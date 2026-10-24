@@ -31,6 +31,28 @@
 | Radios de impacto | `beamHitRadius`, `deathRayHitRadius` |
 | Daño | `beamDamage`, `deathRayDamage` → `hit()` |
 
+## Modelo de datos actual de los poderes (Pedro, 2026-10-24)
+
+| Comando | Poder | Quién | Desbloqueo | Enfriamiento | Dónde |
+|---|---|---|---|---|---|
+| `V` | Rayo Mortal | Solo Freezer | nivel 1 | 1.8 s | código |
+| `M` | Makankosappo | Todas | nivel 10 | 7 s | código |
+| `K` | Kamehameha | Todas | nivel 20 | 3.8 s | código |
+
+Multiplicador de ki editable en settings (`settingsJson.powers`, lineal de nivel 1 a 100):
+
+| Grupo | Poder | `start` | `end` |
+|---|---|---|---|
+| `generic` | kamehameha | 1.9 | 4.4 |
+| `generic` | makankosappo | 3.2 | 8.5 |
+| `freezer` | deathRay | 2.6 | 3.4 |
+| `freezer` | makankosappo | 3.2 | 4.2 |
+| `freezer` | kamehameha | 5.5 | 7.0 |
+
+Pendientes sin acción (`powers.pending`, valor 1): `kiBlast`, `finalFlash`, `mafuba`, `deathBall`.
+
+La categoría hoy es por grupo de raza (`freezer` frente a `generic`, con `race === 3` fijo en código), no por poder.
+
 ## Colisión de rayo
 
 Para cada objetivo: `along = (target − origen) · dir`, `side = |(target − origen) × dir|`. Impacta si `0 ≤ along ≤ dist + 18` y `side < radio`. `b.hit` (un `Set`) evita repetir daño.

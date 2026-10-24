@@ -20,3 +20,7 @@
 - [ ] 3.2 `joinPlayer` rechaza `E` de perfiles `isActive=false` sin recrearlos — _HU-ENT-06.2_
 - [ ] 3.3 `init` y `reloadCloudPlayers` ignoran perfiles inactivos — _HU-ENT-06.3_
 - [ ] 3.4 Acción de operador para desactivar/reactivar perfil (en `/bot`) — _HU-ENT-06.1, 06.4_
+
+## 4. Catálogo de personajes (Pedro, 2026-10-24) · requiere aprobación de Pedro
+
+- [ ] 4.1 `joinPlayer` elige desde `kiArenaPlayerTypes` y guarda `playerTypeRef`/`userRef` — _HU-ENT-07_

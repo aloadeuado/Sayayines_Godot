@@ -61,3 +61,11 @@ Un espectador entra a la arena con el comando `E`. Su nombre normalizado es su i
 2. SI llega `E` de un perfil con `isActive=false`, ENTONCES el sistema NO DEBE crear otro perfil con la misma clave ni reactivarlo solo; DEBE responder que el perfil está desactivado.
 3. La arena y el roster NO DEBEN mostrar perfiles con `isActive=false`.
 4. Reactivar un perfil DEBE ser una acción explícita del operador (`isActive=true`).
+
+### HU-ENT-07 — Crear personaje desde el catálogo · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como jugador, quiero que al entrar se me cree un personaje a partir del catálogo, para que los personajes nuevos aparezcan sin cambiar código.
+
+**Criterios de aceptación**
+1. CUANDO se crea un personaje nuevo, el sistema DEBE elegir al azar un tipo de `kiArenaPlayerTypes` con `isActive !== false` e `isEligible !== false`, y guardar `playerTypeRef`.
+2. SI el usuario tiene cuenta, ENTONCES el personaje DEBE guardar `userRef` y añadirse a `playerRefs` del usuario; si no tiene `primaryPlayerRef`, este pasa a ser el principal.
+3. CUANDO un usuario con varios personajes entra desde el chat, el sistema DEBE usar su `primaryPlayerRef` (pregunta abierta: o elegir con un comando).

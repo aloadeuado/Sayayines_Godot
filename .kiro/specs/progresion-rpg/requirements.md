@@ -47,3 +47,36 @@ Cada perfil tiene un nivel `N` entre 1 y 100 guardado en Firestore. Todos los at
 **Criterios de aceptación**
 1. CUANDO se selecciona un perfil, el sistema DEBE mostrar nivel, `xp / xpForNext`, victorias, caídas y los cinco atributos derivados.
 2. El sistema DEBE listar solo los poderes desbloqueados para su raza y nivel.
+
+### HU-RPG-06 — Características por raza · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero que cada raza tenga sus propios multiplicadores de ki, daño físico, defensa física y defensa de ki, para que las razas se sientan distintas.
+
+**Criterios de aceptación**
+1. `calculateLevelStats` DEBE multiplicar ki, ataque físico, defensa física y defensa de ki por `stats.*` de la raza del personaje (`kiArenaRaces`); la vida (`hp`) sigue siendo global.
+2. Valores iniciales:
+
+| Raza | Ki | Daño físico | Def. física | Def. ki |
+|---|---|---|---|---|
+| Saiyajin | 1.10 | 1.20 | 0.95 | 0.90 |
+| Namekuseijin | 1.05 | 0.95 | 1.10 | 1.10 |
+| Terrícola | 0.95 | 1.00 | 1.00 | 1.00 |
+| Freezer | 1.25 | 0.95 | 0.95 | 1.05 |
+
+3. SI la raza no se puede leer, ENTONCES el sistema DEBE usar 1.0 en todos los multiplicadores.
+4. **Pregunta abierta:** se propone multiplicar sobre los multiplicadores globales de settings, no reemplazarlos.
+
+### HU-RPG-07 — Utilidad por raza · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como jugador, quiero que mi raza tenga una habilidad especial, para tener una ventaja propia.
+
+**Criterios de aceptación**
+1. Cada raza DEBE tener una utilidad con variables editables en `utility.params`:
+
+| Raza | Utilidad | Qué hace | Variables (por defecto) |
+|---|---|---|---|
+| Saiyajin | Zenkai | Cada derrota da un bono permanente a sus stats, con tope | `bonusPerDefeat 0.03`, `maxBonus 0.15` |
+| Namekuseijin | Regeneración | Fuera de combate recupera un % de la vida máxima por segundo | `regenPerSecond 0.02`, `outOfCombatSeconds 3` |
+| Terrícola | Ingenio | Gana más XP y puede esquivar golpes | `xpBonus 0.20`, `dodgeChance 0.08` |
+| Freezer | Transformación | Con poca vida gana más daño un tiempo, una vez por vida | `hpThreshold 0.30`, `damageBonus 0.25`, `durationSeconds 8` |
+
+2. Lo acumulado por la utilidad (p. ej. `zenkaiBonus`) DEBE guardarse en `kiArenaPlayers.utilityState`.
+3. CUANDO cambia un parámetro en settings, el sistema DEBE aplicarlo sin reiniciar la arena.

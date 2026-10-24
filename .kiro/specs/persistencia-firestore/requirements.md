@@ -16,6 +16,7 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 4. El sistema DEBE usar las rutas `environments/{APP_ENV}/kiArenaPlayers`, `…/kiArenaMessages`, `…/kiArenaEvents` y `environments/{APP_ENV}/kiArenaSettings/gameplay`.
 5. **Estado actual del código:** usa `?env=dev|qa|prod` en la URL; ver tareas 3.x.
 6. La documentación NO DEBE describir los entornos como aislamiento de seguridad, cuota o facturación.
+7. (Pedro, 2026-10-24) La estructura DEBE ser: colección raíz `environments` → un documento por entorno (`dev`, `qa`, `prd`) → todas las colecciones de la app dentro de ese documento. Cada documento de entorno es una base de datos completa; ninguna colección de la app DEBE vivir fuera de `environments/{APP_ENV}/`. Aplica a todos los modelos.
 
 ### HU-FS-02 — Perfil de jugador
 **Historia de usuario:** Como jugador, quiero que mi progreso quede guardado, para no perderlo entre sesiones.
@@ -68,3 +69,42 @@ Firestore es la única fuente de verdad para perfiles, mensajes, eventos y ajust
 3. Las lecturas (`get`, `listPlayers`, `listMessages`, `listEvents`, `getSettings`) DEBEN ignorar registros con `isActive === false`.
 4. Un registro sin `isActive` DEBE tratarse siempre como activo.
 5. `isActive` y `alive` DEBEN tratarse como campos distintos.
+
+### HU-FS-09 — Catálogo de razas `kiArenaRaces` · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero las razas en su propia colección con sus características, para balancearlas sin tocar código.
+
+**Criterios de aceptación**
+1. El sistema DEBE guardar cada raza en `environments/{APP_ENV}/kiArenaRaces/{code}` con `code` ∈ `saiyajin`, `namekuseijin`, `terricola`, `freezer` y los campos base `id`, `reference`, `isActive`.
+2. Cada raza DEBE tener `stats.ki`, `stats.physicalAttack`, `stats.physicalDefense`, `stats.kiDefense` (multiplicadores, 1.0 = normal) y `utility` con `code`, `name`, `description` y `params` (map editable).
+3. Una raza con `isActive === false` NO DEBE asignarse a tipos ni jugadores nuevos; los existentes la siguen leyendo.
+4. Valores iniciales y utilidades: ver `design.md` y HU-RPG-06/07.
+
+### HU-FS-10 — Catálogo de tipos de personaje `kiArenaPlayerTypes` · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como administrador, quiero un catálogo de personajes (Goku, Piccolo, Gohan, Freezer) ligado a su raza, para añadir personajes nuevos sin cambiar código.
+
+**Criterios de aceptación**
+1. El sistema DEBE guardar cada tipo en `environments/{APP_ENV}/kiArenaPlayerTypes/{code}` con `code`, `name`, `raceRef` (referencia completa a `kiArenaRaces`), `legacyRace` (0–3, opcional), `isEligible`, `spriteKey` y `order` opcionales, y los campos base.
+2. `CHARACTER_OPTIONS` y `settings.characters` DEBEN reemplazarse por la lectura de este catálogo.
+3. Relación: una raza tiene N tipos; un tipo tiene una raza.
+
+### HU-FS-11 — Personajes de usuario (`kiArenaPlayers` como tabla intermedia) · PROPUESTA (Pedro, 2026-10-24)
+**Historia de usuario:** Como jugador con cuenta, quiero tener uno o varios personajes con su nombre y progreso, para jugar con distintos personajes.
+
+**Criterios de aceptación**
+1. `kiArenaPlayers` DEBE ser la tabla intermedia muchos a muchos entre `kiArenaUsers` y `kiArenaPlayerTypes`: un usuario tiene N personajes y un tipo lo tienen N usuarios.
+2. Cada personaje DEBE guardar `userRef` (opcional para jugadores de chat sin cuenta), `playerTypeRef`, `name`, `nameKey`, el progreso (`level`, `xp`, `kills`, `deaths`, `alive`, `hp`, `maxHp`), `utilityState` (map opcional), `schemaVersion 3` y los campos base.
+3. El `id` DEBE ser `{userId}:{code}` para jugadores con cuenta; los de chat sin cuenta conservan `usernameKey`.
+4. SI un documento no tiene `playerTypeRef`, ENTONCES el sistema DEBE resolver el tipo por `race` → `legacyRace` y completar `playerTypeRef` al volver a guardar, sin borrar `race`.
+5. `kiArenaUsers` DEBE tener `playerRefs[]` y `primaryPlayerRef` (ver HU-AUT-09).
+6. **Pregunta abierta:** ¿puede un usuario tener dos personajes del mismo tipo? Con el id propuesto, no.
+
+### HU-FS-12 — Eventos de combate `kiArenaEvents` (Pedro, 2026-10-24)
+**Historia de usuario:** Como operador, quiero un historial de combate con referencias a los personajes, para mostrar el feed y auditar resultados.
+
+**Criterios de aceptación**
+1. **Estado actual:** solo existe `type: 'knockout'`, con `killer` y `victim` como texto y `createdAt`; lo escribe `arena.js` al llegar a 0 de vida, y `/bot` lee los últimos 30 para el feed.
+2. El evento DEBE añadir `killerRef` y `victimRef` (referencias completas a `kiArenaPlayers`) y los campos base; `killer`/`victim` se conservan solo para mostrar.
+3. El evento PUEDE añadir `power` (`K`, `M`, `V` o físico) y `xpGained` (propuesta pendiente de aprobación).
+4. Los eventos NO DEBEN usarse como fuente de `kills`/`deaths`: la verdad está en el personaje.
+5. Un fallo al guardar un evento NO DEBE ser silencioso: DEBE registrarse en el estado de Firebase.
+6. **Pendiente de decidir:** la colección crece sin límite (no se borra nada); definir resumen o archivo de eventos viejos.
