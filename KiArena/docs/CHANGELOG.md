@@ -2,6 +2,12 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-10-24 — catálogo de razas (`kiArenaRaces`) con stats y utilidad · PROPUESTA
+
+- **Solicitud:** Pedro pidió separar la raza en su propia colección, con características ki, daño físico, defensa física y defensa de ki, más una variable «utilidad» específica y editable por raza.
+- **Diseño:** `environments/{APP_ENV}/kiArenaRaces/{code}` con `stats` (multiplicadores) y `utility` (`code`, `name`, `description`, `params`). Utilidades propuestas: Saiyajin Zenkai, Namekuseijin Regeneración, Terrícola Ingenio, Freezer Transformación. `kiArenaPlayerTypes.raceRef` reemplaza `raceName`; `kiArenaPlayers.utilityState` guarda lo acumulado. Tarea 3.12. Sin cambios de código.
+- **Rama/commit:** rama `claude/project-thread-osowq6`.
+
 ## 2026-10-24 — catálogo de tipos de personaje (`kiArenaPlayerTypes`) · PROPUESTA
 
 - **Solicitud:** Pedro pidió una colección de tipos de personaje (Saiyajin, Namekuseijin…) y que `kiArenaPlayers` la referencie.

@@ -108,7 +108,7 @@ Mismo patrón que el login (`kiArenaProviderTypes` → `kiArenaProviders`): un c
 | `isActive` | boolean | Opcional | `false` = retirado (borrado suave); ausente = activo |
 | `code` | string | Sí | Llave estable del tipo |
 | `name` | string | Sí | Personaje: Goku, Piccolo, Gohan, Freezer |
-| `raceName` | string | Sí | Raza: Saiyajin, Namekuseijin, Humano, Freezer |
+| `raceRef` | referencia | Sí | → `kiArenaRaces/{code}` (Saiyajin, Namekuseijin, Terrícola, Freezer) |
 | `legacyRace` | number | Opcional | Número `race` antiguo (0–3) para leer jugadores viejos |
 | `color` | string | Opcional | Color del aura/roster (`#ff9d3d`…) |
 | `isEligible` | boolean | Opcional | Si sale al crear un jugador nuevo (hoy `settings.characters`) |
@@ -117,12 +117,51 @@ Mismo patrón que el login (`kiArenaProviderTypes` → `kiArenaProviders`): un c
 
 Datos iniciales:
 
-| `code` | `name` | `raceName` | `legacyRace` | `color` |
+| `code` | `name` | `raceRef` | `legacyRace` | `color` |
 |---|---|---|---|---|
-| `goku` | Goku | Saiyajin | 0 | `#ff9d3d` |
-| `piccolo` | Piccolo | Namekuseijin | 1 | `#68e47b` |
-| `gohan` | Gohan | Humano | 2 | `#68b9ff` |
-| `freezer` | Freezer | Freezer | 3 | `#c487ff` |
+| `goku` | Goku | `…/kiArenaRaces/saiyajin` | 0 | `#ff9d3d` |
+| `piccolo` | Piccolo | `…/kiArenaRaces/namekuseijin` | 1 | `#68e47b` |
+| `gohan` | Gohan | `…/kiArenaRaces/terricola` | 2 | `#68b9ff` |
+| `freezer` | Freezer | `…/kiArenaRaces/freezer` | 3 | `#c487ff` |
+
+### `environments/{APP_ENV}/kiArenaRaces/{code}` — razas (Pedro, 2026-10-24)
+
+Cada raza define sus características y una **utilidad** propia. Todo es editable por entorno desde settings. Los valores de `stats` son multiplicadores sobre la fórmula base de `calculateLevelStats` (1.0 = sin cambio); la vida (`hp`) sigue siendo global.
+
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `id`, `reference`, `isActive` | string / ref / bool | Opcional | Campos base |
+| `code` | string | Sí | `saiyajin`, `namekuseijin`, `terricola`, `freezer` |
+| `name` | string | Sí | Nombre visible |
+| `stats.ki` | number | Sí | Multiplicador de ki (poder de los ataques de ki) |
+| `stats.physicalAttack` | number | Sí | Multiplicador de daño físico |
+| `stats.physicalDefense` | number | Sí | Multiplicador de defensa física |
+| `stats.kiDefense` | number | Sí | Multiplicador de defensa de ki |
+| `utility.code` | string | Sí | Llave de la utilidad (`zenkai`, `regeneracion`, `ingenio`, `transformacion`) |
+| `utility.name` / `utility.description` | string | Sí | Texto visible |
+| `utility.params` | map | Sí | Variables de la utilidad, editables (ver abajo) |
+| `color`, `order` | string / number | Opcional | Aura y orden |
+| `createdAt` / `updatedAt` | string ISO | Opcional | Fechas |
+
+Valores iniciales (propuesta, ajustables):
+
+| Raza | `ki` | `physicalAttack` | `physicalDefense` | `kiDefense` | Perfil |
+|---|---|---|---|---|---|
+| Saiyajin | 1.10 | 1.20 | 0.95 | 0.90 | Agresivo, crece al perder |
+| Namekuseijin | 1.05 | 0.95 | 1.10 | 1.10 | Resistente, se cura |
+| Terrícola | 0.95 | 1.00 | 1.00 | 1.00 | Equilibrado, sube más rápido |
+| Freezer | 1.25 | 0.95 | 0.95 | 1.05 | Ki alto, remonta al final |
+
+Utilidades:
+
+| Raza | Utilidad | Qué hace | `utility.params` (por defecto) |
+|---|---|---|---|
+| Saiyajin | **Zenkai** | Cada derrota le da un bono permanente a todas sus stats, con tope | `bonusPerDefeat: 0.03`, `maxBonus: 0.15` |
+| Namekuseijin | **Regeneración** | Fuera de combate recupera un % de su vida máxima por segundo | `regenPerSecond: 0.02`, `outOfCombatSeconds: 3` |
+| Terrícola | **Ingenio** | Gana más experiencia y puede esquivar golpes | `xpBonus: 0.20`, `dodgeChance: 0.08` |
+| Freezer | **Transformación** | Con poca vida se transforma: más daño por unos segundos, una vez por vida | `hpThreshold: 0.30`, `damageBonus: 0.25`, `durationSeconds: 8` |
+
+El estado de la utilidad que cambia con el juego (p. ej. el Zenkai acumulado) se guarda en el jugador: `kiArenaPlayers.utilityState` (map, opcional; Saiyajin: `{ zenkaiBonus }`).
 
 ### `environments/{APP_ENV}/kiArenaPlayers/{id}` — jugador
 
@@ -137,6 +176,7 @@ Datos iniciales:
 | `username`, `usernameKey` | string | Sí | Nombre visible y normalizado |
 | `level`, `xp`, `kills`, `deaths` | number | Sí | Progreso |
 | `alive`, `hp`, `maxHp`, `hpFormulaVersion` | boolean / number | Sí | Estado en arena (no es `isActive`) |
+| `utilityState` | map | Opcional | Estado acumulado de la utilidad de su raza |
 | `schemaVersion` | number | Sí | Sube a `3` con `playerTypeRef` |
 | `createdAt` / `updatedAt` | string ISO | Opcional / Sí | Fechas |
 
@@ -144,6 +184,7 @@ Datos iniciales:
 
 | Desde | Campo | Hacia | Cardinalidad |
 |---|---|---|---|
+| `kiArenaPlayerTypes` | `raceRef` | `kiArenaRaces` | N tipos → 1 raza |
 | `kiArenaPlayers` | `playerTypeRef` | `kiArenaPlayerTypes` | N jugadores → 1 tipo |
 | `kiArenaPlayers` | `userRef` | `kiArenaUsers` | N jugadores → 1 usuario (por definir) |
 | `kiArenaUsers` | `playerRef` | `kiArenaPlayers` | jugador principal |
