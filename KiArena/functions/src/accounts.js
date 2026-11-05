@@ -2,7 +2,8 @@
 // externas), usuarios y la tabla intermedia usuario-proveedor. Las relaciones
 // se guardan como referencias completas de Firestore, ligadas al entorno.
 // Nada se borra: desvincular o desactivar es isActive=false.
-import { collectionPath, providerDocId, userProviderDocId } from './environment.js';
+import { collectionPath, providerDocId, userProviderDocId, userRoleDocId } from './environment.js';
+import { DEFAULT_USER_ROLE } from './roles.js';
 import { defaultProviderType } from './catalog.js';
 
 export class AccountError extends Error {
@@ -29,6 +30,8 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
     provider: (typeId, providerUserId) => col('providers').doc(providerDocId(typeId, providerUserId)),
     user: uid => col('users').doc(uid),
     userProvider: (uid, providerId) => col('userProviders').doc(userProviderDocId(uid, providerId)),
+    role: code => col('roles').doc(code),
+    userRole: (uid, code) => col('userRoles').doc(userRoleDocId(uid, code)),
     newUser: () => col('users').doc(),
     newEvent: () => col('userProviderEvents').doc()
   };
@@ -136,6 +139,16 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
       const activeRefs = (current?.userProviderRefs || []).filter(ref => !samePath(ref, upRef));
       const typeRefs = (current?.providerTypeRefs || []).filter(ref => !samePath(ref, typeRef));
       const isPrimary = activeRefs.length === 0;
+      // Rol por defecto: un usuario nuevo (o uno viejo sin roleRefs) recibe
+      // «player» en kiArenaUserRoles. Si la fila ya existe se respeta tal cual
+      // (un rol revocado no se vuelve a dar solo).
+      const needsRoles = !Array.isArray(current?.roleRefs);
+      const defaultRoleRef = refs.role(DEFAULT_USER_ROLE);
+      const userRoleRef = refs.userRole(userRef.id, DEFAULT_USER_ROLE);
+      const userRoleSnap = needsRoles ? await tx.get(userRoleRef) : null;
+      const roleRefs = needsRoles
+        ? (!userRoleSnap.exists || isActive(userRoleSnap.data()) ? [defaultRoleRef] : [])
+        : current.roleRefs;
 
       tx.set(providerRef, providerRecord(profile, providerSnap.exists, timestamp), { merge: true });
       tx.set(upRef, {
@@ -162,12 +175,27 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
         userProviderRefs: [...activeRefs, upRef],
         primaryUserProviderRef: isPrimary ? upRef : current?.primaryUserProviderRef,
         providerTypeRefs: [...typeRefs, typeRef],
-        roles: current?.roles || ['player'],
+        roles: current?.roles || [DEFAULT_USER_ROLE],
+        roleRefs,
         createdAt: current?.createdAt || timestamp,
         updatedAt: timestamp,
         lastLoginAt: timestamp,
         schemaVersion: 1
       }), { merge: true });
+      if (needsRoles && !userRoleSnap.exists) {
+        tx.set(userRoleRef, {
+          id: userRoleRef.id,
+          reference: userRoleRef,
+          isActive: true,
+          userRef,
+          roleRef: defaultRoleRef,
+          grantedByRef: null,
+          grantedAt: timestamp,
+          revokedAt: null,
+          createdAt: timestamp,
+          updatedAt: timestamp
+        });
+      }
       const eventRef = refs.newEvent();
       tx.set(eventRef, eventRecord(eventRef, upSnap.exists ? 'relink' : 'link', providerRef, userRef, timestamp));
       return { status: 'ok', created: !userSnap.exists, userId: userRef.id };
@@ -301,6 +329,7 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
         avatarUrl: user.avatarUrl || null,
         email: user.email || null,
         roles: user.roles || [],
+        roleIds: (user.roleRefs || []).map(ref => ref.id),
         createdAt: user.createdAt || null,
         lastLoginAt: user.lastLoginAt || null
       },

@@ -85,7 +85,8 @@ Todo campo `…Ref`/`…Refs` es `referenceValue` con la ruta completa `projects
 | primaryUserProviderRef | referencia | Vínculo principal |
 | providerTypeRefs | array referencias | Plataformas vinculadas |
 | playerRef | referencia | Su jugador en `kiArenaPlayers` |
-| roles | array string | `player`, `operator` |
+| roles | array string | Legado: `['player']`. Ver «Roles» abajo |
+| roleRefs | array referencias | → `kiArenaRoles`: copia de los roles activos (HU-AUT-10) |
 | createdAt, updatedAt, lastLoginAt | string ISO | Fechas |
 | schemaVersion | number | 1 |
 
@@ -250,6 +251,48 @@ Si Pedro desvincula Kick, su usuario-proveedor queda `isActive: false` con `unli
 - Escritura solo desde servidor; reglas: el usuario lee su propio `kiArenaUsers/{uid}` y nada más.
 - Revocar en el proveedor = el próximo login falla; no se borra nada.
 - Datos mínimos: solo los scopes de la tabla.
+
+## Roles (HU-AUT-10, Pedro 2026-11-05)
+
+### Catálogo — `kiArenaRoles/{code}`
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| id, reference, isActive | string, ref, bool | Opcional | Campos base; `isActive=false` apaga el rol |
+| code, name, description | string | Opcional | Identidad |
+| permissions | array string | Opcional | Permisos del rol (`*` = todos) |
+| level | number | Opcional | Jerarquía; solo se dan roles de nivel menor |
+| order | number | Opcional | Orden en pantalla |
+| createdAt, updatedAt | string ISO | Opcional | Fechas |
+
+Valores iniciales (`functions/src/roles.js`, sembrados en dev el 2026-11-05; editables por entorno):
+
+| code | name | level | permissions |
+|---|---|---|---|
+| player | Jugador | 10 | `arena.play`, `account.manage` |
+| streamer | Streamer | 30 | + `bot.use` |
+| partner | Partner | 40 | + `partner.view` |
+| seller | Vendedor | 40 | + `sales.manage` |
+| admin | Administrador | 80 | + `bot.use`, `settings.edit`, `catalog.edit`, `roles.grant`, `players.deactivate` |
+| superadmin | Superadministrador | 100 | `*` (incluye sincronizar ambientes y prd) |
+
+### Tabla intermedia — `kiArenaUserRoles/{uid}:{roleCode}`
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| id, reference, isActive | string, ref, bool | Opcional | `isActive=false` = revocado |
+| userRef | referencia | Opcional | → `kiArenaUsers` |
+| roleRef | referencia | Opcional | → `kiArenaRoles` |
+| grantedByRef | referencia | Opcional | → `kiArenaUsers`; `null` si lo dio el sistema |
+| grantedAt, revokedAt | string ISO | Opcional | Fechas |
+
+### Relaciones
+| Desde | Campo | Hacia | Cardinalidad |
+|---|---|---|---|
+| kiArenaUserRoles | userRef | kiArenaUsers | N → 1 |
+| kiArenaUserRoles | roleRef | kiArenaRoles | N → 1 |
+| kiArenaUserRoles | grantedByRef | kiArenaUsers | N → 0..1 |
+| kiArenaUsers | roleRefs[] | kiArenaRoles | N ↔ N (copia) |
+
+Código: `signIn` crea la fila `{uid}:player` y `roleRefs` en la misma transacción. Pendiente: dar/quitar roles (Function + pantalla), custom claims en Firebase Auth y reglas por rol (`seguridad-y-autoridad`).
 
 ## Dependencias con otras specs
 

@@ -84,3 +84,14 @@ Ki Arena tendrá usuarios con sesión. Una persona se registra con email y contr
 - Enlace de jugadores existentes con su usuario.
 - ¿Una sola cuenta por proveedor por usuario? (recomendado)
 - ¿Fusionar usuarios en conflicto en una HU futura?
+
+### HU-AUT-10 — Roles de usuario (Pedro, 2026-11-05)
+**Historia de usuario:** Como dueño del juego, quiero que cada usuario tenga uno o varios roles de un catálogo, para decidir qué puede hacer cada uno sin tocar código.
+
+**Criterios de aceptación**
+1. Los roles DEBEN vivir en el catálogo `kiArenaRoles/{code}` con `code`, `name`, `description`, `permissions[]` y `level`, más `id`, `reference` e `isActive`.
+2. Los roles iniciales DEBEN ser `player` (Jugador), `streamer`, `partner`, `seller` (Vendedor), `admin` (Administrador) y `superadmin` (Superadministrador).
+3. La relación usuario × rol DEBE guardarse en la tabla intermedia `kiArenaUserRoles/{uid}:{roleCode}` con `userRef`, `roleRef`, `grantedByRef`, `grantedAt`, `revokedAt`; quitar un rol = `isActive=false`, nunca borrar.
+4. CUANDO se crea un usuario, el sistema DEBE darle `player` (fila en `kiArenaUserRoles` y `roleRefs` en el usuario). Un rol revocado NO DEBE volver a darse solo.
+5. `kiArenaUsers.roleRefs[]` DEBE copiar los roles activos para leerlos rápido; `roles` (texto) se conserva como legado.
+6. Un usuario solo PUEDE dar roles de `level` menor al suyo; `superadmin` puede dar cualquiera (pendiente: pantalla y reglas).

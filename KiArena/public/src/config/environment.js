@@ -29,7 +29,9 @@ export function collectionPaths(env) {
     races: `${base}/kiArenaRaces`,
     playerTypes: `${base}/kiArenaPlayerTypes`,
     powers: `${base}/kiArenaPowers`,
-    playerPowers: `${base}/kiArenaPlayerPowers`
+    playerPowers: `${base}/kiArenaPlayerPowers`,
+    roles: `${base}/kiArenaRoles`,
+    userRoles: `${base}/kiArenaUserRoles`
   });
 }
 

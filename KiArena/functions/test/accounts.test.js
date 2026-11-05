@@ -139,3 +139,29 @@ test('el usuario de email y contraseña guarda su email aunque falte verificarlo
   const other = db.list(`${base}/kiArenaUsers/`).find(u => u.id !== 'U1');
   assert.equal(other.email, undefined);
 });
+
+test('un usuario nuevo recibe el rol player en kiArenaUserRoles y en roleRefs', async () => {
+  const { db, accounts } = setup();
+  await accounts.signIn({ profile: google, preferredUid: 'Xk3f' });
+  const user = db.read(`${base}/kiArenaUsers/Xk3f`);
+  assert.deepEqual(user.roles, ['player']);
+  assert.deepEqual(user.roleRefs.map(r => r.path), [`${base}/kiArenaRoles/player`]);
+  const row = db.read(`${base}/kiArenaUserRoles/Xk3f:player`);
+  assert.equal(row.isActive, true);
+  assert.equal(row.reference.path, `${base}/kiArenaUserRoles/Xk3f:player`);
+  assert.equal(row.userRef.path, `${base}/kiArenaUsers/Xk3f`);
+  assert.equal(row.roleRef.path, `${base}/kiArenaRoles/player`);
+  // Volver a entrar no duplica ni cambia los roles.
+  await accounts.signIn({ profile: google, preferredUid: 'Xk3f' });
+  assert.equal(db.list(`${base}/kiArenaUserRoles/`).length, 1);
+  assert.deepEqual((await accounts.getAccount('Xk3f')).user.roleIds, ['player']);
+});
+
+test('un usuario viejo sin roleRefs con player revocado no lo recupera solo', async () => {
+  const { db, accounts } = setup();
+  db.write(`${base}/kiArenaUsers/Old1`, { displayName: 'Viejo', roles: ['player'] });
+  db.write(`${base}/kiArenaUserRoles/Old1:player`, { isActive: false });
+  await accounts.signIn({ profile: twitch, preferredUid: 'Old1' });
+  assert.deepEqual(db.read(`${base}/kiArenaUsers/Old1`).roleRefs, []);
+  assert.equal(db.read(`${base}/kiArenaUserRoles/Old1:player`).isActive, false);
+});

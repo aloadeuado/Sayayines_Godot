@@ -1,3 +1,4 @@
+import { startEnvSyncPanel } from './env-sync-panel.js';
 import { DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../config/gameplay-settings.js';
 import { DEFAULT_CATALOG, DEFAULT_POWERS, DEFAULT_RACES, DEFAULT_PLAYER_TYPES, buildCatalog, POWER_CATEGORY_LABELS } from '../config/game-catalog.js';
 
@@ -142,6 +143,7 @@ function wireEnvironment() {
 
 export async function startSettings() {
   wireEnvironment();
+  startEnvSyncPanel(window.KI_ARENA_FIREBASE);
   // La validación la hace validate(): los campos dentro de poderes plegados no pueden recibir foco.
   $('#game-settings-form').noValidate = true;
   try {

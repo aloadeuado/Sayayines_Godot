@@ -2,6 +2,13 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-05 — roles de usuario y sincronizar ambientes
+
+- **Solicitud:** Pedro pidió crear los roles (player, administrador, superadministrador, vendedor, partner, streamer) y una sección en un settings de administrador, con su skill, para migrar ciertas tablas de un ambiente a otro (dev → qa → producción), empezando por los roles.
+- **Roles:** catálogo `kiArenaRoles` (6 roles con `permissions` y `level` iniciales, `functions/src/roles.js`) y tabla intermedia `kiArenaUserRoles/{uid}:{roleCode}`. Al registrarse, el usuario recibe `player` y `roleRefs`; un rol revocado no se vuelve a dar. `npm run seed:roles -- <env> [--rest] [--apply] [--confirm-prd]`. Sembrados en dev (6). HU-AUT-10.
+- **Sincronizar ambientes:** `public/src/services/firebase/env-sync.js` (lista permitida, diferencias, referencias reescritas al destino, sin borrar, prd con confirmación), sección en `/settings` y `npm run sync:envs`. Spec `sincronizacion-ambientes` (HU-SYN-01/02) y skill. qa y prd sin tocar. 32 pruebas.
+- **Rama/commit:** rama `claude/project-thread-nf28v9` (desde `claude/project-thread-osowq6`).
+
 ## 2026-10-24 — nombres de los poderes en latino
 
 - **Solicitud:** Pedro pidió los nombres del doblaje latino (Genkidama, no Onda Vital).

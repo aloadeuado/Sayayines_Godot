@@ -15,7 +15,9 @@ export const COLLECTIONS = Object.freeze({
   races: 'kiArenaRaces',
   playerTypes: 'kiArenaPlayerTypes',
   powers: 'kiArenaPowers',
-  playerPowers: 'kiArenaPlayerPowers'
+  playerPowers: 'kiArenaPlayerPowers',
+  roles: 'kiArenaRoles',
+  userRoles: 'kiArenaUserRoles'
 });
 
 export function parseEnvironment(value) {
@@ -40,6 +42,10 @@ export function safeDocId(value) {
 
 export function providerDocId(providerTypeId, providerUserId) {
   return safeDocId(`${providerTypeId}:${providerUserId}`);
+}
+
+export function userRoleDocId(userId, roleCode) {
+  return safeDocId(`${userId}:${roleCode}`);
 }
 
 export function userProviderDocId(userId, providerId) {

@@ -14,3 +14,6 @@
 - [ ] 10. Enlace usuario ↔ jugador (`playerRef` / `userRef`) según la decisión de Pedro — _HU-AUT-09_
 - [ ] 11. Pedir a Pedro: configuración de proveedores en Firebase, client IDs/secrets por entorno, cuenta Apple, app TikTok — _HU-AUT-02, 03_
 - [ ] 12. Verificar (`node --check`, pruebas del modelo, `git diff --check`), CHANGELOG, `PROJECT_SPEC.md`
+- [x] 13. Catálogo `kiArenaRoles` (6 roles) + `kiArenaUserRoles`; registro da `player` y `roleRefs`; `npm run seed:roles`; sembrado en dev — _HU-AUT-10.1–10.5_
+- [ ] 14. Dar y quitar roles (Function con `level`), custom claims y pantalla de administrador — _HU-AUT-10.6_
+- [ ] 15. Llevar roles a qa/prd con «Sincronizar ambientes» — _HU-SYN-01_

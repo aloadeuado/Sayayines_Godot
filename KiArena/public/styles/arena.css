@@ -685,3 +685,14 @@ canvas {
 .power-card select { width: 100%; background: #08101d; border: 1px solid #29405e; border-radius: 6px; color: #fff; padding: 6px; font: inherit; font-size: 11px; margin-top: 3px; }
 .power-badge { font-style: normal; font-size: 9px; padding: 1px 6px; border-radius: 999px; background: #29324a; color: #c2cde0; }
 .power-badge.ok { background: #13402c; color: #71e5a3; }
+
+/* Sincronizar ambientes (/settings) */
+.env-sync-tables { border: 0; padding: 0; margin: 12px 0; }
+.env-sync-tables legend { font-weight: 700; margin-bottom: 8px; }
+.env-sync-confirm { display: grid; gap: 6px; margin: 12px 0; }
+.env-sync-confirm input { max-width: 200px; }
+.env-sync-result { display: grid; gap: 12px; margin-top: 12px; }
+.env-sync-table { overflow-x: auto; }
+.env-sync-table table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+.env-sync-table th, .env-sync-table td { text-align: left; padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,.12); vertical-align: top; }
+.env-sync-confirm[hidden] { display: none; }
