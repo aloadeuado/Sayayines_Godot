@@ -95,3 +95,17 @@ Ki Arena tendrá usuarios con sesión. Una persona se registra con email y contr
 4. CUANDO se crea un usuario, el sistema DEBE darle `player` (fila en `kiArenaUserRoles` y `roleRefs` en el usuario). Un rol revocado NO DEBE volver a darse solo.
 5. `kiArenaUsers.roleRefs[]` DEBE copiar los roles activos para leerlos rápido; `roles` (texto) se conserva como legado.
 6. Un usuario solo PUEDE dar roles de `level` menor al suyo; `superadmin` puede dar cualquiera (pendiente: pantalla y reglas).
+
+### HU-AUT-11 — Panel de superadministrador e invitaciones de rol (Pedro, 2026-11-05)
+**Historia de usuario:** Como superadministrador, quiero un panel donde vea usuarios, players y todas las tablas, cambie roles y edite los catálogos (razas, poderes, …) agregando campos, para operar el juego sin tocar código ni la consola de Firebase.
+
+**Criterios de aceptación**
+1. `/admin` y «Sincronizar ambientes» DEBEN mostrarse solo a un `superadmin` activo del entorno; `/settings` a quien tenga `settings.edit` (superadmin, admin). Los demás ven «Sin permiso» y un enlace a su cuenta.
+2. El panel DEBE listar usuarios con sus roles activos y permitir dar y quitar roles: fila `kiArenaUserRoles/{uid}:{rol}` con `grantedByRef`/`grantedAt` o `isActive=false` + `revokedAt`/`revokedByRef`, y copiar `roleRefs` y `roles` en el usuario. Nadie PUEDE quitarse `superadmin` a sí mismo ni desactivarse.
+3. Un superadmin PUEDE dar un rol por email a quien aún no ha entrado: `kiArenaRoleInvites/{email}:{rol}` (`email`, `roleRef`, `createdByRef`, `usedAt`, `usedByRef`, `isActive`). Al entrar con ese email VERIFICADO el servidor asigna el rol y marca la invitación como usada (`isActive=false`).
+4. El panel DEBE ofrecer CRUD sobre todas las tablas del entorno: crear (con `id`, `reference`, `isActive`, `createdAt` automáticos), editar con tipos (texto, número, sí/no, referencia completa, fecha, mapa, lista), agregar un campo a un registro o a todos los que no lo tienen, y desactivar/reactivar. NUNCA DEBE borrar documentos.
+5. En `prd`, cada escritura del panel DEBE pedir teclear «prd».
+6. La puerta por rol es de la interfaz; la protección de los datos necesita reglas de Firestore por rol (HU-AUT-08, tarea 9).
+
+### HU-AUT-12 — Login sin Cloud Functions desplegadas (2026-11-05)
+1. CUANDO `authApi` responde 404 (no desplegada) o no responde, la app de escritorio DEBE correr el mismo `createAuthApi` en local con Firestore por REST y el ID token verificado en Google. Email y Google DEBEN funcionar; Twitch, Kick y TikTok DEBEN explicar que necesitan la función.

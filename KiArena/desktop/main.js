@@ -28,6 +28,7 @@ function buildMenu() {
         { label: 'Entrar / Mi cuenta', accelerator: 'CmdOrCtrl+2', click: () => open('/login') },
         { label: 'Bot / Chat', accelerator: 'CmdOrCtrl+3', click: () => open('/bot') },
         { label: 'Settings', accelerator: 'CmdOrCtrl+4', click: () => open('/settings') },
+        { label: 'Panel superadmin', accelerator: 'CmdOrCtrl+5', click: () => open('/admin') },
         { type: 'separator' },
         { role: 'reload', label: 'Recargar' },
         { role: 'togglefullscreen', label: 'Pantalla completa' },
@@ -41,7 +42,11 @@ function buildMenu() {
 
 async function createWindow() {
   const root = path.join(__dirname, 'app-public');
-  const { port } = await startServer({ root, apiBase: API_BASE });
+  // Puerto fijo: Firebase guarda la sesión por origen (localhost:puerto).
+  const { port } = await startServer({
+    root, apiBase: API_BASE, port: Number(process.env.KI_ARENA_PORT) || 47321,
+    localApiModule: path.join(__dirname, 'app-auth', 'local-api.js')
+  });
   baseUrl = `http://localhost:${port}`;
 
   mainWindow = new BrowserWindow({

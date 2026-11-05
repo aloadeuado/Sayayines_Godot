@@ -1,12 +1,22 @@
 // Servidor local de la app de escritorio: sirve la web de Ki Arena (copiada en
-// app-public/) con las mismas rutas que Firebase Hosting, y reenvía /api/auth/**
-// a la función authApi desplegada.
+// app-public/) con las mismas rutas que Firebase Hosting y atiende /api/auth/**.
+//
+// Modo del login (KI_ARENA_AUTH_MODE):
+// - auto (por defecto): reenvía a la Cloud Function authApi; si Google responde
+//   404 porque la función no está desplegada, o no hay conexión con ella, usa
+//   el modo local y se queda en él mientras la app esté abierta.
+// - remote: solo la Cloud Function.
+// - local: siempre el authApi local (mismo código, Firestore y Auth por REST).
 const http = require('node:http');
 const https = require('node:https');
 const fs = require('node:fs');
 const path = require('node:path');
+const { pathToFileURL } = require('node:url');
 
-const ROUTES = { '/settings': '/settings/index.html', '/bot': '/bot/index.html', '/login': '/login/index.html', '/cuenta': '/login/index.html' };
+const ROUTES = {
+  '/settings': '/settings/index.html', '/bot': '/bot/index.html', '/login': '/login/index.html',
+  '/cuenta': '/login/index.html', '/admin': '/admin/index.html'
+};
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon'
@@ -22,23 +32,88 @@ function resolveFile(root, pathname) {
   return file;
 }
 
-function proxy(req, res, apiBase) {
-  // authApi acepta la ruta completa /api/auth/...; se reenvía tal cual.
-  const url = new URL(`${apiBase.replace(/\/$/, '')}${req.url}`);
-  const upstream = https.request(url, { method: req.method, headers: { ...req.headers, host: url.host } }, response => {
-    res.writeHead(response.statusCode, response.headers);
-    response.pipe(res);
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on('data', chunk => chunks.push(chunk));
+    req.on('end', () => resolve(Buffer.concat(chunks)));
+    req.on('error', reject);
   });
-  upstream.on('error', () => {
-    res.writeHead(502, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'offline', message: 'No hay conexión con el servidor de login.' }));
-  });
-  req.pipe(upstream);
 }
 
-function startServer({ root, apiBase, port = 0 }) {
+// Llama a la Cloud Function. Devuelve null si no está desplegada (404 que no
+// viene de authApi) o si no hay conexión; así se puede caer al modo local.
+function forward(req, body, apiBase) {
+  return new Promise(resolve => {
+    const url = new URL(`${apiBase.replace(/\/$/, '')}${req.url}`);
+    const headers = { ...req.headers, host: url.host, 'content-length': String(body.length) };
+    const upstream = https.request(url, { method: req.method, headers, timeout: 15000 }, response => {
+      const chunks = [];
+      response.on('data', chunk => chunks.push(chunk));
+      response.on('end', () => {
+        const payload = Buffer.concat(chunks);
+        const fromAuthApi = String(response.headers['content-type'] || '').includes('application/json');
+        if (response.statusCode === 404 && !fromAuthApi) return resolve(null);
+        resolve({ status: response.statusCode, headers: response.headers, payload });
+      });
+    });
+    upstream.on('timeout', () => upstream.destroy(new Error('timeout')));
+    upstream.on('error', () => resolve(null));
+    upstream.end(body);
+  });
+}
+
+function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApiOptions = {} }) {
+  let localHandler = null;
+  let useLocal = authMode === 'local';
+  async function local() {
+    if (!localHandler) {
+      const mod = await import(pathToFileURL(localApiModule).href);
+      localHandler = mod.createLocalAuthApi(localApiOptions);
+    }
+    return localHandler;
+  }
+  return async function route(req, res) {
+    const body = await readBody(req);
+    if (!useLocal) {
+      const remote = await forward(req, body, apiBase);
+      if (remote) {
+        const headers = { ...remote.headers };
+        delete headers['transfer-encoding'];
+        delete headers['content-length'];
+        res.writeHead(remote.status, headers);
+        return res.end(remote.payload);
+      }
+      if (authMode === 'remote') {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'offline', message: 'No hay conexión con el servidor de login (authApi no responde o no está desplegada).' }));
+      }
+      useLocal = true;
+      console.warn('[ki-arena] authApi no está desplegada o no responde: el login pasa a modo local.');
+    }
+    try {
+      await (await local())(req, res, body);
+    } catch (error) {
+      console.error('[ki-arena] authApi local', error);
+      if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'internal', message: `Login local: ${error.message}` }));
+    }
+  };
+}
+
+function listen(server, port) {
+  return new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, '127.0.0.1', () => { server.off('error', reject); resolve(server.address().port); });
+  });
+}
+
+// port fijo para que la sesión de Firebase (guardada por origen) sobreviva al
+// reiniciar la app; si está ocupado se usa uno libre.
+async function startServer({ root, apiBase, port = 0, authMode = process.env.KI_ARENA_AUTH_MODE || 'auto', localApiModule, localApiOptions }) {
+  const authRoute = createAuthRouter({ apiBase, authMode, localApiModule, localApiOptions });
   const server = http.createServer((req, res) => {
-    if (req.url.startsWith('/api/auth')) return proxy(req, res, apiBase);
+    if (req.url.startsWith('/api/auth')) return authRoute(req, res);
     const file = resolveFile(root, new URL(req.url, 'http://localhost').pathname);
     if (!file || !fs.existsSync(file)) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
@@ -47,7 +122,14 @@ function startServer({ root, apiBase, port = 0 }) {
     res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
     fs.createReadStream(file).pipe(res);
   });
-  return new Promise(resolve => server.listen(port, '127.0.0.1', () => resolve({ server, port: server.address().port })));
+  let actual;
+  try {
+    actual = await listen(server, port);
+  } catch (error) {
+    if (!port || error.code !== 'EADDRINUSE') throw error;
+    actual = await listen(server, 0);
+  }
+  return { server, port: actual };
 }
 
 module.exports = { startServer };

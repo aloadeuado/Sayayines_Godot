@@ -17,7 +17,8 @@ export const COLLECTIONS = Object.freeze({
   powers: 'kiArenaPowers',
   playerPowers: 'kiArenaPlayerPowers',
   roles: 'kiArenaRoles',
-  userRoles: 'kiArenaUserRoles'
+  userRoles: 'kiArenaUserRoles',
+  roleInvites: 'kiArenaRoleInvites'
 });
 
 export function parseEnvironment(value) {
@@ -50,4 +51,9 @@ export function userRoleDocId(userId, roleCode) {
 
 export function userProviderDocId(userId, providerId) {
   return safeDocId(`${userId}:${providerId}`);
+}
+
+// Invitación de rol por email: {email}:{roleCode}, email en minúsculas.
+export function roleInviteDocId(email, roleCode) {
+  return safeDocId(`${String(email).trim().toLowerCase()}:${roleCode}`);
 }

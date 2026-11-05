@@ -15,6 +15,10 @@
         "destination": "/settings/index.html"
       },
       {
+        "source": "/admin",
+        "destination": "/admin/index.html"
+      },
+      {
         "source": "/bot",
         "destination": "/bot/index.html"
       },

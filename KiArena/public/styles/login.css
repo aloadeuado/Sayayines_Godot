@@ -208,6 +208,9 @@ body.dbz-auth {
 .unlink-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .account-actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 24px; }
+.admin-links { grid-template-columns: 1fr 1fr; margin-top: 10px; }
+.admin-links[hidden], .admin-links [hidden] { display: none; }
+.admin-links a { text-align: center; text-decoration: none; }
 
 .auth-alert {
   margin-bottom: 14px; padding: 12px 14px; border-radius: 12px;

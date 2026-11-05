@@ -337,11 +337,63 @@ export function createAccounts({ db, env, now = () => new Date().toISOString() }
     };
   }
 
+  // Invitaciones de rol (kiArenaRoleInvites): un superadmin da un rol a un
+  // email aunque esa persona no haya entrado nunca. Al entrar con ese email
+  // VERIFICADO, el rol se le asigna (kiArenaUserRoles + roleRefs + roles) y la
+  // invitación queda usada (isActive=false, usedAt, usedByRef).
+  async function claimRoleInvites({ userId, email, emailVerified }) {
+    const normalized = String(email || '').trim().toLowerCase();
+    if (!normalized || emailVerified !== true) return [];
+    const pending = await col('roleInvites').where('email', '==', normalized).where('isActive', '==', true).get();
+    if (pending.empty) return [];
+    return db.runTransaction(async tx => {
+      const timestamp = now();
+      const userRef = refs.user(userId);
+      const userSnap = await tx.get(userRef);
+      if (!userSnap.exists || !isActive(userSnap.data())) return [];
+      const invites = [];
+      for (const doc of pending.docs) {
+        const fresh = await tx.get(doc.ref);
+        if (fresh.exists && isActive(fresh.data()) && fresh.data().roleRef) invites.push(fresh);
+      }
+      const rows = [];
+      for (const invite of invites) {
+        const roleRef = invite.data().roleRef;
+        const userRoleRef = refs.userRole(userId, roleRef.id);
+        rows.push({ invite, roleRef, userRoleRef, snap: await tx.get(userRoleRef) });
+      }
+      const user = userSnap.data();
+      const roleRefs = [...(user.roleRefs || [])];
+      const roles = [...(user.roles || [])];
+      for (const { invite, roleRef, userRoleRef, snap } of rows) {
+        if (!roleRefs.some(ref => samePath(ref, roleRef))) roleRefs.push(roleRef);
+        if (!roles.includes(roleRef.id)) roles.push(roleRef.id);
+        tx.set(userRoleRef, clean({
+          id: userRoleRef.id,
+          reference: userRoleRef,
+          isActive: true,
+          userRef,
+          roleRef,
+          grantedByRef: invite.data().createdByRef || null,
+          inviteRef: invite.ref,
+          source: 'invite',
+          grantedAt: timestamp,
+          revokedAt: null,
+          createdAt: snap.exists ? undefined : timestamp,
+          updatedAt: timestamp
+        }), { merge: true });
+        tx.set(invite.ref, { isActive: false, usedAt: timestamp, usedByRef: userRef, updatedAt: timestamp }, { merge: true });
+      }
+      if (rows.length) tx.set(userRef, { roleRefs, roles, updatedAt: timestamp }, { merge: true });
+      return rows.map(row => row.roleRef.id);
+    });
+  }
+
   async function updateProfile(userId, { displayName }) {
     const name = String(displayName || '').trim().slice(0, 40);
     if (!name) throw new AccountError('invalid_name', 'Escribe un nombre de guerrero.');
     await refs.user(userId).set({ displayName: name, updatedAt: now() }, { merge: true });
   }
 
-  return { refs, getProviderType, listProviderTypes, signIn, link, unlink, getAccount, updateProfile };
+  return { refs, getProviderType, listProviderTypes, signIn, link, unlink, getAccount, updateProfile, claimRoleInvites };
 }

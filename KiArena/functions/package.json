@@ -12,7 +12,9 @@
     "seed:provider-types": "node scripts/seed-provider-types.js",
     "migrate:characters": "node scripts/migrate-character-model.js",
     "seed:roles": "node scripts/seed-roles.js",
-    "sync:envs": "node scripts/sync-environments.js"
+    "sync:envs": "node scripts/sync-environments.js",
+    "grant:role": "node scripts/grant-role.js",
+    "test:emulator": "node test/local-api.emulator.js"
   },
   "dependencies": {
     "firebase-admin": "^12.6.0",

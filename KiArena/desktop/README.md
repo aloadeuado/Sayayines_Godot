@@ -1,8 +1,12 @@
 # Ki Arena de escritorio
 
-Envoltorio de Electron sobre la web de Ki Arena. Abre el login y, desde el menú **Ki Arena**, la arena (⌘1), el login (⌘2), `/bot` (⌘3) y `/settings` (⌘4).
+Envoltorio de Electron sobre la web de Ki Arena. Abre el login y, desde el menú **Ki Arena**, la arena (⌘1), el login (⌘2), `/bot` (⌘3), `/settings` (⌘4) y el panel de superadministrador `/admin` (⌘5).
 
-La app sirve una copia de `KiArena/public` en `http://localhost:<puerto>`, porque `localhost` está autorizado por defecto en Firebase Auth. Las llamadas a `/api/auth/**` se reenvían a la función `authApi` desplegada. Variables opcionales: `KI_ARENA_ENV` (`dev`, `qa` o `prd`; por defecto `dev`) y `KI_ARENA_API_BASE`.
+La app sirve una copia de `KiArena/public` en `http://localhost:47321` (puerto fijo para que la sesión de Firebase sobreviva al reiniciar; si está ocupado usa otro), porque `localhost` está autorizado por defecto en Firebase Auth.
+
+`/api/auth/**` (login): primero se reenvía a la función `authApi` desplegada. Si Google responde 404 porque la función no está desplegada (plan Spark), o no hay conexión, la app usa el **login local**: el mismo código de `functions/src` (copiado en `app-auth/`), con Firestore por REST y el ID token verificado en Google (`accounts:lookup`). Email y Google funcionan igual; Twitch, Kick y TikTok siguen necesitando la función, porque solo ella puede firmar el token.
+
+Variables opcionales: `KI_ARENA_ENV` (`dev`, `qa` o `prd`; por defecto `dev`), `KI_ARENA_API_BASE`, `KI_ARENA_AUTH_MODE` (`auto` por defecto, `local` o `remote`) y `KI_ARENA_PORT`.
 
 ## Desarrollo
 
@@ -38,6 +42,6 @@ Descomprime el zip y ejecuta `KiArena.exe`. Si aparece SmartScreen: «Más infor
 ## Límites actuales
 
 - Sin internet se ven las pantallas, pero la arena, `/bot`, `/settings` y el login necesitan Firebase.
-- El login necesita la función `authApi` desplegada y los métodos activados en Firebase Authentication.
+- Sin la función `authApi` desplegada, el login con email y Google usa el modo local; los métodos tienen que estar activados en Firebase Authentication.
 - Twitch, Kick y TikTok terminan el login en el dominio web registrado como `redirectUri`, no dentro de la app. Volver a la app tras ese login queda pendiente (por ejemplo, con un esquema `kiarena://`).
 - La app no está firmada ni notarizada.

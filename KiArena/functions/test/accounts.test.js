@@ -165,3 +165,27 @@ test('un usuario viejo sin roleRefs con player revocado no lo recupera solo', as
   assert.deepEqual(db.read(`${base}/kiArenaUsers/Old1`).roleRefs, []);
   assert.equal(db.read(`${base}/kiArenaUserRoles/Old1:player`).isActive, false);
 });
+
+test('una invitación de rol por email se aplica al entrar con ese email verificado, una sola vez', async () => {
+  const { db, accounts } = setup();
+  const inviteRef = db.doc(`${base}/kiArenaRoleInvites/pedro@example.com:superadmin`);
+  await inviteRef.set({ id: inviteRef.id, reference: inviteRef, isActive: true, email: 'pedro@example.com', roleRef: db.doc(`${base}/kiArenaRoles/superadmin`) });
+  await accounts.signIn({ profile: google, preferredUid: 'Xk3f' });
+
+  // Sin verificar no se aplica.
+  assert.deepEqual(await accounts.claimRoleInvites({ userId: 'Xk3f', email: 'pedro@example.com', emailVerified: false }), []);
+  assert.deepEqual(await accounts.claimRoleInvites({ userId: 'Xk3f', email: 'Pedro@Example.com', emailVerified: true }), ['superadmin']);
+
+  const user = db.read(`${base}/kiArenaUsers/Xk3f`);
+  assert.deepEqual(user.roles, ['player', 'superadmin']);
+  assert.deepEqual(user.roleRefs.map(r => r.id), ['player', 'superadmin']);
+  const row = db.read(`${base}/kiArenaUserRoles/Xk3f:superadmin`);
+  assert.equal(row.isActive, true);
+  assert.equal(row.source, 'invite');
+  assert.equal(row.inviteRef.path, inviteRef.path);
+  const invite = db.read(inviteRef.path);
+  assert.equal(invite.isActive, false);
+  assert.equal(invite.usedByRef.path, `${base}/kiArenaUsers/Xk3f`);
+  // Ya usada: no se vuelve a aplicar.
+  assert.deepEqual(await accounts.claimRoleInvites({ userId: 'Xk3f', email: 'pedro@example.com', emailVerified: true }), []);
+});

@@ -102,6 +102,7 @@ export function createAuthApi({ db, auth, secrets = {}, fetchImpl = fetch, now =
       if (result.userId !== decoded.uid) {
         throw new AccountError('uid_mismatch', 'Esta cuenta está ligada a otro usuario. Entra con ese usuario.', 409);
       }
+      await accounts.claimRoleInvites({ userId: decoded.uid, email: profile.email, emailVerified: profile.emailVerified });
       return { ...result, account: await accounts.getAccount(decoded.uid) };
     },
 

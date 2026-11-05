@@ -1,4 +1,5 @@
 import { startEnvSyncPanel } from './env-sync-panel.js';
+import { requireAccess } from './access-gate.js';
 import { DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../config/gameplay-settings.js';
 import { DEFAULT_CATALOG, DEFAULT_POWERS, DEFAULT_RACES, DEFAULT_PLAYER_TYPES, buildCatalog, POWER_CATEGORY_LABELS } from '../config/game-catalog.js';
 
@@ -143,7 +144,19 @@ function wireEnvironment() {
 
 export async function startSettings() {
   wireEnvironment();
-  startEnvSyncPanel(window.KI_ARENA_FIREBASE);
+  // Solo superadmin (o quien tenga settings.edit, p. ej. admin). /settings aún usa «prod».
+  const cfg = window.KI_ARENA_FIREBASE;
+  const env = cfg.environment === 'prod' ? 'prd' : cfg.environment;
+  const gate = await requireAccess({ env, what: 'ver y editar settings', allow: access => access.can('settings.edit') });
+  if (!gate) return;
+  // Sincronizar ambientes y el panel: solo superadmin.
+  if (gate.access.isSuperadmin) {
+    startEnvSyncPanel(cfg);
+    $('#admin-nav-link').hidden = false;
+    $('#admin-nav-link').href = `/admin?env=${env}${gate.emulator ? '&emulators=1' : ''}`;
+  } else {
+    $('#env-sync').hidden = true;
+  }
   // La validación la hace validate(): los campos dentro de poderes plegados no pueden recibir foco.
   $('#game-settings-form').noValidate = true;
   try {

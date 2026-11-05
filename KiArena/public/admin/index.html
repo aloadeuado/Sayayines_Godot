@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Superadmin</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+  <link rel="stylesheet" href="/styles/admin.css">
+</head>
+<body class="admin-body">
+  <main class="admin-page">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA · SUPERADMIN</h1>
+        <div class="tag">USUARIOS · ROLES · PLAYERS · TABLAS · CONFIGURACIÓN</div>
+        <div id="admin-who" class="admin-who"></div>
+      </div>
+      <nav class="page-nav">
+        <a href="/" class="nav-btn" id="nav-arena">← Arena</a>
+        <a href="/settings" class="nav-btn" id="nav-settings">Settings</a>
+        <a href="/bot" class="nav-btn" id="nav-bot">Bot / Chat</a>
+        <a href="/cuenta" class="nav-btn" id="nav-account">Mi cuenta</a>
+        <label class="env-settings">Entorno <select id="admin-env" aria-label="Entorno"><option value="dev">Desarrollo</option><option value="qa">QA</option><option value="prd">Producción</option></select></label>
+      </nav>
+    </header>
+
+    <div id="admin-prd-banner" class="admin-banner" hidden>Estás en <strong>PRODUCCIÓN</strong>. Cada escritura pide confirmación.</div>
+
+    <nav class="admin-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="users" aria-selected="true">Usuarios y roles</button>
+      <button type="button" role="tab" data-tab="players" aria-selected="false">Players</button>
+      <button type="button" role="tab" data-tab="tables" aria-selected="false">Tablas</button>
+      <button type="button" role="tab" data-tab="config" aria-selected="false">Configuración</button>
+    </nav>
+
+    <div id="admin-status" class="settings-status" role="status" aria-live="polite"></div>
+
+    <!-- Usuarios y roles -->
+    <section class="card admin-section" data-panel="users">
+      <div class="admin-toolbar">
+        <input id="users-search" type="search" placeholder="Buscar por nombre, email o id">
+        <label class="admin-check"><input id="users-inactive" type="checkbox"> Mostrar desactivados</label>
+        <button type="button" id="users-reload">Recargar</button>
+      </div>
+      <div class="admin-table-wrap"><table class="admin-table" id="users-table"></table></div>
+
+      <h3>Dar un rol por email</h3>
+      <p class="settings-help">Para alguien que todavía no ha entrado: se guarda en <code>kiArenaRoleInvites</code> y el rol se asigna cuando entre con ese email verificado (Google siempre lo está).</p>
+      <form id="invite-form" class="admin-inline">
+        <input name="email" type="email" placeholder="email@ejemplo.com" required>
+        <select name="role" id="invite-role"></select>
+        <button type="submit">Invitar</button>
+      </form>
+      <div class="admin-table-wrap"><table class="admin-table" id="invites-table"></table></div>
+    </section>
+
+    <!-- Players -->
+    <section class="card admin-section" data-panel="players" hidden>
+      <div class="admin-toolbar">
+        <input id="players-search" type="search" placeholder="Buscar player">
+        <label class="admin-check"><input id="players-inactive" type="checkbox"> Mostrar desactivados</label>
+        <button type="button" id="players-new">Nuevo player</button>
+        <button type="button" id="players-reload">Recargar</button>
+      </div>
+      <p class="settings-help">Perfiles de juego (<code>kiArenaPlayers</code>): usuario × tipo de personaje, nivel y progreso. Desactivar no borra nada.</p>
+      <div class="admin-table-wrap"><table class="admin-table" id="players-table"></table></div>
+    </section>
+
+    <!-- Tablas -->
+    <section class="card admin-section" data-panel="tables" hidden>
+      <div class="admin-toolbar">
+        <select id="tables-collection" aria-label="Tabla"></select>
+        <input id="tables-search" type="search" placeholder="Buscar">
+        <label class="admin-check"><input id="tables-inactive" type="checkbox"> Mostrar desactivados</label>
+        <button type="button" id="tables-new">Nuevo registro</button>
+        <button type="button" id="tables-add-field">Agregar campo a toda la tabla</button>
+        <button type="button" id="tables-reload">Recargar</button>
+      </div>
+      <p class="settings-help" id="tables-help"></p>
+      <div class="admin-table-wrap"><table class="admin-table" id="tables-table"></table></div>
+    </section>
+
+    <!-- Configuración -->
+    <section class="card admin-section" data-panel="config" hidden>
+      <p class="settings-help">Ajustes globales del juego en <code>kiArenaSettings</code>. Las fórmulas, razas, poderes y personajes elegibles también se editan con formularios en <a id="config-settings-link" href="/settings">/settings</a>, donde está además «Sincronizar ambientes».</p>
+      <div class="admin-table-wrap"><table class="admin-table" id="config-table"></table></div>
+    </section>
+  </main>
+
+  <!-- Editor de usuario -->
+  <dialog id="user-dialog" class="admin-dialog">
+    <form method="dialog" id="user-form">
+      <h2 id="user-dialog-title">Usuario</h2>
+      <div id="user-dialog-body"></div>
+      <div class="settings-actions">
+        <button type="submit" value="save" class="primary">Guardar</button>
+        <button type="button" id="user-edit-raw">Editar todos los campos</button>
+        <button type="submit" value="cancel" formnovalidate>Cerrar</button>
+      </div>
+      <div id="user-dialog-status" class="settings-status"></div>
+    </form>
+  </dialog>
+
+  <!-- Editor genérico de documento -->
+  <dialog id="doc-dialog" class="admin-dialog wide">
+    <form method="dialog" id="doc-form">
+      <h2 id="doc-dialog-title">Registro</h2>
+      <p class="settings-help" id="doc-dialog-path"></p>
+      <div id="doc-dialog-body" class="field-editor"></div>
+      <div class="settings-actions">
+        <button type="submit" value="save" class="primary">Guardar</button>
+        <button type="button" id="doc-toggle-active"></button>
+        <button type="submit" value="cancel" formnovalidate>Cerrar</button>
+      </div>
+      <div id="doc-dialog-status" class="settings-status"></div>
+    </form>
+  </dialog>
+
+  <!-- Agregar un campo a todos los registros -->
+  <dialog id="field-dialog" class="admin-dialog">
+    <form method="dialog" id="field-form">
+      <h2>Agregar campo a <span id="field-dialog-table"></span></h2>
+      <p class="settings-help">Se agrega a los registros que no lo tienen; los que ya lo tienen no cambian. Recuerda: los campos nuevos son opcionales y el código debe tolerar que falten.</p>
+      <div id="field-dialog-body" class="field-editor"></div>
+      <div class="settings-actions">
+        <button type="submit" value="save" class="primary">Agregar</button>
+        <button type="submit" value="cancel" formnovalidate>Cancelar</button>
+      </div>
+      <div id="field-dialog-status" class="settings-status"></div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/src/app/admin-app.js"></script>
+</body>
+</html>

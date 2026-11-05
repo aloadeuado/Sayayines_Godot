@@ -15,5 +15,7 @@
 - [ ] 11. Pedir a Pedro: configuración de proveedores en Firebase, client IDs/secrets por entorno, cuenta Apple, app TikTok — _HU-AUT-02, 03_
 - [ ] 12. Verificar (`node --check`, pruebas del modelo, `git diff --check`), CHANGELOG, `PROJECT_SPEC.md`
 - [x] 13. Catálogo `kiArenaRoles` (6 roles) + `kiArenaUserRoles`; registro da `player` y `roleRefs`; `npm run seed:roles`; sembrado en dev — _HU-AUT-10.1–10.5_
-- [ ] 14. Dar y quitar roles (Function con `level`), custom claims y pantalla de administrador — _HU-AUT-10.6_
+- [ ] 14. Dar y quitar roles (Function con `level`), custom claims y pantalla de administrador — _HU-AUT-10.6_ · Pantalla hecha: panel `/admin` (HU-AUT-11). Pendiente: Function con `level`, custom claims y reglas.
+- [x] 16. Panel `/admin` (usuarios, roles, invitaciones, players, CRUD de tablas, agregar campos) y puerta por rol en `/settings` — _HU-AUT-11_
+- [x] 17. Login local en escritorio cuando `authApi` no está desplegada; `npm run grant:role`; `npm run test:emulator` — _HU-AUT-12_
 - [ ] 15. Llevar roles a qa/prd con «Sincronizar ambientes» — _HU-SYN-01_

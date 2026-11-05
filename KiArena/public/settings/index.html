@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Ki Arena · Settings</title>
   <link rel="stylesheet" href="/styles/arena.css">
+  <link rel="stylesheet" href="/styles/admin.css">
 </head>
 <body>
   <main class="settings-page">
@@ -17,6 +18,7 @@
       <nav class="page-nav">
         <a href="/" class="nav-btn">← Volver a la arena</a>
         <a href="/bot" class="nav-btn">Bot / Chat</a>
+        <a href="/admin" class="nav-btn" id="admin-nav-link" hidden>Panel superadmin</a>
         <label class="env-settings">Entorno <select id="environment-switch" aria-label="Entorno de Firebase"><option value="dev">Desarrollo</option><option value="qa">QA</option><option value="prod">Producción</option></select></label>
       </nav>
     </header>
@@ -47,7 +49,7 @@
     </section>
     <section class="card settings-card" id="env-sync" aria-labelledby="env-sync-title">
       <h2 id="env-sync-title">SINCRONIZAR AMBIENTES</h2>
-      <p class="settings-help">Copia tablas de catálogo de un ambiente a otro (dev → qa → prd). Primero revisa las diferencias; luego sincroniza. No borra nada, no toca usuarios ni jugadores y cambia las referencias al ambiente destino. Pendiente: mostrar esta sección solo a <code>superadmin</code> cuando las reglas por rol estén activas.</p>
+      <p class="settings-help">Copia tablas de catálogo de un ambiente a otro (dev → qa → prd). Primero revisa las diferencias; luego sincroniza. No borra nada, no toca usuarios ni jugadores y cambia las referencias al ambiente destino. Solo la ve un <code>superadmin</code>.</p>
       <form id="env-sync-form">
         <div class="settings-grid">
           <label><span>Origen</span><select id="env-sync-from"><option value="dev">Desarrollo (dev)</option><option value="qa">QA (qa)</option><option value="prd">Producción (prd)</option></select></label>

@@ -2,6 +2,16 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-05 — error 404 del login y panel de superadministrador
+
+- **Solicitud:** Pedro entró con Google en la app de escritorio (dev) y vio «Error 404 del servidor de login». Pidió verificar su usuario y dejarlo como superadmin, que solo los superadmins vean `/settings` y un panel de superadministrador con usuarios, perfiles, roles, players y CRUDs de las tablas ya pobladas (razas, poderes, …) con opción de agregar campos.
+- **Causa del 404:** la Cloud Function `authApi` no está desplegada (falta el plan Blaze). Firebase Auth sí aceptó el login con Google, pero el registro en Firestore (`POST /api/auth/session`) devolvía 404, así que en dev no se creó ningún `kiArenaUsers`.
+- **Login local:** `functions/src/rest-backend.js` (Firestore por REST con transacciones reales y Auth con `accounts:lookup`) y `functions/src/local-api.js` corren el mismo `createAuthApi`. La app de escritorio usa la función si existe y, si no, el modo local (`KI_ARENA_AUTH_MODE`). Puerto fijo 47321. Prueba de integración contra emuladores: `npm run test:emulator`.
+- **Invitaciones de rol:** `kiArenaRoleInvites/{email}:{rol}` (id, reference, isActive, email, roleRef, createdByRef, usedAt, usedByRef). Al entrar con ese email verificado se crea la fila en `kiArenaUserRoles` y la invitación queda usada (isActive=false). Script `npm run grant:role -- <env> <email> <rol> [--rest] [--apply]`: asigna directo si el usuario existe o crea la invitación.
+- **Acceso por rol:** `/settings` pide `settings.edit` (superadmin y admin); «Sincronizar ambientes» y `/admin` solo superadmin. Es una puerta de la interfaz: las reglas de Firestore por rol siguen pendientes (HU-AUT-10).
+- **Panel `/admin`:** usuarios y roles (dar y quitar roles con auditoría grantedByRef/revokedAt, nombre, avatar, activar), invitaciones por email, players, todas las tablas (crear, editar con tipos incluidas referencias y mapas, agregar campo a un registro o a toda la tabla, desactivar/reactivar; nunca borra) y configuración (`kiArenaSettings`). En prd cada escritura pide teclear «prd».
+- **Rama:** `claude/project-thread-rzaw3a` (desde `claude/project-thread-nf28v9`).
+
 ## 2026-11-05 — roles de usuario y sincronizar ambientes
 
 - **Solicitud:** Pedro pidió crear los roles (player, administrador, superadministrador, vendedor, partner, streamer) y una sección en un settings de administrador, con su skill, para migrar ciertas tablas de un ambiente a otro (dev → qa → producción), empezando por los roles.

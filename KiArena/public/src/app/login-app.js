@@ -126,6 +126,16 @@ function showAccount(account) {
   avatar.style.backgroundImage = user.avatarUrl ? `url("${encodeURI(user.avatarUrl)}")` : '';
   $('#name-form').displayName.value = user.displayName || '';
 
+  // Superadmin: panel y settings. Admin: settings. (La pantalla destino vuelve a revisar el rol.)
+  const roleIds = user.roleIds || [];
+  const isSuper = roleIds.includes('superadmin');
+  const canSettings = isSuper || roleIds.includes('admin');
+  $('#admin-links').hidden = !canSettings;
+  $('#admin-link').hidden = !isSuper;
+  $('#admin-link').href = `/admin?env=${encodeURIComponent(state.env)}`;
+  // /settings todavía usa ?env=dev|qa|prod (migración prod → prd pendiente).
+  $('#settings-link').href = `/settings?env=${state.env === 'prd' ? 'prod' : encodeURIComponent(state.env)}`;
+
   const list = $('#linked-list');
   list.replaceChildren();
   for (const link of links) {

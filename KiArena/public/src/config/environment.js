@@ -31,7 +31,8 @@ export function collectionPaths(env) {
     powers: `${base}/kiArenaPowers`,
     playerPowers: `${base}/kiArenaPlayerPowers`,
     roles: `${base}/kiArenaRoles`,
-    userRoles: `${base}/kiArenaUserRoles`
+    userRoles: `${base}/kiArenaUserRoles`,
+    roleInvites: `${base}/kiArenaRoleInvites`
   });
 }
 
