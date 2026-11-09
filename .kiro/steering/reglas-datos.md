@@ -78,3 +78,7 @@ Toda pieza que se ejecuta o depura (web/Hosting, Cloud Functions, Electron y las
 - **Protección de `prd`:** `dev` es el valor por defecto. Ejecutar contra `prd` pide confirmación explícita; nunca se siembran datos ni se escriben datos reales de `prd` desde una sesión de depuración sin aprobación de Pedro.
 - **Secretos:** los archivos de entorno versionados solo llevan valores públicos (`APP_ENV`, `projectId`, `clientId`); los secretos van en `.env.*.local` ignorados por Git o en Secret Manager, con un `.env.example` documentado.
 - Referencia de implementación: hilo «Depurar Ki Arena en Windows» (`.vscode/launch.json`, `.vscode/tasks.json`, `scripts/emulators.js`).
+
+## Cambios de modelo: siempre con Pedro (2026-11-09)
+
+Ningún modelo de Firestore (colecciones, campos, tipos, ids, relaciones) se crea ni se cambia sin consultar antes a Pedro y tener su respuesta. Aplica a código, scripts, migraciones, semillas y datos reales de dev, qa y prd. Ver la skill `reglas-desarrollo`, regla 6.

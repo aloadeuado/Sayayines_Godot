@@ -13,6 +13,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
+// Sube cuando cambie el login de la app de escritorio (se ve en /login).
+const STATUS_VERSION = 'login-local-2';
+
 const ROUTES = {
   '/settings': '/settings/index.html', '/bot': '/bot/index.html', '/login': '/login/index.html',
   '/cuenta': '/login/index.html', '/admin': '/admin/index.html'
@@ -41,6 +44,14 @@ function readBody(req) {
   });
 }
 
+function isAuthApiError(payload) {
+  try {
+    return typeof JSON.parse(payload.toString('utf8'))?.error === 'string';
+  } catch {
+    return false;
+  }
+}
+
 // Llama a la Cloud Function. Devuelve null si no está desplegada (404 que no
 // viene de authApi) o si no hay conexión; así se puede caer al modo local.
 function forward(req, body, apiBase) {
@@ -52,9 +63,11 @@ function forward(req, body, apiBase) {
       response.on('data', chunk => chunks.push(chunk));
       response.on('end', () => {
         const payload = Buffer.concat(chunks);
-        const fromAuthApi = String(response.headers['content-type'] || '').includes('application/json');
-        if (response.statusCode === 404 && !fromAuthApi) return resolve(null);
-        resolve({ status: response.statusCode, headers: response.headers, payload });
+        // authApi siempre responde JSON con «error» de texto cuando falla. Un 4xx/5xx
+        // sin esa forma viene de Google (función no desplegada, sin permiso, caída):
+        // en ese caso se usa el login local.
+        if (response.statusCode >= 400 && !isAuthApiError(payload)) return resolve(null);
+        resolve({ status: response.statusCode, headers: { ...response.headers, 'x-ki-arena-auth': 'remote' }, payload });
       });
     });
     upstream.on('timeout', () => upstream.destroy(new Error('timeout')));
@@ -66,6 +79,7 @@ function forward(req, body, apiBase) {
 function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApiOptions = {} }) {
   let localHandler = null;
   let useLocal = authMode === 'local';
+  let lastRemote = null;
   async function local() {
     if (!localHandler) {
       const mod = await import(pathToFileURL(localApiModule).href);
@@ -73,11 +87,12 @@ function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApi
     }
     return localHandler;
   }
-  return async function route(req, res) {
+  async function route(req, res) {
     const body = await readBody(req);
     if (!useLocal) {
       const remote = await forward(req, body, apiBase);
       if (remote) {
+        lastRemote = remote.status;
         const headers = { ...remote.headers };
         delete headers['transfer-encoding'];
         delete headers['content-length'];
@@ -89,7 +104,7 @@ function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApi
         return res.end(JSON.stringify({ error: 'offline', message: 'No hay conexión con el servidor de login (authApi no responde o no está desplegada).' }));
       }
       useLocal = true;
-      console.warn('[ki-arena] authApi no está desplegada o no responde: el login pasa a modo local.');
+      console.warn(`[ki-arena] authApi no responde como la función (${apiBase}): el login pasa a modo local.`);
     }
     try {
       await (await local())(req, res, body);
@@ -98,7 +113,10 @@ function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApi
       if (!res.headersSent) res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: 'internal', message: `Login local: ${error.message}` }));
     }
-  };
+  }
+  // Para la pantalla de login: qué servidor atiende hoy el login.
+  route.status = () => ({ authMode, using: useLocal ? 'local' : lastRemote ? 'remote' : 'pending', apiBase, version: STATUS_VERSION });
+  return route;
 }
 
 function listen(server, port) {
@@ -114,6 +132,10 @@ async function startServer({ root, apiBase, port = 0, authMode = process.env.KI_
   const authRoute = createAuthRouter({ apiBase, authMode, localApiModule, localApiOptions });
   const server = http.createServer((req, res) => {
     if (req.url.startsWith('/api/auth')) return authRoute(req, res);
+    if (req.url.startsWith('/__ki-arena/status')) {
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+      return res.end(JSON.stringify({ desktop: true, ...authRoute.status() }));
+    }
     const file = resolveFile(root, new URL(req.url, 'http://localhost').pathname);
     if (!file || !fs.existsSync(file)) {
       res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });

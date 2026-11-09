@@ -17,7 +17,7 @@ const quoteField = key => (SIMPLE_FIELD.test(key) ? key : `\`${String(key).repla
 const autoId = () => randomBytes(15).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 20).padEnd(20, '0');
 
 export function createRestAdminFirestore({
-  projectId, apiKey, databaseId = '(default)', origin = 'https://firestore.googleapis.com', fetchImpl = globalThis.fetch
+  projectId, apiKey, databaseId = '(default)', origin = 'https://firestore.googleapis.com', fetchImpl = globalThis.fetch, transactions = true
 }) {
   const root = `projects/${projectId}/databases/${databaseId}/documents`;
   const base = `${origin}/v1/${root}`;
@@ -156,9 +156,35 @@ export function createRestAdminFirestore({
     doc(id) { return new DocRef(`${this.path}/${id || autoId()}`); }
   }
 
+  // Sin sesión de servicio, Firestore real niega beginTransaction de lectura y
+  // escritura a un cliente que solo tiene la apiKey (403), aunque las reglas
+  // dejen leer y escribir. En ese caso se lee sin transacción y las escrituras
+  // se guardan juntas en un solo commit (atómico entre ellas). Es el modo de
+  // desarrollo local; la Cloud Function usa transacciones del Admin SDK.
+  let transactionsAllowed = transactions;
+
+  async function runBatch(fn) {
+    const writes = [];
+    const tx = {
+      get: target => (target instanceof DocRef ? getDoc(target) : runQuery(target)),
+      set: (ref, data, options) => { writes.push(writeOf(ref, data, options)); return tx; }
+    };
+    const result = await fn(tx);
+    await commit(writes);
+    return result;
+  }
+
   async function runTransaction(fn) {
+    if (!transactionsAllowed) return runBatch(fn);
     for (let attempt = 0; ; attempt++) {
-      const begun = await request(`${base}:beginTransaction`, { method: 'POST', body: JSON.stringify({}) });
+      let begun;
+      try {
+        begun = await request(`${base}:beginTransaction`, { method: 'POST', body: JSON.stringify({}), noRetry: true });
+      } catch (error) {
+        if (!/Firestore 403/.test(error.message)) throw error;
+        transactionsAllowed = false;
+        return runBatch(fn);
+      }
       const transaction = begun.transaction;
       const writes = [];
       const tx = {

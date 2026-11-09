@@ -32,7 +32,8 @@ async function signUp(email) {
   return again.json();
 }
 
-const handler = createLocalAuthApi({ projectId, apiKey: 'demo-key', firestoreOrigin, authOrigin });
+// KI_TX=0 prueba el modo sin transacciones (como Firestore real con solo la apiKey).
+const handler = createLocalAuthApi({ projectId, apiKey: 'demo-key', firestoreOrigin, authOrigin, transactions: process.env.KI_TX !== '0' });
 const server = http.createServer(async (req, res) => {
   const chunks = [];
   for await (const chunk of req) chunks.push(chunk);

@@ -70,7 +70,10 @@ export function createAuthClient({ env, emulator = false, apiBase = '/api/auth' 
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const error = new Error(payload.message || `Error ${response.status} del servidor de login.`);
+      const fallback = response.status === 404
+        ? 'Error 404: el servidor de login (authApi) no está desplegado y esta app no usó el login local. Actualiza la app de escritorio a la rama dev y vuelve a abrirla.'
+        : `Error ${response.status} del servidor de login.`;
+      const error = new Error(payload.message || fallback);
       error.code = payload.error;
       throw error;
     }

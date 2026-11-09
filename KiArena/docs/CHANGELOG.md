@@ -2,6 +2,13 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-09 — bug del 404 al entrar con Google y regla de modelos
+
+- **Solicitud:** Pedro sigue viendo «Error 404 del servidor de login» en la app de escritorio (Desarrollo, cuenta padbem). Pidió tratarlo como bug con su rama, y una regla nueva: no cambiar modelos de datos sin consultarle.
+- **Causas:** (1) el paso al login local solo se activaba con un 404 que no fuera JSON; ahora se activa con cualquier error que no venga de authApi. (2) Con solo la apiKey, Firestore real niega `beginTransaction` de lectura y escritura (403): el login local habría fallado después; ahora lee sin transacción y guarda todo en un solo commit. (3) La app que corre Pedro puede ser anterior al arreglo: /login muestra ahora qué login usa la app de escritorio y su versión (`login-local-2`).
+- **Regla:** regla 6 de `reglas-desarrollo`, `.kiro/steering/reglas-datos.md` y `AGENTS.md`.
+- **Rama:** `bugfix/login-404` desde `dev`. Sin cambios de modelo.
+
 ## 2026-11-09 — los pull requests van hacia dev
 
 - **Solicitud:** Pedro pidió que todos los PRs apunten a `dev`, cerrar el PR #1 (apuntaba a `main`) y abrir uno nuevo hacia `dev`.
