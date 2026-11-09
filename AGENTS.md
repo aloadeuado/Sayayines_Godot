@@ -8,3 +8,7 @@ Antes de cambiar Ki Arena, lee:
 4. El inicio de `KiArena/docs/CHANGELOG.md` para conocer el estado y decisiones recientes.
 
 Para cada instrucción nueva del usuario relacionada con el proyecto, agrega una entrada al historial aunque sea una pregunta de diseño que cambie el alcance. Si la respuesta cambia una regla, comportamiento o estado, actualiza también la especificación correspondiente. Distingue requisitos, comportamiento comprobado y trabajo pendiente. No afirmes que Twitch, producción o un despliegue están activos si no se verificaron.
+
+## Pull requests
+
+Todo pull request se abre hacia la rama `dev` (Pedro, 2026-11-09). Nunca hacia `main` salvo pedido explícito.

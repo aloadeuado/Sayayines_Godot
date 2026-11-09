@@ -32,6 +32,10 @@ git diff --check
 
 Para probar fórmulas o desbloqueos sin navegador, importa `KiArena/public/src/config/gameplay-settings.js` desde un script Node (`node --input-type=module`) y haz aserciones; ese módulo no toca el DOM ni Firestore.
 
+## Ramas y pull requests (Pedro, 2026-11-09)
+
+Todo pull request va hacia **`dev`** (rama base). Nunca hacia `main` salvo pedido explícito de Pedro. Antes de abrirlo se trae `dev` a la rama con un merge. Ver la skill `reglas-desarrollo`, regla 5.
+
 ## Restricciones técnicas
 
 - No usar `localStorage`/`sessionStorage` como fuente de verdad de jugadores, chat, settings ni progreso.

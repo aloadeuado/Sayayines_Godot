@@ -46,9 +46,17 @@ Cuando Pedro pida ver un objeto, colección o modelo, entrégalo SIEMPRE así:
 5. Una tabla de **relaciones** (Desde | Campo | Hacia | Cardinalidad) cuando haya referencias.
 6. Nada de listas sueltas en prosa para describir campos.
 
+## 5. Todos los pull requests van hacia `dev` (Pedro, 2026-11-09)
+
+- Todo PR se abre con rama base **`dev`**. Nunca hacia `main` ni hacia otra rama, salvo que Pedro lo pida para ese PR.
+- Antes de abrir el PR, trae `dev` a tu rama (merge, sin reescribir historia) y resuelve conflictos ahí.
+- Si un PR quedó apuntando a otra rama, ciérralo y abre uno nuevo hacia `dev`.
+- El paso de `dev` a `qa`/`main` lo decide Pedro.
+
 ## Checklist para cada cambio
 
 - [ ] ¿Las escrituras nuevas llenan `id`, `reference`, `isActive`, y el código tolera que falten al leer?
 - [ ] ¿`reference` y las relaciones son referencias completas del entorno actual, no IDs sueltos?
 - [ ] ¿Las lecturas ignoran `isActive === false` y tratan el ausente como activo?
 - [ ] ¿Algún flujo borra
+- [ ] ¿El PR apunta a `dev`?

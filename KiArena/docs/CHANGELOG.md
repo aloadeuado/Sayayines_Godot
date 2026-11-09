@@ -2,6 +2,11 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-09 — los pull requests van hacia dev
+
+- **Solicitud:** Pedro pidió que todos los PRs apunten a `dev`, cerrar el PR #1 (apuntaba a `main`) y abrir uno nuevo hacia `dev`.
+- **Cambio:** regla 5 en la skill `reglas-desarrollo`, sección «Ramas y pull requests» en `.kiro/steering/tech.md` y en `AGENTS.md`. Se trajo `dev` a la rama `claude/project-thread-rzaw3a`.
+
 ## 2026-11-05 — error 404 del login y panel de superadministrador
 
 - **Solicitud:** Pedro entró con Google en la app de escritorio (dev) y vio «Error 404 del servidor de login». Pidió verificar su usuario y dejarlo como superadmin, que solo los superadmins vean `/settings` y un panel de superadministrador con usuarios, perfiles, roles, players y CRUDs de las tablas ya pobladas (razas, poderes, …) con opción de agregar campos.
