@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Settings</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+  <link rel="stylesheet" href="/styles/admin.css">
+</head>
+<body>
+  <main class="settings-page">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA · SETTINGS</h1>
+        <div class="tag">FÓRMULAS · MULTIPLICADORES · PERSONAJES ELEGIBLES</div>
+        <div id="firebase-status">Conectando con Firebase…</div>
+      </div>
+      <nav class="page-nav">
+        <a href="/" class="nav-btn">← Volver a la arena</a>
+        <a href="/bot" class="nav-btn">Bot / Chat</a>
+        <a href="/admin" class="nav-btn" id="admin-nav-link" hidden>Panel superadmin</a>
+        <label class="env-settings">Entorno <select id="environment-switch" aria-label="Entorno de Firebase"><option value="dev">Desarrollo</option><option value="qa">QA</option><option value="prod">Producción</option></select></label>
+      </nav>
+    </header>
+    <section class="card settings-card">
+      <h2>FÓRMULAS Y PERSONAJES</h2>
+      <p class="settings-help">N representa el nivel (1–100). Estos ajustes se guardan en Firebase para el entorno seleccionado.</p>
+      <form id="game-settings-form">
+        <h3>Estadísticas por nivel</h3>
+        <div class="settings-grid">
+          <label><span>Sangre / HP</span><small>100 + M_HP × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="hp"></label>
+          <label><span>Ataque de ki</span><small>12 + M_KI × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="ki"></label>
+          <label><span>Ataque físico</span><small>9 + M_FIS × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="physicalAttack"></label>
+          <label><span>Defensa física</span><small>5 + M_DEF_FIS × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="physicalDefense"></label>
+          <label><span>Defensa de ki</span><small>5 + M_DEF_KI × (N − 1)</small><input type="number" min="0" max="100" step="0.01" data-stat-multiplier="kiDefense"></label>
+        </div>
+        <h3>Razas</h3>
+        <p class="settings-help">Multiplicadores de la raza sobre las estadísticas por nivel (1 = sin cambio) y las variables de su utilidad. Se guardan en <code>kiArenaRaces</code>.</p>
+        <div id="race-settings" class="race-settings"></div>
+        <h3>Poderes por raza</h3>
+        <p class="settings-help">Daño = Ataque de ki(N) × multiplicador de ki del poder(N) − defensa del rival. Cada multiplicador crece de forma lineal desde N=1 hasta N=100. Las defensas del poder se aplican a quien lo lanza mientras lo usa. Se guardan en <code>kiArenaPowers</code>.</p>
+        <div id="power-settings"></div>
+        <h3>Personajes elegibles para usuarios nuevos</h3>
+        <p class="settings-help">Deshabilitar un personaje lo excluye del sorteo de usuarios nuevos. Los perfiles existentes conservan su personaje y progreso. Se guarda en <code>kiArenaPlayerTypes</code>.</p>
+        <div id="character-settings" class="character-settings"></div>
+        <div class="settings-actions"><button type="submit">Guardar ajustes</button><button id="settings-reset" type="button">Restablecer valores iniciales</button></div>
+        <div id="settings-status" class="settings-status" role="status" aria-live="polite">Cargando ajustes…</div>
+      </form>
+    </section>
+    <section class="card settings-card" id="env-sync" aria-labelledby="env-sync-title">
+      <h2 id="env-sync-title">SINCRONIZAR AMBIENTES</h2>
+      <p class="settings-help">Copia tablas de catálogo de un ambiente a otro (dev → qa → prd). Primero revisa las diferencias; luego sincroniza. No borra nada, no toca usuarios ni jugadores y cambia las referencias al ambiente destino. Solo la ve un <code>superadmin</code>.</p>
+      <form id="env-sync-form">
+        <div class="settings-grid">
+          <label><span>Origen</span><select id="env-sync-from"><option value="dev">Desarrollo (dev)</option><option value="qa">QA (qa)</option><option value="prd">Producción (prd)</option></select></label>
+          <label><span>Destino</span><select id="env-sync-to"><option value="dev">Desarrollo (dev)</option><option value="qa" selected>QA (qa)</option><option value="prd">Producción (prd)</option></select></label>
+        </div>
+        <fieldset class="env-sync-tables"><legend>Tablas</legend><div id="env-sync-collections" class="character-settings"></div></fieldset>
+        <label id="env-sync-prd" class="env-sync-confirm" hidden><span>Vas a escribir en producción. Escribe <strong>prd</strong> para confirmar.</span><input id="env-sync-prd-input" type="text" autocomplete="off" spellcheck="false"></label>
+        <div class="settings-actions"><button id="env-sync-preview" type="button">Ver diferencias</button><button id="env-sync-apply" type="submit" disabled>Sincronizar</button></div>
+        <div id="env-sync-status" class="settings-status" role="status" aria-live="polite">Elige origen, destino y tablas.</div>
+        <div id="env-sync-result" class="env-sync-result"></div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

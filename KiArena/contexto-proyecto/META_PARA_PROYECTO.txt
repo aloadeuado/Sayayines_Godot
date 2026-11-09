@@ -1,0 +1,7 @@
+Nombre sugerido: DBZ_FLOW
+
+Meta (copiar en el campo “Meta”):
+Construir y mantener Ki Arena, un juego 2D continuo para transmisiones verticales con progresión RPG, combate y poderes que escalan por nivel, persistencia en Cloud Firestore, panel independiente de Bot/Chat/Settings y una futura integración segura con regalos de TikTok y chats de streaming. Priorizar estabilidad del juego en vivo, evitar duplicados y pérdida de progreso, respetar la arquitectura existente y documentar cada cambio.
+
+Contexto (agregar como archivo o carpeta):
+Adjunta CONTEXTO_PROYECTO_KI_ARENA.md. Este documento explica el producto, la arquitectura, las fórmulas, personajes, comandos, Firebase, el estado real de Twitch/TikTok, el ejecutable y las instrucciones para que un asistente continúe el proyecto con seguridad.

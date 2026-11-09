@@ -10,7 +10,7 @@ Sin parámetro se usa `dev`. Los datos actuales de desarrollo permanecen en `env
 
 La aplicación no lee ni escribe almacenamiento local del navegador. Posiciones y animaciones viven en memoria durante la sesión.
 
-Firebase Hosting sirve los archivos estáticos desde `outputs/`. La vista del emulador local se inicia con `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`.
+Firebase Hosting sirve los archivos estáticos desde `public/`. Configuración de entorno y persistencia se encuentran en `public/src/config/firebase.js` y `public/src/services/firebase/arena-cloud.js`. La vista local se inicia desde `KiArena/` con `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`.
 
 ## Seguridad pendiente
 

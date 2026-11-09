@@ -1,0 +1,59 @@
+// Única fuente de rutas por entorno para las funciones (regla de datos 2).
+export const ENVIRONMENTS = Object.freeze(['dev', 'qa', 'prd']);
+
+export const COLLECTIONS = Object.freeze({
+  providerTypes: 'kiArenaProviderTypes',
+  providers: 'kiArenaProviders',
+  users: 'kiArenaUsers',
+  userProviders: 'kiArenaUserProviders',
+  userProviderEvents: 'kiArenaUserProviderEvents',
+  oauthStates: 'kiArenaOAuthStates',
+  players: 'kiArenaPlayers',
+  messages: 'kiArenaMessages',
+  events: 'kiArenaEvents',
+  settings: 'kiArenaSettings',
+  races: 'kiArenaRaces',
+  playerTypes: 'kiArenaPlayerTypes',
+  powers: 'kiArenaPowers',
+  playerPowers: 'kiArenaPlayerPowers',
+  roles: 'kiArenaRoles',
+  userRoles: 'kiArenaUserRoles',
+  roleInvites: 'kiArenaRoleInvites'
+});
+
+export function parseEnvironment(value) {
+  const env = String(value || '').trim().toLowerCase();
+  if (!ENVIRONMENTS.includes(env)) {
+    const error = new Error(`Entorno inválido: "${value}". Usa dev, qa o prd.`);
+    error.code = 'invalid_env';
+    error.status = 400;
+    throw error;
+  }
+  return env;
+}
+
+export function collectionPath(env, name) {
+  return `environments/${parseEnvironment(env)}/${COLLECTIONS[name]}`;
+}
+
+// Firestore permite casi cualquier carácter en un ID, salvo "/".
+export function safeDocId(value) {
+  return String(value).replace(/\//g, '%2F');
+}
+
+export function providerDocId(providerTypeId, providerUserId) {
+  return safeDocId(`${providerTypeId}:${providerUserId}`);
+}
+
+export function userRoleDocId(userId, roleCode) {
+  return safeDocId(`${userId}:${roleCode}`);
+}
+
+export function userProviderDocId(userId, providerId) {
+  return safeDocId(`${userId}:${providerId}`);
+}
+
+// Invitación de rol por email: {email}:{roleCode}, email en minúsculas.
+export function roleInviteDocId(email, roleCode) {
+  return safeDocId(`${String(email).trim().toLowerCase()}:${roleCode}`);
+}

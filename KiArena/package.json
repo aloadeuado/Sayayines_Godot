@@ -1,0 +1,13 @@
+{
+  "name": "ki-arena",
+  "private": true,
+  "description": "Ki Arena: web, funciones y emuladores locales.",
+  "scripts": {
+    "emulators": "node scripts/emulators.js",
+    "test:functions": "npm --prefix functions test"
+  },
+  "devDependencies": {
+    "firebase-tools": "15.34.1"
+  },
+  "type": "module"
+}

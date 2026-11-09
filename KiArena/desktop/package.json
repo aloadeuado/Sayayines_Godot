@@ -1,0 +1,17 @@
+{
+  "name": "ki-arena-desktop",
+  "productName": "Ki Arena",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ki Arena de escritorio: abre la arena, el login, /bot y /settings.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node scripts/copy-public.js && electron .",
+    "check": "node --check main.js && node --check server.js && node --check scripts/copy-public.js && node --check scripts/build.js",
+    "build": "node scripts/copy-public.js && node scripts/build.js"
+  },
+  "devDependencies": {
+    "@electron/packager": "^18.3.6",
+    "electron": "33.4.11"
+  }
+}

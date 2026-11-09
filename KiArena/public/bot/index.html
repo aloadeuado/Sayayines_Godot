@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · Bot & Control</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+</head>
+<body>
+  <main class="bot-page">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA · BOT & CONTROL</h1>
+        <div class="tag">CHAT · ROSTER DE LUCHADORES · MÉTRICAS EN VIVO</div>
+        <div id="firebase-status">Conectando con Firebase…</div>
+      </div>
+      <nav class="page-nav">
+        <a href="/" class="nav-btn">← Volver a la arena</a>
+        <a href="/settings" class="nav-btn">Settings</a>
+        <label class="env-settings">
+          Entorno
+          <select id="environment-switch" aria-label="Entorno de Firebase">
+            <option value="dev">Desarrollo</option>
+            <option value="qa">QA</option>
+            <option value="prod">Producción</option>
+          </select>
+        </label>
+      </nav>
+    </header>
+
+    <div id="bot-status" class="bot-status-bar" role="status" aria-live="polite">Conectando con Firestore…</div>
+
+    <div class="bot-grid">
+      <!-- Columna 1: Chat y Comandos -->
+      <section class="card" id="chat-panel">
+        <h2>CHAT DE LA ARENA</h2>
+        <div class="chat-log" id="chat-log">
+          <div class="chat-system">Comandos rápidos: E entra, K Kamehameha, M Makankosappo, V Rayo Mortal (Freezer).</div>
+        </div>
+        <div class="chat-user">
+          <input id="chat-user" maxlength="24" placeholder="Nombre de usuario">
+          <button id="join-user" type="button">Ingresar (E)</button>
+        </div>
+        <div class="chat-compose">
+          <input id="chat-message" maxlength="120" placeholder="Escribe un mensaje o comando...">
+          <button id="send-chat" type="button">Enviar</button>
+        </div>
+        <div class="chat-shortcuts">
+          <button data-sim-command="E" type="button">E ➔ Entrar</button>
+          <button data-sim-command="K" type="button">K ➔ Kamehameha</button>
+          <button data-sim-command="M" type="button">M ➔ Makankosappo</button>
+          <button data-sim-command="V" type="button">V ➔ Rayo Mortal</button>
+        </div>
+        <div class="help">
+          Usa <b>Elegir</b> en el roster para fijar el usuario que emitirá los próximos poderes.
+        </div>
+      </section>
+
+      <!-- Columna 2: Roster de Luchadores -->
+      <section class="card" id="roster-card">
+        <div class="roster-head">
+          <h2>LUCHADORES</h2>
+          <button id="join-all" type="button">Agregar todos</button>
+        </div>
+        <div class="roster" id="roster">
+          <div class="help">Cargando luchadores desde Firestore…</div>
+        </div>
+      </section>
+
+      <!-- Columna 3: Métricas y Combate -->
+      <div class="side" id="metrics-side">
+        <section class="card">
+          <h2>MÉTRICAS GLOBALES</h2>
+          <div class="stats" id="global-metrics">
+            <div class="stat">Total luchadores<b>-</b></div>
+            <div class="stat">Vivos en arena<b>-</b></div>
+            <div class="stat">Bajas / KOs<b>-</b></div>
+            <div class="stat">Nivel más alto<b>-</b></div>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>ATRIBUTOS · SELECCIONADO</h2>
+          <div id="selected" class="help">Haz clic en un luchador para ver sus estadísticas completas.</div>
+          <div class="stats" id="stats"></div>
+        </section>
+
+        <section class="card">
+          <h2>REGISTRO DE COMBATE</h2>
+          <div class="feed" id="feed">
+            <div class="help">Cargando eventos de combate…</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

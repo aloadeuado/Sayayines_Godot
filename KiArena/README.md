@@ -1,26 +1,60 @@
 # Ki Arena
 
-Prototipo de arena 2D en HTML, CSS y JavaScript. Los perfiles, el progreso, el chat y las bajas se guardan en Cloud Firestore. El juego y sus imágenes son archivos estáticos.
+Juego de arena 2D en HTML, CSS y JavaScript. Firestore guarda los perfiles, el progreso, el chat y las bajas; el navegador ejecuta la simulación y presenta el canvas.
+
+## Estructura y Vistas
+
+```text
+KiArena/
+├── firebase.json                 # Firebase Hosting: public/, cleanUrls y rewrites
+├── .firebaserc                   # Proyecto de Firebase CLI
+├── FIREBASE.md                   # Datos, entornos y seguridad
+├── docs/                         # Especificaciones e historial
+└── public/
+    ├── index.html                # Ruta /: Arena de combate limpia para stream
+    ├── bot/
+    │   └── index.html            # Ruta /bot: Chat, roster y métricas en vivo
+    ├── settings/
+    │   └── index.html            # Ruta /settings: Ajustes de fórmulas y personajes
+    ├── ki-arena.html             # Redirección a /
+    ├── assets/                   # Fondo, sprites y efectos
+    ├── styles/arena.css          # Estilos unificados y responsive
+    └── src/
+        ├── main.js               # Enrutador e inicializador
+        ├── app/
+        │   ├── arena-app.js      # Entrada de la arena (/)
+        │   ├── bot-app.js        # Entrada de bot, chat y métricas (/bot)
+        │   └── settings-app.js   # Entrada de configuración (/settings)
+        ├── game/arena.js         # Canvas, animación, duelos y comandos remotos
+        ├── config/firebase.js    # Selección dev/qa/prod y configuración web
+        ├── config/gameplay-settings.js # Fórmulas de nivel y multiplicadores
+        └── services/
+            ├── firebase/arena-cloud.js # Persistencia y eventos Firestore
+            └── twitch/                 # Punto previsto para conectar Twitch
+```
+
+### Rutas disponibles
+- **`/`**: Ventana del juego directa con canvas 2D (`900 × 540`), física arcade, duelos automáticos e hitboxes activables.
+- **`/bot`**: Panel interactivo con chat, atajos (`E`, `K`, `M`, `V`), roster con barras de HP, selección de remitente, botón 'Agregar todos', métricas globales, atributos de luchador seleccionado y feed de eventos.
+- **`/settings`**: Panel para configurar multiplicadores por nivel de estadísticas (HP, Ki, Ataque, Defensas), daño de poderes y razas habilitadas.
+
+La lógica de arena se conserva junta en `game/arena.js` durante esta primera reorganización para reducir el riesgo de alterar el combate. La interfaz, el motor, el chat y el input se pueden extraer a módulos más pequeños después, conservando la misma API de persistencia.
 
 ## Entornos
 
-El selector cambia entre Desarrollo, QA y Producción. El entorno activo viaja en el parámetro `?env=dev`, `?env=qa` o `?env=prod` de la URL y define el prefijo de las colecciones. Sin parámetro, se usa Desarrollo.
+El selector usa `?env=dev`, `?env=qa` o `?env=prod` para elegir las colecciones. Hoy esos espacios comparten el proyecto `sayayin-c0dfe`; son separación lógica, no aislamiento de permisos, cuotas o facturación. Producción real debe usar su propio proyecto Firebase y reglas.
 
-Por ahora los tres espacios son rutas separadas dentro del proyecto Firebase `sayayin-c0dfe`; esto los separa lógicamente, pero no separa permisos, cuotas ni facturación. Antes de producción real, conviene asignar proyectos Firebase independientes para QA y producción con sus reglas propias.
+La página anterior `/ki-arena.html` permanece disponible como redirección a `/index.html`, conservando el parámetro del entorno. La simulación vive en memoria; Firestore mantiene los datos persistentes.
 
-## Código
+## Desarrollo local
 
-- `outputs/ki-arena.html`: escena, chat y paneles
-- `outputs/ki-arena-firebase.js`: acceso a Firestore
-- `outputs/firebase-config.js`: selección de entorno y configuración web
-- `outputs/*.png`: sprites y fondo
-- `firebase.json` y `.firebaserc`: Firebase Hosting y proyecto CLI
+Desde `KiArena/`, ejecuta `firebase.cmd emulators:start --only hosting --project sayayin-c0dfe` y abre `http://127.0.0.1:5000/`.
 
-La aplicación no guarda progreso en almacenamiento local del navegador. La simulación visual activa vive en memoria y se reconstruye al abrir la página.
+## Documentación detallada
 
-## Vista local
-
-`firebase.cmd emulators:start --only hosting --project sayayin-c0dfe`
-
-Luego abre `http://127.0.0.1:5000/ki-arena.html`.
-
+- [`docs/PROJECT_SPEC.md`](docs/PROJECT_SPEC.md): reglas de juego, luchadores, progresión, poderes y estado pendiente.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md): carpetas, módulos, dependencias y ejecución.
+- [`docs/FIRESTORE.md`](docs/FIRESTORE.md): rutas, campos, sincronización, entornos y seguridad.
+- [`docs/TWITCH_INTEGRATION.md`](docs/TWITCH_INTEGRATION.md): alcance planeado, OAuth y preguntas pendientes.
+- [`docs/CHANGELOG.md`](docs/CHANGELOG.md): registro acumulativo de instrucciones y cambios.
+- `../AGENTS.md` y `../.agents/skills/ki-arena-project/SKILL.md`: contexto y flujo para agentes de desarrollo.
