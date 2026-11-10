@@ -341,7 +341,14 @@ async function start() {
   if (oauth && oauth.status !== 'ok' && !state.client.auth.currentUser) {
     alertBox(oauth.message || `No se pudo entrar con ${typeName(oauth.provider)}.`, oauth.status === 'cancelled' ? 'info' : 'error');
   }
-  setStatus(`Entorno: ${ENVIRONMENT_LABELS[env]}${emulator ? ' · Emuladores locales (datos de prueba)' : ''}`);
+  const baseStatus = `Entorno: ${ENVIRONMENT_LABELS[env]}${emulator ? ' · Emuladores locales (datos de prueba)' : ''}`;
+  setStatus(baseStatus);
+  // App de escritorio: muestra si el login va por la Cloud Function o en local.
+  fetch('/__ki-arena/status', { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).then(info => {
+    if (!info?.desktop) return;
+    const mode = { local: 'login local (sin Cloud Functions)', remote: 'login con Cloud Functions', pending: 'login automático' }[info.using] || info.using;
+    setStatus(`${baseStatus} · Escritorio: ${mode} · ${info.version}`);
+  }).catch(() => {});
 }
 
 start();

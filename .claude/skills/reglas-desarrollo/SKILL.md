@@ -53,6 +53,13 @@ Cuando Pedro pida ver un objeto, colección o modelo, entrégalo SIEMPRE así:
 - Si un PR quedó apuntando a otra rama, ciérralo y abre uno nuevo hacia `dev`.
 - El paso de `dev` a `qa`/`main` lo decide Pedro.
 
+## 6. No cambiar los modelos de datos sin consultar a Pedro (Pedro, 2026-11-09)
+
+- Antes de crear una colección, agregar, renombrar o quitar un campo, cambiar un tipo, un id de documento o una relación de Firestore, **pregunta a Pedro y espera su respuesta**. Muestra el cambio como propuesta (ruta, tabla de campos y relaciones, ver regla 4).
+- Vale para código, scripts, migraciones, semillas y datos reales en cualquier entorno (dev, qa, prd).
+- Si un arreglo necesita tocar un modelo, detente y consulta; arregla primero lo que no lo toque.
+- Lo que Pedro edite a mano desde el panel `/admin` es decisión suya y no necesita esta consulta.
+
 ## Checklist para cada cambio
 
 - [ ] ¿Las escrituras nuevas llenan `id`, `reference`, `isActive`, y el código tolera que falten al leer?
@@ -60,3 +67,4 @@ Cuando Pedro pida ver un objeto, colección o modelo, entrégalo SIEMPRE así:
 - [ ] ¿Las lecturas ignoran `isActive === false` y tratan el ausente como activo?
 - [ ] ¿Algún flujo borra
 - [ ] ¿El PR apunta a `dev`?
+- [ ] ¿Cambia algún modelo de Firestore? Entonces ¿Pedro lo aprobó antes?

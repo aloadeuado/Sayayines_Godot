@@ -12,3 +12,7 @@ Para cada instrucción nueva del usuario relacionada con el proyecto, agrega una
 ## Pull requests
 
 Todo pull request se abre hacia la rama `dev` (Pedro, 2026-11-09). Nunca hacia `main` salvo pedido explícito.
+
+## Modelos de datos
+
+No cambies ningún modelo de Firestore (colección, campo, tipo, id o relación) sin consultar antes a Pedro (2026-11-09).

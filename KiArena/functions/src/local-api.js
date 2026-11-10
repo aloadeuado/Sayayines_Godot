@@ -11,9 +11,9 @@ export const PUBLIC_WEB_CONFIG = Object.freeze({
 
 export function createLocalAuthApi({
   projectId = PUBLIC_WEB_CONFIG.projectId, apiKey = PUBLIC_WEB_CONFIG.apiKey,
-  firestoreOrigin, authOrigin, fetchImpl = globalThis.fetch
+  firestoreOrigin, authOrigin, fetchImpl = globalThis.fetch, transactions = true
 } = {}) {
-  const db = createRestAdminFirestore({ projectId, apiKey, origin: firestoreOrigin, fetchImpl });
+  const db = createRestAdminFirestore({ projectId, apiKey, origin: firestoreOrigin, fetchImpl, transactions });
   const auth = createRestAuth({ projectId, apiKey, origin: authOrigin, fetchImpl });
   const handler = createAuthApi({ db, auth, fetchImpl });
 
