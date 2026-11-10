@@ -25,9 +25,9 @@ Antes de tocar datos o rutas, aplica la skill `reglas-desarrollo` (`.kiro/steeri
 
 ## Reglas del área
 
-- Primero preguntar a Pedro por su trabajo local de `B`; no reimplementar a ciegas.
+- Ya implementada (2026-11-10): motor `kiBlast` en `game/arena.js` (`launchBlast`, `fireBlast`, `drawBlast`), nivel 1 para las cuatro razas, pose a una mano y esfera recta. Es el poder de la Rosa en TikTok y el reemplazo de un regalo bloqueado.
 - Seguir la checklist completa de poder nuevo; un botón sin flujo de juego no cuenta.
-- Validar nivel 4 (bloqueado) y 5 (permitido) en las cuatro razas.
+- Validar nivel 1 permitido en las cuatro razas (`scripts/test-tiktok-map.mjs`).
 
 ## Cómo trabajar una tarea
 

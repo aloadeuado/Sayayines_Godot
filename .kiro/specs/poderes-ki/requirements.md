@@ -110,3 +110,13 @@ Los poderes se lanzan con una letra del chat. Cada uno tiene requisito de raza/n
 6. Personajes antiguos sin filas DEBEN recibirlas al cargar según su nivel y raza (sin backfill masivo obligatorio).
 
 **Estado (2026-10-24):** HU-POD-09, 10 y 11 implementadas en la rama `claude/project-thread-osowq6` (`public/src/config/game-catalog.js`, `game/arena.js`, `app/settings-app.js`, `functions/scripts/migrate-character-model.js`). 42 registros de poder (28 poderes distintos por raza); solo los de mecánica `kamehameha`, `makankosappo` y `deathRay` están activos en combate, el resto queda con `status: 'pending'` hasta tener su animación y hitbox.
+
+### HU-POD-12 — Ráfaga de Ki activa y poderes por regalo · IMPLEMENTADO (2026-11-10)
+1. `kiBlast` (Ráfaga de Ki, `B`) DEBE tener `engine: 'kiBlast'` (activo en combate) para las cuatro razas desde nivel 1.
+2. Los regalos de TikTok DEBEN lanzar poderes por `code` (`powerForCode`) respetando nivel y raza, sin enfriamiento; si el poder está bloqueado o no tiene mecánica, se lanza la Ráfaga de Ki y se explica el motivo (`powerBlockReasonForCode`). Ver `.kiro/specs/integracion-tiktok/`.
+
+### HU-POD-13 — Golpes, combos, rayos nuevos y Genkidama · IMPLEMENTADO (2026-11-10)
+1. `rush`, `meteorCombo`, `wolfFangFist` y `dragonFist` DEBEN usar el motor `melee`: acercarse al rival más cercano y golpearlo 2, 4, 6 o 1 vez con daño físico; Puño del Dragón también daña a quien esté detrás en línea.
+2. `galickGun` y `finalFlash` DEBEN usar el motor del Kamehameha con su color, grosor, carga y daño del catálogo.
+3. `spiritBomb` DEBE cargar sobre la cabeza durante `chargeSeconds`, sumar poder con el chat (`chatCharge`) y caer sobre el rival más cercano con daño en área.
+4. Todos respetan nivel y raza; no tienen letra: se lanzan con regalos de TikTok.

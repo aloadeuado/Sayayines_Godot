@@ -7,11 +7,14 @@
   "main": "main.js",
   "scripts": {
     "start": "node scripts/copy-public.js && electron .",
-    "check": "node --check main.js && node --check server.js && node --check scripts/copy-public.js && node --check scripts/build.js",
+    "check": "node --check main.js && node --check server.js && node --check tiktok/receiver.js && node --check scripts/copy-public.js && node --check scripts/build.js",
     "build": "node scripts/copy-public.js && node scripts/build.js"
   },
   "devDependencies": {
     "@electron/packager": "^18.3.6",
     "electron": "33.4.11"
+  },
+  "dependencies": {
+    "tiktok-live-connector": "^2.5.0"
   }
 }

@@ -63,17 +63,51 @@ function renderCharacters() {
   }).join('');
 }
 
+// Mapa de regalos de TikTok: una fila por regalo (spec integracion-tiktok).
+function giftRow(gift) {
+  const codes = [...new Map(catalog.powers.map(p => [p.code, p])).values()];
+  const options = codes.map(p => `<option value="${escape(p.code)}" ${p.code === gift.powerCode ? 'selected' : ''}>${escape(p.name)}${p.status === 'implemented' ? '' : ' (pendiente)'}</option>`).join('');
+  return `<div class="power-setting-pair tiktok-gift" data-tiktok-gift>
+    <label>Regalo (nombre en TikTok)<input type="text" maxlength="40" data-gift-field="giftName" value="${escape(gift.giftName)}"></label>
+    <label>ID<input type="number" min="0" step="1" data-gift-field="giftId" value="${escape(gift.giftId)}"></label>
+    <label>Monedas<input type="number" min="0" step="1" data-gift-field="coins" value="${escape(gift.coins)}"></label>
+    <label>Poder<select data-gift-field="powerCode">${options}</select></label>
+    <label>Activo<input type="checkbox" data-gift-field="isActive" ${gift.isActive !== false ? 'checked' : ''}></label>
+  </div>`;
+}
+
+function renderTikTok() {
+  $('#tiktok-like-heal').value = settings.tiktok.likeHealHp;
+  $('#tiktok-max-queue').value = settings.tiktok.maxQueuedPerUser;
+  $('#rejoin-cooldown').value = settings.rejoinCooldownSeconds;
+  $('#tiktok-gift-settings').innerHTML = settings.tiktok.gifts.map(giftRow).join('');
+}
+
+function readTikTok(next) {
+  next.rejoinCooldownSeconds = Number($('#rejoin-cooldown').value);
+  next.tiktok = {
+    likeHealHp: Number($('#tiktok-like-heal').value),
+    maxQueuedPerUser: Number($('#tiktok-max-queue').value),
+    gifts: [...document.querySelectorAll('[data-tiktok-gift]')].map(row => {
+      const field = name => row.querySelector(`[data-gift-field="${name}"]`);
+      return { giftName: field('giftName').value.trim(), giftId: Number(field('giftId').value) || 0, coins: Number(field('coins').value) || 0, powerCode: field('powerCode').value, isActive: field('isActive').checked };
+    })
+  };
+}
+
 function render() {
   document.querySelectorAll('[data-stat-multiplier]').forEach(input => { input.value = settings.stats[input.dataset.statMultiplier]; });
   renderRaces();
   renderPowers();
   renderCharacters();
+  renderTikTok();
 }
 
 // Lee el formulario y devuelve los cambios por documento de catálogo.
 function readForm() {
   const nextSettings = structuredClone(settings);
   document.querySelectorAll('[data-stat-multiplier]').forEach(input => { nextSettings.stats[input.dataset.statMultiplier] = Number(input.value); });
+  readTikTok(nextSettings);
   const races = catalog.races.map(race => {
     const box = document.querySelector(`[data-race="${race.code}"]`);
     const stats = { ...race.stats }, params = { ...(race.utility?.params || {}) };
@@ -180,6 +214,9 @@ export async function startSettings() {
     } catch (error) {
       status(`No se pudieron guardar los ajustes: ${error.message}`, 'error');
     }
+  });
+  $('#tiktok-add-gift').addEventListener('click', () => {
+    $('#tiktok-gift-settings').insertAdjacentHTML('beforeend', giftRow({ giftName: '', giftId: 0, coins: 1, powerCode: 'kiBlast', isActive: true }));
   });
   $('#settings-reset').addEventListener('click', async () => {
     try {

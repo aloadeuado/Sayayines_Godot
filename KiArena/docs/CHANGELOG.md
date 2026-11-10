@@ -2,6 +2,43 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — primera conexión a un live real (@aloadecuad0)
+
+- **Problema:** en el primer live real, «e» no hacía nada: la app nunca se había conectado (se probó con el @ equivocado) y, ya con el @ correcto (`aloadecuad0`, con cero), la conexión fallaba porque pedir la lista de regalos al conectar (`enableExtendedGiftInfo`) usa un servicio de Euler Stream que exige plan Business.
+- **Cambio:** la lista de regalos se pide aparte y, si falla, la conexión sigue (los regalos se reconocen por el nombre que llega en cada evento). Si TikTok no encuentra un live abierto para el @, el panel lo explica y sigue reintentando.
+- **Comprobado:** el receptor se conecta al live de @aloadecuad0 (sala 7706599578691652360) con y sin API key. La lista de regalos del panel queda vacía con el plan gratuito.
+- **Segundo problema:** conectado, «e» seguía sin hacer nada. tiktok-live-connector 2.5 entrega el usuario en `user.id` y `user.displayId` y el comentario en `content` (el README de la librería todavía dice `userId`, `uniqueId` y `comment`), así que todos los comentarios llegaban vacíos y sin usuario. El receptor ahora lee ambos nombres (también para likes y regalos). Comprobado con los comentarios reales del live (`aloadecuad0: e`, `ronalito_sai: El mejor de todos`).
+- **Nota:** los comentarios de la cuenta de prueba «Resaltando lo obvio» no le llegan a nadie más que al anfitrión: TikTok no los reparte (ni en el historial), probablemente por ser una cuenta nueva. Con otras cuentas sí llegan.
+
+## 2026-11-10 — orientación de la arena más a la mano
+
+- **Solicitud:** Pedro no encontraba el modo vertical: su ventana «Ki Arena · Arena» seguía en horizontal (1200×720, `layout=horizontal`). La opción solo estaba en el menú de la ventana principal, y la ventana de la arena no muestra menú.
+- **Cambio:** clic derecho en la ventana de la arena → Horizontal / Vertical; nuevo atajo «Cambiar horizontal / vertical» (Ctrl/⌘+Shift+O) en el menú Ki Arena. Cambiar redimensiona la ventana y recarga la arena en esa orientación; la elección queda en `preferencias.json`.
+- **Comprobado:** Electron en Windows con Playwright: vertical → 540×960 con canvas 540×960, horizontal → 1200×720, y el atajo alterna.
+
+## 2026-11-10 — TikTok Live fase 2: golpes, combos, rayos nuevos y Genkidama
+
+- **Solicitud:** Pedro pidió «hagamos la fase 2» de TikTok Live.
+- **Golpes y combos (motor `melee`):** el guerrero se lanza hacia el rival más cercano y lo golpea con las poses de cuerpo a cuerpo. Embestida 2 golpes, Combo Meteoro 4, Puño del Lobo 6, Puño del Dragón 1 golpe fuerte que también daña a quien esté detrás en línea. Daño físico = ataque físico × multiplicador del poder, repartido entre los golpes (total ≈ 0.8 a 1.2 veces, parecido a un Kamehameha); empuja al rival en el último golpe. Nadie puede iniciar un duelo con quien está en un combo.
+- **Rayos:** Galick Ho y Resplandor Final usan el motor del Kamehameha con su color, grosor, carga y daño del catálogo; el texto de la arena dice el nombre del poder.
+- **Genkidama (motor `spiritBomb`):** carga 4 s con la esfera creciendo sobre la cabeza (pose de carga); cada comentario del chat de TikTok durante la carga suma poder (utilidad `chatCharge`: +2 % por mensaje, hasta +100 %, y la esfera crece). Luego cae sobre el rival más cercano, lo sigue y explota en área.
+- **Catálogo:** `engine` en código para `rush`, `meteorCombo`, `wolfFangFist`, `dragonFist` (`melee`), `galickGun`, `finalFlash` (`kamehameha`) y `spiritBomb`. Siguen respetando su nivel y su raza (p. ej. Genkidama: Saiyajin nivel 80). Sin cambios de modelo en Firestore.
+- **Comprobado:** `scripts/test-tiktok-map.mjs` (motor, nivel y raza de cada poder nuevo); prueba visual en Chrome contra el emulador con tres jugadores de nivel 80 sembrados solo en el emulador: Combo Meteoro, Puño del Lobo, Resplandor Final, Galick Ho, Embestida, Puño del Dragón bloqueado para Terrícola (sale Ráfaga de Ki) y Genkidama cargada con el chat. Sin errores de JavaScript. **Sin probar:** live real y macOS.
+- **Pendiente:** Pedro elige los regalos de ≈10–20 monedas para Galick Ho, Puño del Lobo y Puño del Dragón (se agregan en Settings → TikTok Live).
+
+## 2026-11-10 — TikTok Live: entrar con «e», likes que curan y regalos que lanzan poderes (fase 1)
+
+- **Solicitud:** Pedro pidió conectar Ki Arena a su TikTok Live, todo en su propio computador (issue #7): escribir «e»/«E» en el chat entra con un guerrero con el nombre de la cuenta; cada like cura 1 HP; cada poder tiene un regalo (simples = 1 moneda, buenos = 10–20, León = Genkidama); golpes y combos con la misma frecuencia; quien sale espera para volver. Primero se escribió la HU y Pedro respondió: solo sale del tablero quien llega a 0 HP y vuelve con «e» tras **10 s**; los poderes siguen liberándose por nivel; la **Rosa** lanza un poder sencillo nuevo a una mano (Ráfaga de Ki) que cualquiera puede usar; con regalo no hay enfriamiento, con letra sí; un regalo de alguien muerto antes de los 10 s queda en cola. Aprobó los cambios de modelo 1 (Settings) y 3 (mensajes), y el 2 solo con `username`.
+- **Escritorio:** `desktop/tiktok/receiver.js` se conecta al live por @usuario con `tiktok-live-connector` 2.5 (sin contraseña), normaliza chat, likes y regalos (solo el final de cada racha), deduplica por ID y reintenta 5→60 s. `server.js` expone `/api/tiktok/status|events` (SSE) y `POST /api/tiktok/connect|disconnect|simulate` (solo desde páginas del mismo servidor; `127.0.0.1`). Menú «TikTok Live» (Ctrl/⌘6 abre el panel, Desconectar); el @usuario queda en `preferencias.json` y se reconecta al abrir. La API key de firma de Euler Stream se lee de `TIKTOK_SIGN_API_KEY` o `config/environments/{env}.local.env` (ignorado por Git).
+- **Web:** panel `/tiktok` (conectar, estado, lista de regalos del live con su ID y simulador marcado «simulado»); `/settings` edita HP por like, cola por espectador, espera para volver y el mapa de regalos; `/bot` muestra los mensajes de TikTok y suma el comando `B`.
+- **Arena:** jugador `tiktok_{userId}` con el @ limpio como nombre; like = +HP hasta el máximo con «+N» verde (se guarda cada 5 s); regalo = poder por `powerCode` respetando nivel y raza, sin enfriamiento, cola de 5 y tope de 20 poderes/s; si está bloqueado sale la Ráfaga de Ki y se explica por qué; regalo sin mapa = agradecimiento. A 0 HP sale del tablero y espera `rejoinCooldownSeconds` (10 s) para volver, en todas las plataformas. Los mensajes de TikTok se guardan como `kiArenaMessages/tiktok_{eventId}` y no se reejecutan.
+- **Ráfaga de Ki (`kiBlast`, `B`):** ya tiene mecánica: pose a una mano (la del dedo), esfera de ki recta que daña al primer rival, nivel 1 para todas las razas, enfriamiento 2.5 s con letra.
+- **Modelo (aprobado por Pedro):** `settingsJson.tiktok` (`likeHealHp`, `maxQueuedPerUser`, `gifts[]` con `giftId`, `giftName`, `coins`, `powerCode`, `isActive`) y `settingsJson.rejoinCooldownSeconds`; mensajes con `platform` y `gift` (`giftId`, `giftName`, `count`, `powerCode`). Los jugadores de TikTok no tienen campos nuevos. `kiArenaPowers` no cambia.
+- **Comprobado:** `scripts/test-tiktok-map.mjs` (mapeo, ajustes, desbloqueo); prueba de punta a punta con el servidor del escritorio, el receptor y la arena en Chrome contra el emulador de Firestore: entrada de dos jugadores, Rosa ×2, regalo bloqueado → Ráfaga de Ki, regalo sin mapa, letra B, likes con «+N», deduplicación y bloqueo de otros orígenes (403). **Sin probar:** un live real (lo abre Pedro), macOS, la muerte y la espera de 10 s en vivo.
+- **Pendiente (fase 2):** motores de golpes y combos (Embestida, Combo Meteoro, Puño del Lobo, Puño del Dragón), Galick Ho y Resplandor Final, y Genkidama; mientras tanto esos regalos lanzan la Ráfaga de Ki.
+- **Nota:** `npm run emulators` falla en Windows con Node 24 (`spawn EINVAL` al lanzar `npx.cmd`); el arreglo sigue en el stash local de Pedro. Para la prueba se usó `npx firebase emulators:start --only firestore`.
+- **Rama:** `feature/tiktok-live` desde `dev`.
+
 ## 2026-11-10 — arena en ventana propia y modo vertical (escritorio)
 
 - **Solicitud:** Pedro pidió que la app de escritorio abra la arena en una ventana aparte (la que captura en OBS) y una opción de modo vertical 9:16 para TikTok (issue #5).

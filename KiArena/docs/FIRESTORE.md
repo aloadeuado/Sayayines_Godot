@@ -20,7 +20,24 @@ Los tres entornos actuales son prefijos lógicos dentro del mismo proyecto:
 | `qa` | `environments/qa/kiArenaPlayers/{usernameKey}` | `environments/qa/kiArenaMessages/{auto-id}` | `environments/qa/kiArenaEvents/{auto-id}` |
 | `prod` | `environments/prod/kiArenaPlayers/{usernameKey}` | `environments/prod/kiArenaMessages/{auto-id}` | `environments/prod/kiArenaEvents/{auto-id}` |
 
-La configuración del juego se guarda en `environments/{dev|qa|prod}/kiArenaSettings/gameplay`. El documento contiene `settingsJson` (JSON serializado con versión, multiplicadores de atributos, curvas de daño por nivel y elegibilidad de personajes), `environment` y `updatedAt`. La pantalla lee y escribe únicamente el documento del entorno seleccionado. Si nunca se ha guardado Settings, los valores predeterminados del código se usan como fallback.
+La configuración del juego se guarda en `environments/{dev|qa|prod}/kiArenaSettings/gameplay`. El documento contiene `settingsJson` (JSON serializado con versión, multiplicadores de atributos, curvas de daño por nivel, elegibilidad de personajes, `rejoinCooldownSeconds` y `tiktok`), `environment` y `updatedAt`.
+
+TikTok Live (aprobado por Pedro, 2026-11-10):
+
+| Campo | Tipo | Obligatorio | Descripción |
+|---|---|---|---|
+| `settingsJson.rejoinCooldownSeconds` | number | No (10) | Segundos que espera quien llega a 0 HP para volver con `E` |
+| `settingsJson.tiktok.likeHealHp` | number | No (1) | HP que cura cada like |
+| `settingsJson.tiktok.maxQueuedPerUser` | number | No (5) | Poderes de regalo en cola por espectador |
+| `settingsJson.tiktok.gifts[].giftId` | number | Sí (0 = por nombre) | ID del regalo en TikTok |
+| `settingsJson.tiktok.gifts[].giftName` | string | Sí | Nombre del regalo que manda TikTok (Rose, Lion…) |
+| `settingsJson.tiktok.gifts[].coins` | number | No | Monedas (informativo) |
+| `settingsJson.tiktok.gifts[].powerCode` | string | Sí | `code` del poder en `kiArenaPowers` |
+| `settingsJson.tiktok.gifts[].isActive` | boolean | No | `false` desactiva el regalo |
+| `kiArenaMessages/tiktok_{eventId}.platform` | string | No | `tiktok` o `tiktok-sim` |
+| `kiArenaMessages/tiktok_{eventId}.gift.giftId` · `.giftName` · `.count` · `.powerCode` | number · string · number · string | No | Regalo recibido y poder que lanzó |
+
+Los jugadores de TikTok usan el ID `tiktok_{userId}` (`usernameKey`) y el @ limpio en `username`; no tienen campos nuevos. La pantalla lee y escribe únicamente el documento del entorno seleccionado. Si nunca se ha guardado Settings, los valores predeterminados del código se usan como fallback.
 
 Esto evita mezclar documentos por convención; **no** aísla permisos, cuotas, facturación o recursos. La configuración `.firebaserc` todavía tiene un alias `default` apuntando a `sayayin-c0dfe`. Antes de producción real, asignar proyectos por entorno y reglas propias.
 

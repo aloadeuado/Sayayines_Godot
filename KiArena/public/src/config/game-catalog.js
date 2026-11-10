@@ -56,7 +56,7 @@ export const DEFAULT_PLAYER_TYPES = Object.freeze([
 
 // category: physical | kiBeam | kiArea | control | buff
 // engine: mecánica del juego que ejecuta el poder. Solo kamehameha,
-// makankosappo y deathRay existen hoy; los demás quedan con status 'pending'
+// makankosappo, deathRay, kiBlast, melee (golpes y combos) y spiritBomb existen hoy; los demás quedan con status 'pending'
 // (registrados y editables, pero sin acción en combate todavía).
 const ALL = ['saiyajin', 'namekuseijin', 'terricola'];
 const POWER_SPECS = [
@@ -72,26 +72,26 @@ const POWER_SPECS = [
   { code: 'deathRay', name: 'Rayo Mortal', races: ['freezer'], category: 'kiBeam', engine: 'deathRay', command: 'V', unlockLevel: 1, cooldownSeconds: 1.8, chargeSeconds: 0.24, ki: curve(2.6, 3.4), baseSizeY: 10, sizeY: curve(1, 0.7), hitbox: 'front', color: '#ff48d7',
     description: 'Rayo rápido desde un dedo, con enfriamiento corto.' },
   // Pendientes de mecánica: físicos y combos
-  { code: 'dragonFist', name: 'Puño del Dragón', races: ['saiyajin'], category: 'physical', unlockLevel: 35, cooldownSeconds: 9, physicalAttack: curve(2.5, 6), physicalDefense: 0.9, hitbox: 'front', description: 'Puñetazo que atraviesa a varios en línea.' },
-  { code: 'meteorCombo', name: 'Combo Meteoro', races: ['saiyajin'], category: 'physical', unlockLevel: 15, cooldownSeconds: 6, physicalAttack: curve(2, 5), physicalDefense: 1.1, hitbox: 'contact', description: 'Cadena de 4 golpes que lanza al rival.' },
+  { code: 'dragonFist', name: 'Puño del Dragón', races: ['saiyajin'], category: 'physical', engine: 'melee', unlockLevel: 35, cooldownSeconds: 9, physicalAttack: curve(2.5, 6), physicalDefense: 0.9, hitbox: 'front', description: 'Puñetazo que atraviesa a varios en línea.' },
+  { code: 'meteorCombo', name: 'Combo Meteoro', races: ['saiyajin'], category: 'physical', engine: 'melee', unlockLevel: 15, cooldownSeconds: 6, physicalAttack: curve(2, 5), physicalDefense: 1.1, hitbox: 'contact', description: 'Cadena de 4 golpes que lanza al rival.' },
   { code: 'janKen', name: 'Jan Ken', races: ['terricola'], category: 'physical', unlockLevel: 5, cooldownSeconds: 4, physicalAttack: curve(1.6, 3.5), hitbox: 'contact', description: 'Piedra, papel y tijera: 3 golpes rápidos.' },
-  { code: 'wolfFangFist', name: 'Puño del Lobo', races: ['terricola'], category: 'physical', unlockLevel: 12, cooldownSeconds: 6, physicalAttack: curve(1.8, 4.2), physicalDefense: 0.9, hitbox: 'contact', description: 'Combo largo; más probabilidad de esquivar mientras dura.' },
+  { code: 'wolfFangFist', name: 'Puño del Lobo', races: ['terricola'], category: 'physical', engine: 'melee', unlockLevel: 12, cooldownSeconds: 6, physicalAttack: curve(1.8, 4.2), physicalDefense: 0.9, hitbox: 'contact', description: 'Combo largo; más probabilidad de esquivar mientras dura.' },
   { code: 'elasticArm', name: 'Brazo Elástico', races: ['namekuseijin'], category: 'physical', unlockLevel: 8, cooldownSeconds: 5, physicalAttack: curve(1.5, 3.8), physicalDefense: 1.1, hitbox: 'front', description: 'Agarra a distancia y acerca al rival.' },
   { code: 'tailWhip', name: 'Latigazo de Cola', races: ['freezer'], category: 'physical', unlockLevel: 6, cooldownSeconds: 4, physicalAttack: curve(1.7, 4), hitbox: 'area', description: 'Golpea alrededor y empuja.' },
-  { code: 'rush', name: 'Embestida', races: [...ALL, 'freezer'], category: 'physical', unlockLevel: 3, cooldownSeconds: 4, physicalAttack: curve(1.4, 3), physicalDefense: 1.2, hitbox: 'contact', description: 'Entra a un duelo cuerpo a cuerpo de inmediato.' },
+  { code: 'rush', name: 'Embestida', races: [...ALL, 'freezer'], category: 'physical', engine: 'melee', unlockLevel: 3, cooldownSeconds: 4, physicalAttack: curve(1.4, 3), physicalDefense: 1.2, hitbox: 'contact', description: 'Entra a un duelo cuerpo a cuerpo de inmediato.' },
   // Pendientes: ki en rayo
-  { code: 'galickGun', name: 'Galick Ho', races: ['saiyajin'], category: 'kiBeam', unlockLevel: 25, cooldownSeconds: 5, ki: curve(2.2, 5), kiDefense: 0.9, physicalDefense: 0.9, hitbox: 'full', color: '#b46bff', description: 'Onda de ki ancha y violeta.' },
-  { code: 'finalFlash', name: 'Resplandor Final', races: ['saiyajin'], category: 'kiBeam', unlockLevel: 60, cooldownSeconds: 14, chargeSeconds: 1.8, ki: curve(3.5, 9), kiDefense: 0.6, physicalDefense: 0.6, baseSizeY: 40, sizeY: curve(1, 3.5), hitbox: 'full', color: '#fff27a', description: 'Carga larga y muy expuesta; onda enorme.' },
+  { code: 'galickGun', name: 'Galick Ho', races: ['saiyajin'], category: 'kiBeam', engine: 'kamehameha', unlockLevel: 25, cooldownSeconds: 5, ki: curve(2.2, 5), kiDefense: 0.9, physicalDefense: 0.9, hitbox: 'full', color: '#b46bff', description: 'Onda de ki ancha y violeta.' },
+  { code: 'finalFlash', name: 'Resplandor Final', races: ['saiyajin'], category: 'kiBeam', engine: 'kamehameha', unlockLevel: 60, cooldownSeconds: 14, chargeSeconds: 1.8, ki: curve(3.5, 9), kiDefense: 0.6, physicalDefense: 0.6, baseSizeY: 40, sizeY: curve(1, 3.5), hitbox: 'full', color: '#fff27a', description: 'Carga larga y muy expuesta; onda enorme.' },
   { code: 'masenko', name: 'Masenko', races: ['terricola'], category: 'kiBeam', unlockLevel: 18, cooldownSeconds: 4.5, ki: curve(2, 4.6), hitbox: 'front', color: '#ffe066', description: 'Rayo de carga corta desde la frente.' },
   { code: 'triBeam', name: 'Kikoho', races: ['terricola'], category: 'kiArea', unlockLevel: 40, cooldownSeconds: 10, ki: curve(3, 7), kiDefense: 0.8, physicalDefense: 0.8, hitbox: 'area', color: '#ffd23f', description: 'Golpe de área que cuesta un porcentaje de su propia vida.',
     utility: { code: 'selfDamage', name: 'Sacrificio', description: 'Pierde parte de su vida al lanzarlo.', params: { selfHpCost: 0.1 } } },
   // Pendientes: ki en área y esferas
-  { code: 'spiritBomb', name: 'Genkidama', races: ['saiyajin'], category: 'kiArea', unlockLevel: 80, cooldownSeconds: 30, chargeSeconds: 4, ki: curve(4, 10), kiDefense: 0.5, physicalDefense: 0.5, baseSizeY: 80, sizeY: curve(1, 4), baseSizeX: 80, sizeX: curve(1, 4), hitbox: 'area', color: '#7fe3ff', description: 'Carga muy larga; crece con la energía del chat.',
+  { code: 'spiritBomb', name: 'Genkidama', races: ['saiyajin'], category: 'kiArea', engine: 'spiritBomb', unlockLevel: 80, cooldownSeconds: 30, chargeSeconds: 4, ki: curve(4, 10), kiDefense: 0.5, physicalDefense: 0.5, baseSizeY: 80, sizeY: curve(1, 4), baseSizeX: 80, sizeX: curve(1, 4), hitbox: 'area', color: '#7fe3ff', description: 'Carga muy larga; crece con la energía del chat.',
     utility: { code: 'chatCharge', name: 'Energía del chat', description: 'Cada mensaje del chat durante la carga suma poder.', params: { bonusPerMessage: 0.02, maxBonus: 1 } } },
   { code: 'bigBangAttack', name: 'Ataque Big Bang', races: ['saiyajin'], category: 'kiArea', unlockLevel: 45, cooldownSeconds: 9, ki: curve(2.8, 6.5), kiDefense: 0.9, physicalDefense: 0.9, hitbox: 'area', color: '#8fd8ff', description: 'Esfera que explota al impactar.' },
   { code: 'deathBall', name: 'Supernova', races: ['freezer'], category: 'kiArea', unlockLevel: 70, cooldownSeconds: 25, chargeSeconds: 3, ki: curve(3.8, 9.5), kiDefense: 0.6, physicalDefense: 0.6, baseSizeY: 70, sizeY: curve(1, 4), baseSizeX: 70, sizeX: curve(1, 4), hitbox: 'area', color: '#ff6b3d', description: 'Esfera gigante, lenta y aplastante.' },
   { code: 'hellzoneGrenade', name: 'Granada Infernal', races: ['namekuseijin'], category: 'kiArea', unlockLevel: 30, cooldownSeconds: 10, ki: curve(2.4, 5.8), hitbox: 'area', color: '#9dff6b', description: 'Esferas que rodean al rival y se cierran.' },
-  { code: 'kiBlast', name: 'Ráfaga de Ki', races: [...ALL, 'freezer'], category: 'kiBeam', command: 'B', unlockLevel: 1, cooldownSeconds: 2.5, ki: curve(1.2, 2.6), hitbox: 'front', color: '#ffe9a3', description: 'Muchos disparos pequeños seguidos.' },
+  { code: 'kiBlast', name: 'Ráfaga de Ki', races: [...ALL, 'freezer'], category: 'kiBeam', engine: 'kiBlast', command: 'B', unlockLevel: 1, cooldownSeconds: 2.5, chargeSeconds: 0.2, ki: curve(1.2, 2.6), baseSizeY: 14, sizeY: curve(1, 2), hitbox: 'front', color: '#ffe9a3', description: 'Esfera de ki lanzada con una sola mano. Es el poder de la Rosa en TikTok.' },
   { code: 'explosiveWave', name: 'Onda Explosiva', races: [...ALL, 'freezer'], category: 'kiArea', unlockLevel: 22, cooldownSeconds: 8, ki: curve(1.5, 3.2), kiDefense: 1.2, physicalDefense: 1.2, hitbox: 'area', color: '#fff6d6', description: 'Aleja a todos alrededor.' },
   // Pendientes: utilidad y control
   { code: 'destructoDisc', name: 'Kienzan', races: ['terricola'], category: 'kiBeam', unlockLevel: 28, cooldownSeconds: 8, ki: curve(2.5, 6), hitbox: 'front', color: '#ffe36b', description: 'Disco cortante que ignora la defensa física.',
@@ -308,6 +308,29 @@ export function powerForCommand(catalog, fighter, command, rows = []) {
   const cmd = String(command || '').trim().toUpperCase();
   const options = availablePowers(catalog, fighter, rows).filter(p => p.command === cmd);
   return options.find(p => p.raceCode === fighter.raceCode) || options[0] || null;
+}
+
+// Poder por su code (regalos de TikTok): la versión de su raza o, si lo tiene por
+// otra vía (fila admin), cualquiera disponible. Respeta nivel y raza.
+export function powerForCode(catalog, fighter, code, rows = []) {
+  const options = availablePowers(catalog, fighter, rows).filter(p => p.code === code);
+  return options.find(p => p.raceCode === fighter.raceCode) || options[0] || null;
+}
+
+// Motivo por el que un poder (por code) no se puede usar ('' = se puede).
+export function powerBlockReasonForCode(catalog, fighter, code, rows = []) {
+  if (powerForCode(catalog, fighter, code, rows)) return '';
+  const all = catalog.powers.filter(p => p.code === code);
+  if (!all.length) return 'Ese regalo apunta a un poder que no existe.';
+  const own = all.find(p => p.raceCode === fighter.raceCode);
+  if (!own) {
+    const races = [...new Set(all.map(p => raceByCode(catalog, p.raceCode)?.name || p.raceCode))].join(', ');
+    return `${all[0].name} solo está disponible para: ${races}.`;
+  }
+  if (own.status !== 'implemented') return `${own.name} todavía no está disponible en combate.`;
+  const row = rows.find(r => (refCode(r.powerRef) || r.powerId) === own.id);
+  if (row && row.isActive === false) return `${own.name} fue desactivado para este personaje.`;
+  return `${own.name} requiere nivel ${own.unlockLevel}; tu nivel actual es ${clampLevel(fighter.level)}.`;
 }
 
 // Motivo por el que un comando no se puede usar ('' = se puede).

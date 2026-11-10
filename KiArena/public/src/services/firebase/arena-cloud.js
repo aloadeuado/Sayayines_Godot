@@ -102,8 +102,9 @@ export function createArenaCloud(cfg){
     const doc = await getDoc(`${paths.players}/${encodeURIComponent(key)}`);
     return doc ? { ...doc, id: doc.id || key } : null;
   }
-  async function save(username, progress, existing = undefined) {
-    const key = normalize(username), now = new Date().toISOString();
+  // playerKey: ID del documento cuando no sale del nombre (TikTok: tiktok_{userId}).
+  async function save(username, progress, existing = undefined, playerKey = '') {
+    const key = playerKey ? String(playerKey) : normalize(username), now = new Date().toISOString();
     const current = existing === undefined ? await get(key) : existing;
     const record = {
       ...baseFields('players', key, current, now),
@@ -168,19 +169,23 @@ export function createArenaCloud(cfg){
   }
 
   // ---------- Mensajes y eventos ----------
-  async function addRecord(kind, value) {
-    const id = newId(), now = new Date().toISOString();
-    await patch(`${paths[kind]}/${id}`, { id, reference: ref(kind, id), isActive: true, ...value, createdAt: now });
+  async function addRecord(kind, value, fixedId = '') {
+    const id = fixedId || newId(), now = new Date().toISOString();
+    await patch(`${paths[kind]}/${encodeURIComponent(id)}`, { id, reference: ref(kind, id), isActive: true, ...value, createdAt: now });
     return id;
   }
-  async function addMessage(username, text) {
-    const key = normalize(username);
+  // extra (TikTok): id fijo `tiktok_{eventId}` para deduplicar, playerKey cuando el
+  // ID del jugador no sale del nombre (tiktok_{userId}), platform y gift.
+  async function addMessage(username, text, extra = {}) {
+    const key = extra.playerKey || normalize(username);
     return addRecord('messages', {
       username: String(username || 'Sistema'),
       ...(key && key !== 'sistema' ? { playerRef: ref('players', key) } : {}),
       text: String(text || '').slice(0, 120),
-      command: /^[A-Z]$/i.test(String(text || '').trim()) ? String(text).trim().toUpperCase() : ''
-    });
+      command: /^[A-Z]$/i.test(String(text || '').trim()) ? String(text).trim().toUpperCase() : '',
+      ...(extra.platform ? { platform: String(extra.platform) } : {}),
+      ...(extra.gift ? { gift: extra.gift } : {})
+    }, extra.id || '');
   }
   // value puede traer killerKey/victimKey (usernameKey) y powerId: se guardan como referencias.
   async function addEvent(type, value = {}) {

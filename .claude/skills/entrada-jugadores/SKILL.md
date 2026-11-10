@@ -26,7 +26,8 @@ Antes de tocar datos o rutas, aplica la skill `reglas-desarrollo` (`.kiro/steeri
 
 ## Reglas del área
 
-- La clave es `trim().toLowerCase()`; nunca crear un segundo perfil por diferencias de mayúsculas.
+- La clave es `trim().toLowerCase()`; nunca crear un segundo perfil por diferencias de mayúsculas. Excepción: TikTok usa `tiktok_{userId}` (`playerKeyOf`, `keyForName` en `arena.js`).
+- Quien llega a 0 HP espera `rejoinCooldownSeconds` (10 s) antes de volver con `E` (HU-ENT-08).
 - La raza se sortea **solo** al crear y solo entre razas habilitadas; jamás re-sortear en reingreso.
 - El reingreso conserva `level`, `xp`, `kills`, `deaths`, `race`; solo restaura `alive` y `hp`.
 - La arena no vuelve a publicar `E` al procesarla; los mensajes históricos no se ejecutan.
