@@ -2,6 +2,13 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — «Ingresar» del panel Bot no metía al luchador
+
+- **Problema:** Pedro pulsó Ingresar en Lordviril (HP 0/252) y no entró. En Firestore dev no quedó ningún mensaje E de Lordviril: el clic nunca llegó a enviarse. La lista de `/bot` se recarga cada 4 s y se reemplazaba entera aunque no cambiara nada; si la recarga cae entre que se presiona y se suelta el mouse, el botón se reemplaza y el navegador descarta el clic. Además, Ingresar no avisaba si la arena rechazaba la entrada (p. ej. la espera de `rejoinCooldownSeconds` tras caer), y en la ventana de la arena ese aviso del chat no se ve.
+- **Cambio:** la lista solo se redibuja si cambió algo y nunca con el mouse presionado sobre ella (se redibuja al soltar); los clics se atienden con un único listener delegado. Un luchador recién caído muestra «Espera N s» deshabilitado. Tras Ingresar, el panel comprueba en Firestore que entró («@X entró a la arena.») o explica por qué no (espera tras el KO, ventana de la arena cerrada, perfil desactivado). Sin cambios de modelo en Firestore.
+- **Comprobado:** Chrome con Playwright contra el emulador de Firestore: con el código anterior, un clic que dura una recarga de la lista no envía nada; con el arreglo, sí. Comprobados también «Espera N s», el aviso sin arena y la confirmación de entrada.
+- **Rama:** `bugfix/ingresar-bot`, sale de `dev`.
+
 ## 2026-11-10 — instrucciones para el público sobre la arena
 
 - **Solicitud:** Pedro pidió un recuadro de instrucciones que se pueda prender y apagar dentro de la ventana de la arena (la que se transmite), en vertical y horizontal, con el mismo estilo y sin tapar mucho: «Juega con nosotros», E para entrar con TikTok, cómo lanzar poderes (letras y regalos), likes que curan, niveles y volver con E tras caer.
