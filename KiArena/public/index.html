@@ -30,13 +30,17 @@
     </header>
 
     <section class="stage stage-standalone">
-      <canvas id="game" width="900" height="540"></canvas>
+      <div class="arena-frame">
+        <canvas id="game" width="900" height="540"></canvas>
+        <aside id="arena-help" class="arena-help" aria-label="Instrucciones para jugar" hidden></aside>
+      </div>
       <div class="legend">
         <span>🟠 Saiyajin</span>
         <span>🟢 Namekuseijin</span>
         <span>🔷 Terrícola</span>
         <span>🟣 Freezer</span>
         <span>Los choques inician combates cuerpo a cuerpo automáticos</span>
+        <button id="instructions-toggle" class="hitbox-toggle" type="button" aria-pressed="true" title="Atajo: I">Instrucciones</button>
         <button id="hitbox-toggle" class="hitbox-toggle" type="button" aria-pressed="false">Mostrar hitboxes</button>
         <span id="hitbox-legend" class="hitbox-legend" hidden>
           <i class="hitbox-key fighter-core"></i> Cuerpo / Rayos

@@ -33,6 +33,19 @@ Hojas en `public/assets/`: `fighter-sprites-v1.png` (vuelo), `fighter-melee-pose
 - El `try/catch` de `start()` escribe el error en el estado y en el chat, pero `frame` ya está corriendo.
 - `arena.js` comprueba nulidad de nodos DOM (`#selected`, chat, roster) porque la vista `/` no los tiene todos.
 
+## Recuadro de instrucciones (HU-ARE-08)
+
+| Pieza | Qué hace |
+|---|---|
+| `public/index.html` | `.arena-frame` envuelve el canvas y el `<aside id="arena-help">`; botón **Instrucciones** en la leyenda. |
+| `public/src/game/instructions-overlay.js` | `buildInstructions(settings, catalog)` (puro, probado con Node) arma letras, regalos, likes, XP y espera para volver; `createInstructionsOverlay()` pinta, rota las páginas cada 7 s, escucha la tecla **I** y expone `window.kiArenaInstructions`. |
+| `public/src/game/arena.js` | En `start()` crea el recuadro y lo actualiza con los valores de fábrica y otra vez tras `loadGameSettings()`/`loadCatalog()`. |
+| `public/src/config/gameplay-settings.js` | `xpForNext` y `xpForKnockout` exportados: la arena y el recuadro usan la misma fórmula. |
+| `public/styles/arena.css` | `.arena-frame` es contenedor (`container-type: inline-size`); `--u` = 1 px lógico del canvas, así el recuadro escala con la ventana. Horizontal: abajo a la izquierda, 250 u. Vertical: arriba (debajo de la franja de TikTok), 320 u y letra ×1,25 para el móvil. |
+| `desktop/main.js` | «Mostrar / ocultar instrucciones» (Ctrl/⌘+Shift+H) en el menú Ki Arena y en el clic derecho de la ventana de la arena: llama `kiArenaInstructions.toggle()`. |
+
+La visibilidad se guarda en `localStorage` (`kiArena.instructions.visible`); no hay datos nuevos en Firestore. Los nombres de los regalos se traducen al español con un diccionario corto; un regalo que no esté en él muestra el nombre que manda TikTok.
+
 ## Decisiones
 
 - `arena.js` sigue siendo un módulo combinado para no romper el combate; la extracción a `engine/renderer/combat/chat/roster` debe hacerse por pasos pequeños y verificados (ver `ARCHITECTURE.md`).

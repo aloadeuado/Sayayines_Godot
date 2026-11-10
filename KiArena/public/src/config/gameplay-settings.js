@@ -40,6 +40,16 @@ export const DEFAULT_GAME_SETTINGS = {
   }
 };
 
+// XP que pide el nivel actual para subir al siguiente (nivel máximo 100).
+export function xpForNext(level) {
+  return Math.round(100 + level * 24 + level * level * 1.3);
+}
+
+// XP por derrotar a un rival: 100 + 4 por nivel del rival, más el bono de raza (Ingenio).
+export function xpForKnockout(victimLevel, bonus = 0) {
+  return Math.round((100 + Math.round((Number(victimLevel) || 1) * 4)) * (1 + (Number(bonus) || 0)));
+}
+
 // Legado: niveles, enfriamientos y curvas de poderes viven ahora en kiArenaPowers.
 export const POWER_UNLOCK_LEVELS = Object.freeze({ V: 1, M: 10, K: 20 });
 
