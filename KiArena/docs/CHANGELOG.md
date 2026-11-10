@@ -2,6 +2,17 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — instrucciones para el público sobre la arena
+
+- **Solicitud:** Pedro pidió un recuadro de instrucciones que se pueda prender y apagar dentro de la ventana de la arena (la que se transmite), en vertical y horizontal, con el mismo estilo y sin tapar mucho: «Juega con nosotros», E para entrar con TikTok, cómo lanzar poderes (letras y regalos), likes que curan, niveles y volver con E tras caer.
+- **Cambio:** HU-ARE-08. Recuadro HTML sobre el canvas que rota cada 7 s entre «Cómo entrar», «Poderes: escribe la letra», «Regalos = poderes al instante», «Likes y niveles» y «Si caes»; el titular con la E queda siempre. Todo sale de los datos efectivos (`kiArenaPowers`, `settingsJson.tiktok.gifts`, `likeHealHp`, `rejoinCooldownSeconds`, fórmulas de XP). Se muestra u oculta con la tecla I, el botón Instrucciones de la leyenda, el clic derecho de la ventana de la arena o Ctrl/⌘+Shift+H; se recuerda en `localStorage`. Sin cambios de modelo en Firestore.
+- **Comprobado:** Electron en Windows (puerto 47391) + Chrome con Playwright, `?view=window` en 1200×720 y 540×960: el recuadro queda en su esquina, escala con el canvas, rota las 5 páginas, I lo oculta y lo vuelve a mostrar, y el menú de la app lo alterna en la ventana de la arena.
+- **Rama:** `feature/overlay-instrucciones`, sale de `feature/tiktok-live`.
+
+## 2026-11-10 — todos los poderes en el panel Bot / Chat
+
+- **Solicitud:** Pedro vio que `/bot` solo tenía botones para E, K, M, V y B.
+- **Cambio:** `/bot` muestra un botón por cada poder con mecánica que no tiene letra (Embestida, Combo Meteoro, Puño del Lobo, Puño del Dragón, Galick Ho, Resplandor Final, Genkidama), con su nivel. El botón manda el mensaje `/poder <code>`; `/bot` valida nivel y raza antes de guardarlo y la arena lo ejecuta respetando nivel, raza y enfriamiento.
 ## 2026-11-10 — iconos de poderes bajo el nombre y mensajes rojos (issue #8)
 
 - **Solicitud:** Pedro pidió iconos bajo el nombre de cada guerrero (cuántos Kamehameha, Makankosappo…, y un hueco para buffs futuros) y mensajes rojos encima cuando una acción no se puede (nivel insuficiente, recarga, etc.), con el texto de cada caso en la HU. Spec `.kiro/specs/feedback-arena`, skill `.claude/skills/feedback-arena`.

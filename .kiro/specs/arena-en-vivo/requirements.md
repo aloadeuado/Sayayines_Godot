@@ -60,3 +60,15 @@ La ruta raíz muestra solo el juego para capturarlo en el stream: canvas, fondo 
 1. DONDE se configure el modo vertical, el sistema DEBE usar un canvas lógico `540 × 960`.
 2. CUANDO se abre con `?stream=1`, el sistema DEBE ocultar encabezado, leyenda y pie para dejar solo el canvas.
 3. **Estado:** descrito en `contexto-proyecto/` como trabajo local; no está en el repositorio.
+
+### HU-ARE-08 — Instrucciones para el público sobre la arena
+**Historia de usuario:** Como streamer, quiero un recuadro de instrucciones sobre la arena que pueda mostrar u ocultar, para que quien entra al live sepa cómo jugar sin que yo lo explique y sin tapar el combate.
+
+**Criterios de aceptación**
+1. El sistema DEBE dibujar las instrucciones como una capa HTML encima del canvas, dentro de la misma ventana que se captura en OBS, en español.
+2. El recuadro DEBE ocupar poco espacio: en horizontal (900 × 540) va en la esquina inferior izquierda; en vertical (540 × 960) va arriba, debajo de la franja que tapa la interfaz de TikTok, y en ambos casos escala con el canvas.
+3. El recuadro DEBE mostrar siempre el titular «Juega con nosotros · escribe **E** en el chat para entrar con tu cuenta de TikTok» y rotar cada pocos segundos entre estas páginas: poderes por letra, regalos → poderes, likes que curan, niveles y qué pasa al caer.
+4. Los valores DEBEN salir de los datos efectivos (Firestore sobre los de fábrica), no escritos a mano: letras y nivel de desbloqueo de `kiArenaPowers` (con su restricción de raza), mapa de regalos activos de `settingsJson.tiktok.gifts`, `tiktok.likeHealHp`, `rejoinCooldownSeconds` y las fórmulas de XP del juego (`xpForNext`, XP por derrota).
+5. CUANDO se pulsa **I** en la arena, el botón **Instrucciones** de la leyenda, o «Mostrar / ocultar instrucciones» (clic derecho en la ventana de la arena o menú Ki Arena, Ctrl/⌘+Shift+H), el sistema DEBE mostrar u ocultar el recuadro sin recargar ni afectar la simulación.
+6. El sistema DEBE recordar si el recuadro está visible (por navegador/app, `localStorage`); por defecto está visible.
+7. El recuadro NO DEBE cambiar ningún modelo de Firestore.

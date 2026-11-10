@@ -114,9 +114,9 @@ function openArenaWindow() {
   arenaWindow.on('page-title-updated', (event) => event.preventDefault());
   arenaWindow.webContents.setWindowOpenHandler(externalOnly);
   arenaWindow.on('closed', () => { arenaWindow = null; });
-  // La ventana de la arena no muestra menú: clic derecho para cambiar la orientación.
+  // La ventana de la arena no muestra menú: clic derecho para la orientación y las instrucciones.
   arenaWindow.webContents.on('context-menu', () => {
-    Menu.buildFromTemplate(orientationItems()).popup({ window: arenaWindow });
+    Menu.buildFromTemplate([...orientationItems(), { type: 'separator' }, instructionsItem()]).popup({ window: arenaWindow });
   });
   arenaWindow.loadURL(arenaUrl());
 }
@@ -128,6 +128,16 @@ function orientationItems() {
     checked: layout === arenaLayout,
     click: () => setArenaLayout(layout)
   }));
+}
+
+// Recuadro de instrucciones de la arena (también con la tecla I dentro de la ventana).
+function instructionsItem() {
+  return { label: 'Mostrar / ocultar instrucciones', accelerator: 'CmdOrCtrl+Shift+H', click: toggleInstructions };
+}
+
+function toggleInstructions() {
+  if (!arenaWindow) return openArenaWindow();
+  arenaWindow.webContents.executeJavaScript('window.kiArenaInstructions?.toggle()').catch(() => {});
 }
 
 function toggleArenaLayout() {
@@ -155,6 +165,7 @@ function buildMenu() {
         { label: 'Abrir ventana de la arena', accelerator: 'CmdOrCtrl+1', click: openArenaWindow },
         { label: 'Orientación de la arena', submenu: orientationItems() },
         { label: 'Cambiar horizontal / vertical', accelerator: 'CmdOrCtrl+Shift+O', click: toggleArenaLayout },
+        instructionsItem(),
         { type: 'separator' },
         { label: 'Entrar / Mi cuenta', accelerator: 'CmdOrCtrl+2', click: () => open('/login') },
         { label: 'Bot / Chat', accelerator: 'CmdOrCtrl+3', click: () => open('/bot') },

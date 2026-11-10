@@ -140,6 +140,166 @@ canvas {
   image-rendering: pixelated;
 }
 
+/* Lienzo + capas HTML encima (instrucciones). Las capas escalan con el canvas:
+   --u = 1 px lógico del canvas (900 de ancho en horizontal, 540 en vertical). */
+.arena-frame {
+  position: relative;
+  container-type: inline-size;
+}
+
+/* Recuadro de instrucciones (HU-ARE-08) */
+.arena-help {
+  --u: calc(100cqw / 900);
+  position: absolute;
+  left: calc(10 * var(--u));
+  bottom: calc(10 * var(--u));
+  width: calc(250 * var(--u));
+  padding: calc(8 * var(--u)) calc(10 * var(--u)) calc(7 * var(--u));
+  background: rgba(8, 16, 29, .8);
+  border: 1px solid #2e4d75;
+  border-radius: calc(9 * var(--u));
+  box-shadow: 0 calc(6 * var(--u)) calc(20 * var(--u)) #00000066;
+  color: #eef5ff;
+  font-size: calc(10 * var(--u));
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.arena-help[hidden] {
+  display: none;
+}
+
+/* En vertical se ve en el móvil: letra un 25 % más grande para que se lea. */
+body[data-layout="vertical"] .arena-help {
+  --u: calc(100cqw / 540 * 1.25);
+  top: calc(90 * var(--u));
+  bottom: auto;
+  left: calc(10 * var(--u));
+  width: calc(320 * var(--u));
+}
+
+.arena-help header {
+  display: block;
+  margin: 0 0 calc(6 * var(--u));
+  padding: 0 0 calc(6 * var(--u));
+  border-bottom: 1px solid #1a2d48;
+}
+
+.arena-help header b {
+  display: block;
+  color: #75d9ff;
+  font-size: calc(12 * var(--u));
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.arena-help header span {
+  color: #c9e2ff;
+}
+
+.arena-help h2 {
+  margin: 0 0 calc(4 * var(--u));
+  color: #ffd46c;
+  font-size: calc(11 * var(--u));
+  font-weight: 800;
+  letter-spacing: .03em;
+}
+
+.arena-help ol, .arena-help ul {
+  margin: 0;
+  padding-left: calc(15 * var(--u));
+}
+
+.arena-help ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.arena-help li {
+  margin: calc(2 * var(--u)) 0;
+}
+
+.arena-help-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: calc(3 * var(--u)) calc(8 * var(--u));
+}
+
+.arena-help-rows li {
+  display: flex;
+  align-items: baseline;
+  gap: calc(5 * var(--u));
+  margin: calc(1 * var(--u)) 0;
+}
+
+.arena-help-rows b {
+  color: #ffffff;
+}
+
+.arena-help-grid li {
+  display: flex;
+  align-items: center;
+  gap: calc(5 * var(--u));
+  margin: 0;
+}
+
+.arena-help-grid span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.arena-help small {
+  color: #9db0cc;
+  font-size: calc(9 * var(--u));
+}
+
+.arena-help kbd {
+  display: inline-block;
+  min-width: calc(17 * var(--u));
+  padding: 0 calc(4 * var(--u));
+  background: #14253d;
+  border: 1px solid #5289cc;
+  border-radius: calc(5 * var(--u));
+  color: #ffffff;
+  font: 800 calc(11 * var(--u)) / 1.45 system-ui, Segoe UI, sans-serif;
+  text-align: center;
+}
+
+.arena-help header kbd {
+  border-color: #ffd46c;
+  color: #ffd46c;
+}
+
+.arena-help-icon {
+  font-size: calc(12 * var(--u));
+  font-weight: 400;
+}
+
+.arena-help-note {
+  margin: calc(5 * var(--u)) 0 0;
+  color: #9db0cc;
+  font-size: calc(9 * var(--u));
+}
+
+.arena-help footer {
+  display: flex;
+  gap: calc(4 * var(--u));
+  margin-top: calc(6 * var(--u));
+}
+
+.arena-help footer i {
+  width: calc(5 * var(--u));
+  height: calc(5 * var(--u));
+  border-radius: 50%;
+  background: #2e4d75;
+}
+
+.arena-help footer i.on {
+  background: #75d9ff;
+}
+
 /* Arena vertical (?layout=vertical, 9:16) */
 body[data-layout="vertical"] .stage-standalone {
   max-width: 560px;
@@ -177,8 +337,11 @@ body.arena-window .stage-standalone {
   background: none;
 }
 
-body.arena-window canvas {
+body.arena-window .stage-standalone {
   width: min(100vw, calc(100vh * var(--arena-aspect, 1.6667)));
+}
+
+body.arena-window canvas {
   height: auto;
   border-radius: 0;
 }

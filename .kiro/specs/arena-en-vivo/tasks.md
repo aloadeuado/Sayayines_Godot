@@ -8,6 +8,8 @@
 - [x] 1.4 Barras de HP y XP sobre el luchador — _HU-ARE-04_
 - [x] 1.5 Overlay de hitboxes activable — _HU-ARE-05_
 
+- [x] 1.6 Recuadro de instrucciones activable (I, botón, menú) con datos reales, horizontal y vertical — _HU-ARE-08_
+
 ## 2. Pendiente
 
 - [ ] 2.1 Corregir la selección por clic: usar `Math.hypot(f.x − x, f.y − y)` en lugar de `f.y − x` en el listener `click` de `game/arena.js` — _HU-ARE-06.2_
