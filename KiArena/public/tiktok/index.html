@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Ki Arena · TikTok Live</title>
+  <link rel="stylesheet" href="/styles/arena.css">
+  <link rel="stylesheet" href="/styles/admin.css">
+</head>
+<body>
+  <main class="settings-page">
+    <header class="page-header">
+      <div>
+        <h1><span>KI</span> ARENA · TIKTOK LIVE</h1>
+        <div class="tag">CONEXIÓN AL LIVE · LIKES · REGALOS · SIMULADOR</div>
+        <div id="firebase-status">Conectando con Firebase…</div>
+      </div>
+      <nav class="page-nav">
+        <a href="/" class="nav-btn">← Volver a la arena</a>
+        <a href="/bot" class="nav-btn">Bot / Chat</a>
+        <a href="/settings" class="nav-btn">Settings</a>
+      </nav>
+    </header>
+    <p id="tiktok-desktop-only" class="settings-help" hidden>TikTok Live solo funciona en la app de escritorio de Ki Arena (corre en tu computador). Ábrela y entra a «TikTok Live → Conectar / estado…».</p>
+    <section class="card settings-card" id="tiktok-panel" hidden>
+      <h2>CONEXIÓN</h2>
+      <p class="settings-help">Escribe el @usuario del live. No se pide contraseña: la app lee el chat, los likes y los regalos del live público. Deja la ventana de la arena abierta para que los eventos lleguen al juego.</p>
+      <form id="tiktok-connect-form">
+        <div class="settings-grid">
+          <label><span>@usuario del live</span><input id="tiktok-username" type="text" autocomplete="off" spellcheck="false" placeholder="@tu_usuario"></label>
+        </div>
+        <div class="settings-actions"><button type="submit">Conectar</button><button id="tiktok-disconnect" type="button">Desconectar</button></div>
+        <div id="tiktok-status" class="settings-status" role="status" aria-live="polite">Sin conexión.</div>
+      </form>
+    </section>
+    <section class="card settings-card" id="tiktok-sim" hidden>
+      <h2>SIMULADOR (no es el live real)</h2>
+      <p class="settings-help">Manda eventos de prueba por el mismo camino que los reales. En el chat de la arena salen marcados «simulado». Usar el simulador no conecta TikTok.</p>
+      <form id="tiktok-sim-form">
+        <div class="settings-grid">
+          <label><span>@usuario de prueba</span><input id="sim-user" type="text" value="tiktoker_prueba" autocomplete="off"></label>
+          <label><span>ID de usuario</span><input id="sim-user-id" type="text" value="900001" autocomplete="off"></label>
+          <label><span>Comentario</span><input id="sim-comment" type="text" value="e" autocomplete="off"></label>
+          <label><span>Likes</span><input id="sim-likes" type="number" min="1" max="100" value="5"></label>
+          <label><span>Regalo</span><select id="sim-gift"></select></label>
+          <label><span>Cantidad (racha)</span><input id="sim-gift-count" type="number" min="1" max="50" value="1"></label>
+        </div>
+        <div class="settings-actions"><button id="sim-send-comment" type="button">Enviar comentario</button><button id="sim-send-likes" type="button">Enviar likes</button><button id="sim-send-gift" type="button">Enviar regalo</button></div>
+        <div id="sim-status" class="settings-status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+    <section class="card settings-card" id="tiktok-gifts" hidden>
+      <h2>REGALOS DEL LIVE</h2>
+      <p class="settings-help">Lista de regalos que TikTok ofrece en tu live (aparece al conectar). Usa el ID en Settings → TikTok Live para fijar cada regalo.</p>
+      <div id="tiktok-gift-list" class="env-sync-result"></div>
+    </section>
+  </main>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

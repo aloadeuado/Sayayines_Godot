@@ -43,6 +43,15 @@
         <h3>Personajes elegibles para usuarios nuevos</h3>
         <p class="settings-help">Deshabilitar un personaje lo excluye del sorteo de usuarios nuevos. Los perfiles existentes conservan su personaje y progreso. Se guarda en <code>kiArenaPlayerTypes</code>.</p>
         <div id="character-settings" class="character-settings"></div>
+        <h3>TikTok Live</h3>
+        <p class="settings-help">Cada like cura HP al guerrero de quien lo da. Cada regalo lanza su poder sin enfriamiento, pero respetando nivel y raza: si aún no lo tiene, sale la Ráfaga de Ki. Si el ID es 0 el regalo se reconoce por su nombre en TikTok (inglés); el ID real se ve en el panel TikTok Live de la app de escritorio. Se guarda en <code>kiArenaSettings/gameplay</code>.</p>
+        <div class="settings-grid">
+          <label><span>HP por like</span><small>Curación por cada like</small><input type="number" min="0" max="100" step="1" id="tiktok-like-heal"></label>
+          <label><span>Cola de regalos</span><small>Poderes en espera por espectador</small><input type="number" min="1" max="20" step="1" id="tiktok-max-queue"></label>
+          <label><span>Espera para volver (s)</span><small>Tras quedar sin HP, para todas las plataformas</small><input type="number" min="0" max="600" step="1" id="rejoin-cooldown"></label>
+        </div>
+        <div id="tiktok-gift-settings" class="tiktok-gifts"></div>
+        <div class="settings-actions"><button id="tiktok-add-gift" type="button">Agregar regalo</button></div>
         <div class="settings-actions"><button type="submit">Guardar ajustes</button><button id="settings-reset" type="button">Restablecer valores iniciales</button></div>
         <div id="settings-status" class="settings-status" role="status" aria-live="polite">Cargando ajustes…</div>
       </form>

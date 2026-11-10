@@ -23,6 +23,10 @@
         "destination": "/bot/index.html"
       },
       {
+        "source": "/tiktok",
+        "destination": "/tiktok/index.html"
+      },
+      {
         "source": "/login",
         "destination": "/login/index.html"
       },

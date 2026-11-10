@@ -20,7 +20,24 @@ export const DEFAULT_GAME_SETTINGS = {
     },
     pending: { kiBlast: 1, finalFlash: 1, mafuba: 1, deathBall: 1 }
   },
-  characters: { goku: true, piccolo: true, gohan: true, freezer: true }
+  characters: { goku: true, piccolo: true, gohan: true, freezer: true },
+  // Segundos que espera quien llega a 0 HP para volver a entrar con E (Pedro, 2026-11-10).
+  rejoinCooldownSeconds: 10,
+  // TikTok Live (spec integracion-tiktok). giftName es el nombre que manda TikTok;
+  // giftId 0 = se reconoce por nombre hasta que se fije el ID real desde /tiktok.
+  tiktok: {
+    likeHealHp: 1,
+    maxQueuedPerUser: 5,
+    gifts: [
+      { giftId: 5655, giftName: 'Rose', coins: 1, powerCode: 'kiBlast', isActive: true },
+      { giftId: 0, giftName: 'Ice Cream Cone', coins: 1, powerCode: 'kamehameha', isActive: true },
+      { giftId: 0, giftName: 'TikTok', coins: 1, powerCode: 'rush', isActive: true },
+      { giftId: 0, giftName: 'GG', coins: 1, powerCode: 'meteorCombo', isActive: true },
+      { giftId: 0, giftName: 'Finger Heart', coins: 5, powerCode: 'makankosappo', isActive: true },
+      { giftId: 0, giftName: 'Perfume', coins: 20, powerCode: 'finalFlash', isActive: true },
+      { giftId: 0, giftName: 'Lion', coins: 29999, powerCode: 'spiritBomb', isActive: true }
+    ]
+  }
 };
 
 // Legado: niveles, enfriamientos y curvas de poderes viven ahora en kiArenaPowers.
@@ -81,9 +98,30 @@ export function normalizeGameSettings(raw = {}) {
     characters: Object.fromEntries(CHARACTER_OPTIONS.map(character => [
       character.id,
       typeof characters[character.id] === 'boolean' ? characters[character.id] : true
-    ]))
+    ])),
+    rejoinCooldownSeconds: clamp(Number.isFinite(Number(raw.rejoinCooldownSeconds)) ? Number(raw.rejoinCooldownSeconds) : DEFAULT_GAME_SETTINGS.rejoinCooldownSeconds, 0, 600),
+    tiktok: normalizeTikTokSettings(raw.tiktok)
   };
   return result;
+}
+
+export function normalizeTikTokSettings(raw) {
+  const defaults = DEFAULT_GAME_SETTINGS.tiktok;
+  const source = raw && typeof raw === 'object' ? raw : {};
+  const gifts = Array.isArray(source.gifts) ? source.gifts : defaults.gifts;
+  return {
+    likeHealHp: clamp(Number.isFinite(Number(source.likeHealHp)) ? Number(source.likeHealHp) : defaults.likeHealHp, 0, 100),
+    maxQueuedPerUser: clamp(Math.floor(Number(source.maxQueuedPerUser) || defaults.maxQueuedPerUser), 1, 20),
+    gifts: gifts
+      .map(g => ({
+        giftId: Math.max(0, Math.floor(Number(g?.giftId) || 0)),
+        giftName: String(g?.giftName || '').trim().slice(0, 40),
+        coins: Math.max(0, Number(g?.coins) || 0),
+        powerCode: String(g?.powerCode || '').trim(),
+        isActive: g?.isActive !== false
+      }))
+      .filter(g => (g.giftId || g.giftName) && g.powerCode)
+  };
 }
 
 // raceStats: multiplicadores de la raza (kiArenaRaces.stats); bonus: bono

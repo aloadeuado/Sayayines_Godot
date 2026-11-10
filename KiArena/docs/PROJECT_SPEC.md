@@ -80,6 +80,21 @@ La interfaz muestra una barra de XP inmediatamente debajo de la barra de vida so
 | `V` | Rayo Mortal | Solo Freezer; se desbloquea desde nivel 1; apunta y dispara con un dedo. |
 | `M` | Makankosappo | Todas las razas lo desbloquean en nivel 10. |
 | `K` | Kamehameha | Todas las razas lo desbloquean en nivel 20. |
+| `B` | Ráfaga de Ki | Todas las razas desde nivel 1; pose a una mano y esfera de ki recta (enfriamiento 2.5 s). Es el poder de la Rosa en TikTok. |
+
+### TikTok Live (app de escritorio, 2026-11-10)
+
+Todo corre en el computador del streamer: la app de escritorio se conecta al live por @usuario (menú «TikTok Live», panel `/tiktok`) y pasa los eventos a la arena por el servidor local. Detalle en `docs/TIKTOK_INTEGRATION.md` y `.kiro/specs/integracion-tiktok/`.
+
+| Evento del live | Efecto |
+|---|---|
+| Escribir `e`/`E` | Entra (o vuelve) el guerrero `tiktok_{userId}` con el @ de la cuenta |
+| Letra `K`, `M`, `V`, `B` | Poder normal: nivel, raza y enfriamiento |
+| Like | +1 HP por like (Settings), sin pasar del máximo ni revivir |
+| Regalo con mapa | Su poder sin enfriamiento, respetando nivel y raza; cola de 5 por espectador. Si está bloqueado, Ráfaga de Ki |
+| Regalo sin mapa | Solo agradecimiento en el chat |
+
+Quien llega a 0 HP sale del tablero y puede volver con `E` después de `rejoinCooldownSeconds` (10 s), en todas las plataformas. Un regalo recibido durante esa espera se lanza al volver.
 
 Los poderes se envían desde el campo de chat o desde botones de simulación. Antes de guardar el comando, el panel valida el nivel y la raza del perfil en Firestore; un poder bloqueado se rechaza con un mensaje claro y no aparece como comando aceptado. La arena repite la validación al ejecutar comandos remotos. `M` requiere nivel 10 y `K` nivel 20 para todas las razas; `V` es exclusivo de Freezer desde nivel 1. También se valida que el usuario haya ingresado antes de activar una técnica. Existe enfriamiento entre lanzamientos.
 
@@ -135,6 +150,7 @@ El juego no tiene botón de reinicio de partida: la arena es continua.
 ## 9. Límites y estado pendiente
 
 - La integración con Twitch no lee chats reales todavía; existe solamente el punto de arquitectura y su plan.
+- TikTok Live funciona solo en la app de escritorio y con una librería no oficial (`tiktok-live-connector`); se probó con eventos simulados, todavía no en un live real. Golpes y combos (Embestida, Combo Meteoro, Puño del Lobo, Puño del Dragón), Galick Ho, Resplandor Final y Genkidama ya tienen mecánica; el resto del catálogo sigue pendiente y un regalo que apunte a uno de ellos lanza la Ráfaga de Ki.
 - Usuarios se identifican por nombre normalizado, no por Twitch OAuth o ID externo todavía.
 - Dev, QA y prod son namespaces de colecciones en el mismo Firebase; no separan reglas, cuotas o facturación.
 - La simulación y la asignación de daño corren en el navegador; un cliente manipulado podría falsificar progreso mientras las reglas actuales lo permitan.

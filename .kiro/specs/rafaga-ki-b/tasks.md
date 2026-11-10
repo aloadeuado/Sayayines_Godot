@@ -1,4 +1,4 @@
-# Tareas — Ráfaga de Ki (`B`) · PENDIENTE
+# Tareas — Ráfaga de Ki (`B`) · IMPLEMENTADA (2026-11-10, ver nota en requirements.md)
 
 - [ ] 1. Pedir a Pedro el trabajo local de `B` (diff o commit) y compararlo con esta spec
 - [ ] 2. Reglas: desbloqueo nivel 5 y motivo de bloqueo — _HU-B-01_

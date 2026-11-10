@@ -192,10 +192,11 @@ async function refreshChat() {
     return true;
   }).reverse();
   log.innerHTML = visibleMessages.map(message => {
-    const isCmd = /^[EKMV]$/i.test(String(message.text || ''));
+    const isCmd = /^[EKMVB]$/i.test(String(message.text || ''));
+    const source = message.platform === 'tiktok' ? ' · TikTok' : message.platform === 'tiktok-sim' ? ' · TikTok (simulado)' : '';
     return `
       <div class="chat-line ${isCmd ? 'cmd-line' : ''}">
-        <b>${escapeHtml(message.username)}</b>: ${escapeHtml(message.text)}
+        <b>${escapeHtml(message.username)}</b>${escapeHtml(source)}: ${escapeHtml(message.text)}
       </div>
     `;
   }).join('') || '<div class="chat-system">El chat está vacío. Usa los botones para enviar comandos.</div>';

@@ -70,3 +70,11 @@ Un espectador entra a la arena con el comando `E`. Su nombre normalizado es su i
 2. SI el usuario tiene cuenta, ENTONCES el personaje DEBE guardar `userRef` y añadirse a `playerRefs` del usuario; si no tiene `primaryPlayerRef`, este pasa a ser el principal.
 3. CUANDO un usuario con varios personajes entra desde el chat, el sistema DEBE usar su `primaryPlayerRef` (pregunta abierta: o elegir con un comando).
 4. **Estado:** el criterio 1 está implementado. Los criterios 2 y 3 esperan el enlace usuario ↔ jugador (HU-AUT-09): la migración no une usuarios con jugadores de chat automáticamente.
+
+### HU-ENT-08 — Espera para volver y jugadores de TikTok · IMPLEMENTADO (Pedro, 2026-11-10)
+**Historia de usuario:** Como streamer, quiero que quien se queda sin vida espere un momento antes de volver, y que los espectadores de TikTok entren con su cuenta, para que la arena sea justa y nadie se duplique.
+
+**Criterios de aceptación**
+1. CUANDO un luchador llega a 0 HP, el sistema DEBE sacarlo del tablero y rechazar su `E` durante `settingsJson.rejoinCooldownSeconds` (10 s por defecto) con «@usuario podrá volver en N s». Aplica a todas las plataformas.
+2. Un espectador de TikTok DEBE tener ID `tiktok_{userId}` (`usernameKey`) y el @ limpio como `username`; `E` desde `/bot` con ese @ DEBE usar esa misma clave.
+3. Ver `.kiro/specs/integracion-tiktok/` (HU-TT-02 y HU-TT-07).

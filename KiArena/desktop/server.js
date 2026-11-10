@@ -7,6 +7,9 @@
 //   el modo local y se queda en él mientras la app esté abierta.
 // - remote: solo la Cloud Function.
 // - local: siempre el authApi local (mismo código, Firestore y Auth por REST).
+//
+// TikTok Live (/api/tiktok/**): si se pasa un receptor (desktop/tiktok/receiver.js),
+// la arena recibe sus eventos por Server-Sent Events en /api/tiktok/events.
 const http = require('node:http');
 const https = require('node:https');
 const fs = require('node:fs');
@@ -18,7 +21,7 @@ const STATUS_VERSION = 'login-local-2';
 
 const ROUTES = {
   '/settings': '/settings/index.html', '/bot': '/bot/index.html', '/login': '/login/index.html',
-  '/cuenta': '/login/index.html', '/admin': '/admin/index.html'
+  '/cuenta': '/login/index.html', '/admin': '/admin/index.html', '/tiktok': '/tiktok/index.html'
 };
 const MIME = {
   '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
@@ -119,6 +122,66 @@ function createAuthRouter({ apiBase, authMode = 'auto', localApiModule, localApi
   return route;
 }
 
+function sendJson(res, status, value) {
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+  res.end(JSON.stringify(value));
+}
+
+// Solo páginas servidas por este mismo servidor pueden mandar órdenes: una web
+// de internet abierta en otro navegador no puede conectar ni simular eventos.
+function sameOrigin(req) {
+  const origin = req.headers.origin;
+  return !origin || origin === `http://${req.headers.host}`;
+}
+
+function createTikTokRouter(receiver) {
+  const clients = new Set();
+  const broadcast = (name, data) => {
+    const chunk = `event: ${name}\ndata: ${JSON.stringify(data)}\n\n`;
+    for (const res of clients) res.write(chunk);
+  };
+  receiver.on('event', event => broadcast('tiktok', event));
+  receiver.on('status', status => broadcast('status', status));
+  // Mantiene viva la conexión SSE.
+  setInterval(() => { for (const res of clients) res.write(': ping\n\n'); }, 20000).unref();
+  return async function route(req, res) {
+    const pathname = new URL(req.url, 'http://localhost').pathname;
+    if (req.method === 'GET' && pathname === '/api/tiktok/status') return sendJson(res, 200, receiver.status());
+    if (req.method === 'GET' && pathname === '/api/tiktok/events') {
+      res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-store', Connection: 'keep-alive' });
+      res.write(`event: status\ndata: ${JSON.stringify(receiver.status())}\n\n`);
+      clients.add(res);
+      req.on('close', () => clients.delete(res));
+      return;
+    }
+    if (req.method !== 'POST') return sendJson(res, 404, { error: 'not_found' });
+    if (!sameOrigin(req)) return sendJson(res, 403, { error: 'forbidden' });
+    let body = {};
+    try {
+      body = JSON.parse((await readBody(req)).toString('utf8') || '{}');
+    } catch {
+      return sendJson(res, 400, { error: 'bad_json' });
+    }
+    try {
+      if (pathname === '/api/tiktok/connect') {
+        receiver.connect(body.username).catch(() => {});
+        return sendJson(res, 200, receiver.status());
+      }
+      if (pathname === '/api/tiktok/disconnect') {
+        receiver.disconnect();
+        return sendJson(res, 200, receiver.status());
+      }
+      if (pathname === '/api/tiktok/simulate') {
+        const delivered = receiver.deliver({ ...body.event, simulated: true });
+        return sendJson(res, delivered ? 200 : 400, { delivered });
+      }
+    } catch (error) {
+      return sendJson(res, 400, { error: error.message });
+    }
+    return sendJson(res, 404, { error: 'not_found' });
+  };
+}
+
 function listen(server, port) {
   return new Promise((resolve, reject) => {
     server.once('error', reject);
@@ -128,13 +191,15 @@ function listen(server, port) {
 
 // port fijo para que la sesión de Firebase (guardada por origen) sobreviva al
 // reiniciar la app; si está ocupado se usa uno libre.
-async function startServer({ root, apiBase, port = 0, authMode = process.env.KI_ARENA_AUTH_MODE || 'auto', localApiModule, localApiOptions }) {
+async function startServer({ root, apiBase, port = 0, authMode = process.env.KI_ARENA_AUTH_MODE || 'auto', localApiModule, localApiOptions, tiktok = null }) {
   const authRoute = createAuthRouter({ apiBase, authMode, localApiModule, localApiOptions });
+  const tiktokRoute = tiktok ? createTikTokRouter(tiktok) : null;
   const server = http.createServer((req, res) => {
     if (req.url.startsWith('/api/auth')) return authRoute(req, res);
+    if (req.url.startsWith('/api/tiktok')) return tiktokRoute ? tiktokRoute(req, res) : sendJson(res, 404, { error: 'tiktok_off' });
     if (req.url.startsWith('/__ki-arena/status')) {
       res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
-      return res.end(JSON.stringify({ desktop: true, ...authRoute.status() }));
+      return res.end(JSON.stringify({ desktop: true, tiktok: !!tiktokRoute, ...authRoute.status() }));
     }
     const file = resolveFile(root, new URL(req.url, 'http://localhost').pathname);
     if (!file || !fs.existsSync(file)) {

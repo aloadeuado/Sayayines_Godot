@@ -1,6 +1,6 @@
-# Requisitos — Ráfaga de Ki (`B`) · PENDIENTE
+# Requisitos — Ráfaga de Ki (`B`) · IMPLEMENTADA (2026-11-10)
 
-> **Estado:** no está en el repositorio. El contexto de Pedro (`KiArena/contexto-proyecto/`) indica que existe como cambio local sin commit en la rama `separate`. Antes de implementar desde cero, pedir a Pedro ese trabajo local para no duplicarlo.
+> **Estado:** implementada en `feature/tiktok-live` como el poder de la Rosa de TikTok (HU-TT-10). Pedro decidió el 2026-11-10 que es el único poder para todos desde **nivel 1** (no 5) y que se lanza con **una sola mano**: pose del dedo (hoja de Makankosappo), esfera de ki recta hacia donde mira que daña al primer rival que toca. Enfriamiento 2.5 s con letra; con regalo, sin enfriamiento. Donde los criterios de abajo digan nivel 5 o haz, manda esta nota.
 
 ## Introducción
 
