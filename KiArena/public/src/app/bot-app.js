@@ -1,5 +1,5 @@
 import { calculateLevelStats, DEFAULT_GAME_SETTINGS, normalizeGameSettings } from '../config/gameplay-settings.js';
-import { DEFAULT_CATALOG, buildCatalog, raceByCode, resolvePlayerType, powerBlockReasonFor } from '../config/game-catalog.js';
+import { DEFAULT_CATALOG, buildCatalog, raceByCode, resolvePlayerType, powerBlockReasonFor, powerBlockReasonForCode } from '../config/game-catalog.js';
 
 const $ = selector => document.querySelector(selector);
 const normalize = value => String(value || '').trim().toLowerCase();
@@ -240,6 +240,14 @@ async function sendCommand(username, text) {
       const restriction = powerBlockReasonFor(catalog, { raceCode: raceOfPlayer(profile).type?.raceCode, level: profile.level }, command);
       if (restriction) return showStatus(restriction, true);
     }
+    // Poderes sin letra: «/poder <code>» (los de los regalos de TikTok).
+    const byCode = /^\/poder\s+([A-Za-z0-9_]+)$/i.exec(message);
+    if (byCode) {
+      const profile = await window.kiArenaCloud.get(name);
+      if (!profile || profile.isActive === false) return showStatus(`@${name} debe ingresar con E antes de usar poderes.`, true);
+      const restriction = powerBlockReasonForCode(catalog, { raceCode: raceOfPlayer(profile).type?.raceCode, level: profile.level }, byCode[1]);
+      if (restriction) return showStatus(restriction, true);
+    }
     await window.kiArenaCloud.addMessage(name, message);
     if ($('#chat-user')) $('#chat-user').value = name;
     if ($('#chat-message')) $('#chat-message').value = '';
@@ -280,6 +288,17 @@ export async function startBot() {
 
   if (joinBtn && userInput) {
     joinBtn.addEventListener('click', () => sendCommand(userInput.value, 'E'));
+  }
+
+  // Un botón por cada poder con mecánica que no tiene letra (golpes, combos, rayos, Genkidama).
+  const powerBox = $('#power-shortcuts');
+  if (powerBox) {
+    const seen = new Set();
+    const powers = catalog.powers.filter(p => p.status === 'implemented' && !p.command && !seen.has(p.code) && seen.add(p.code));
+    powerBox.innerHTML = powers.map(p => `<button type="button" data-power-code="${escapeHtml(p.code)}" title="${escapeHtml(p.description || '')}">${escapeHtml(p.name)} · nv. ${escapeHtml(p.unlockLevel)}</button>`).join('');
+    powerBox.querySelectorAll('[data-power-code]').forEach(button => {
+      button.addEventListener('click', () => { if (userInput) sendCommand(userInput.value, `/poder ${button.dataset.powerCode}`); });
+    });
   }
 
   document.querySelectorAll('[data-sim-command]').forEach(button => {

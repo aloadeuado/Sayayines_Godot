@@ -2,6 +2,11 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — todos los poderes en el panel Bot / Chat
+
+- **Solicitud:** Pedro vio que `/bot` solo tenía botones para E, K, M, V y B.
+- **Cambio:** `/bot` muestra un botón por cada poder con mecánica que no tiene letra (Embestida, Combo Meteoro, Puño del Lobo, Puño del Dragón, Galick Ho, Resplandor Final, Genkidama), con su nivel. El botón manda el mensaje `/poder <code>`; `/bot` valida nivel y raza antes de guardarlo y la arena lo ejecuta respetando nivel, raza y enfriamiento.
+
 ## 2026-11-10 — primera conexión a un live real (@aloadecuad0)
 
 - **Problema:** en el primer live real, «e» no hacía nada: la app nunca se había conectado (se probó con el @ equivocado) y, ya con el @ correcto (`aloadecuad0`, con cero), la conexión fallaba porque pedir la lista de regalos al conectar (`enableExtendedGiftInfo`) usa un servicio de Euler Stream que exige plan Business.
