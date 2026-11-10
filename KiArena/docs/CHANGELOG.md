@@ -2,6 +2,14 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — iconos de poderes bajo el nombre y mensajes rojos (issue #8)
+
+- **Solicitud:** Pedro pidió iconos bajo el nombre de cada guerrero (cuántos Kamehameha, Makankosappo…, y un hueco para buffs futuros) y mensajes rojos encima cuando una acción no se puede (nivel insuficiente, recarga, etc.), con el texto de cada caso en la HU. Spec `.kiro/specs/feedback-arena`, skill `.claude/skills/feedback-arena`.
+- **Cambio:** fila de iconos con la letra y el color de cada poder que puede usar con letra, más los que tenga en la cola de regalos; `×N` en cola, sector oscuro mientras recarga y número gris con los usados en esta vida. Hueco de buffs que lee `f.buffs` (vacío e invisible por ahora). Mensaje rojo sobre el luchador (1.8 s, uno a la vez; si dos se pisan, el siguiente sube) para nivel insuficiente, raza, recarga con segundos, ocupado, sin implementar, desactivado, regalo bloqueado → Ráfaga de Ki, cola llena, sin rival y regalo sin poder. El chat lateral sigue igual; recarga, ocupado, cola llena y sin rival ahora también dicen el motivo ahí.
+- **Comportamiento nuevo:** un golpe o combo sin ningún rival en la arena ya no embiste al aire ni gasta la recarga; si viene de un regalo, espera en la cola.
+- **Decisiones:** P1–P4 de la HU sin respuesta de Pedro; se aplicó la recomendación (×N + usados, buffs invisibles, «sin ki» fuera porque el ki no es una energía que se gaste, bloquear golpes sin rival).
+- **Comprobado:** `node --check`, `git diff --check`, `scripts/test-tiktok-map.mjs`; capturas en Chrome con emulador de Firestore y eventos simulados de TikTok (M1, M2, M3, M4, M7, M8, iconos con cola, recarga y usados). **Sin probar:** M5, M6, M9, M10, modo 9:16 y macOS. Sin cambios de Firestore.
+
 ## 2026-11-10 — primera conexión a un live real (@aloadecuad0)
 
 - **Problema:** en el primer live real, «e» no hacía nada: la app nunca se había conectado (se probó con el @ equivocado) y, ya con el @ correcto (`aloadecuad0`, con cero), la conexión fallaba porque pedir la lista de regalos al conectar (`enableExtendedGiftInfo`) usa un servicio de Euler Stream que exige plan Business.
