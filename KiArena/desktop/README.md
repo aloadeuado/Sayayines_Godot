@@ -1,6 +1,8 @@
 # Ki Arena de escritorio
 
-Envoltorio de Electron sobre la web de Ki Arena. Abre el login y, desde el menú **Ki Arena**, la arena (⌘1), el login (⌘2), `/bot` (⌘3), `/settings` (⌘4) y el panel de superadministrador `/admin` (⌘5).
+Envoltorio de Electron sobre la web de Ki Arena. Abre el login y, desde el menú **Ki Arena**, la ventana de la arena (⌘1), el login (⌘2), `/bot` (⌘3), `/settings` (⌘4) y el panel de superadministrador `/admin` (⌘5).
+
+La arena se abre en su propia ventana, «Ki Arena · Arena», con solo el canvas: es la que se captura en OBS (Captura de ventana; en Windows, método «Windows 10 (1903 y posterior)»). En **Ki Arena › Orientación de la arena** se elige Horizontal (5:3, 1200×720) o Vertical (9:16, 540×960, para TikTok); la elección se guarda entre sesiones. Los enlaces «Volver a la arena» abren esa ventana en lugar de cargar la arena en la principal.
 
 La app sirve una copia de `KiArena/public` en `http://localhost:47321` (puerto fijo para que la sesión de Firebase sobreviva al reiniciar; si está ocupado usa otro), porque `localhost` está autorizado por defecto en Firebase Auth.
 

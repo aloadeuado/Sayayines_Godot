@@ -140,6 +140,49 @@ canvas {
   image-rendering: pixelated;
 }
 
+/* Arena vertical (?layout=vertical, 9:16) */
+body[data-layout="vertical"] .stage-standalone {
+  max-width: 560px;
+}
+
+/* Ventana de captura (?view=window): solo el canvas, ajustado a la ventana */
+body.arena-window {
+  background: #000;
+  overflow: hidden;
+}
+
+body.arena-window .arena-main {
+  max-width: none;
+  height: 100vh;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body.arena-window .page-header,
+body.arena-window .legend,
+body.arena-window .arena-footer-info {
+  display: none;
+}
+
+body.arena-window .stage,
+body.arena-window .stage-standalone {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: none;
+}
+
+body.arena-window canvas {
+  width: min(100vw, calc(100vh * var(--arena-aspect, 1.6667)));
+  height: auto;
+  border-radius: 0;
+}
+
 .arena-footer-info {
   margin-top: 14px;
   padding: 12px 16px;

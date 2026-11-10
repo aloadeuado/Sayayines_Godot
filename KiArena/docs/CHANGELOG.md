@@ -2,6 +2,15 @@
 
 Este registro es acumulativo. Cada nueva instrucción del usuario sobre juego, arquitectura, datos, entornos, Twitch, publicación o seguridad recibe una entrada fechada. Las propuestas no implementadas se anotan como pendientes; las preguntas informativas no cambian requisitos y se registran solo si aportan una decisión al proyecto.
 
+## 2026-11-10 — arena en ventana propia y modo vertical (escritorio)
+
+- **Solicitud:** Pedro pidió que la app de escritorio abra la arena en una ventana aparte (la que captura en OBS) y una opción de modo vertical 9:16 para TikTok (issue #5).
+- **Web:** la arena acepta `?layout=vertical` (canvas 540×960; por defecto 900×540) y `?view=window` (solo el canvas, ajustado a la ventana y con fondo negro). La aparición de jugadores y la grilla inicial usan el tamaño del canvas en lugar de posiciones fijas; en horizontal quedan igual que antes.
+- **Fondo vertical:** Pedro pidió que en vertical el fondo no se vea cortado. `assets/kame-house-background-vertical.png` (540×960) se armó a partir del fondo actual: la isla completa y nítida, el cielo extendido arriba (desenfocado) y el mar con reflejo abajo. La arena lo usa cuando el canvas es más alto que ancho.
+- **Escritorio:** menú Ki Arena › «Abrir ventana de la arena» (Ctrl/⌘1) y «Orientación de la arena» (Horizontal 5:3, 1200×720, o Vertical 9:16, 540×960; se achica si no cabe en la pantalla). La orientación se guarda en `preferencias.json` de la carpeta de datos de la app. La ventana se llama «Ki Arena · Arena», no tiene barra de menú (Alt la muestra en Windows) y no se pausa en segundo plano. Los enlaces «Volver a la arena» de la ventana principal abren la ventana de la arena, para que nunca corran dos simulaciones. Cerrar la ventana principal cierra la app.
+- **Comprobado:** Electron en Windows con Playwright: tamaños exactos en ambas orientaciones y la ventana principal no carga la arena. macOS sin probar.
+- **Rama:** `feature/arena-ventana-vertical` desde `dev` (ya con el PR #4). Sin cambios de modelo.
+
 ## 2026-11-09 — bug del 404 al entrar con Google y regla de modelos
 
 - **Solicitud:** Pedro sigue viendo «Error 404 del servidor de login» en la app de escritorio (Desarrollo, cuenta padbem). Pidió tratarlo como bug con su rama, y una regla nueva: no cambiar modelos de datos sin consultarle.
