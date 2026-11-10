@@ -24,6 +24,7 @@ Cada spec tiene una skill de Claude en `.claude/skills/<spec>/SKILL.md`. El cont
 | [app-escritorio-electron](app-escritorio-electron/) | DSK | Pendiente · existe solo en local de Pedro |
 | [seguridad-y-autoridad](seguridad-y-autoridad/) | SEC | Pendiente |
 | [autenticacion-usuarios](autenticacion-usuarios/) | AUT | En desarrollo · login con email, Google, Apple, TikTok, Twitch y Kick; roles (HU-AUT-10) |
+| [feedback-arena](feedback-arena/) | FB | Implementada · iconos de poderes y mensajes rojos (issue #8) |
 | [sincronizacion-ambientes](sincronizacion-ambientes/) | SYN | En desarrollo · copiar catálogos dev → qa → prd desde /settings |
 
 ## Reglas obligatorias

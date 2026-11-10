@@ -350,6 +350,29 @@ export function powerBlockReasonFor(catalog, fighter, command, rows = []) {
   return `${own.name} requiere nivel ${own.unlockLevel}; tu nivel actual es ${clampLevel(fighter.level)}.`;
 }
 
+// Motivo corto para el mensaje rojo sobre el luchador (spec feedback-arena: M1, M2, M5, M6, M10).
+function shortReason(catalog, fighter, all, rows) {
+  const own = all.find(p => p.raceCode === fighter.raceCode);
+  if (!own) return `${all[0].name}: solo ${[...new Set(all.map(p => raceByCode(catalog, p.raceCode)?.name || p.raceCode))].join(', ')}`;
+  if (own.status !== 'implemented') return `${own.name}: aún no disponible`;
+  const row = rows.find(r => (refCode(r.powerRef) || r.powerId) === own.id);
+  if (row && row.isActive === false) return `${own.name} desactivado`;
+  return `Nivel insuficiente: ${own.name} Nv ${own.unlockLevel}`;
+}
+
+export function shortBlockReasonFor(catalog, fighter, command, rows = []) {
+  const cmd = String(command || '').trim().toUpperCase();
+  if (powerForCommand(catalog, fighter, cmd, rows)) return '';
+  const all = catalog.powers.filter(p => p.command === cmd);
+  return all.length ? shortReason(catalog, fighter, all, rows) : '';
+}
+
+export function shortBlockReasonForCode(catalog, fighter, code, rows = []) {
+  if (powerForCode(catalog, fighter, code, rows)) return '';
+  const all = catalog.powers.filter(p => p.code === code);
+  return all.length ? shortReason(catalog, fighter, all, rows) : 'Regalo sin poder válido';
+}
+
 export const POWER_CATEGORY_LABELS = Object.freeze({
   physical: 'Físico y combos', kiBeam: 'Ki · rayo', kiArea: 'Ki · área', control: 'Control', buff: 'Mejora'
 });
