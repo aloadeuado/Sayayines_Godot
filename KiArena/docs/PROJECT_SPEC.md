@@ -135,7 +135,7 @@ El sistema se organiza en tres vistas independientes accesibles mediante navegac
 
 3. **`/bot` (Control de Chat, Roster y Métricas):**
    - **Chat de la arena:** Registro en tiempo real, campo de usuario, mensaje y atajos de simulación `E` (Entrar), `K` (Kamehameha), `M` (Makankosappo), `V` (Rayo Mortal).
-   - **Roster de luchadores:** Lista completa con avatar por color de raza, nivel, bajas, KOs, barra de HP porcentual, botón **Elegir** (fija remitente en chat), botón **Ingresar** y acción global **Agregar todos** para perfiles pendientes/eliminados.
+   - **Roster de luchadores:** Lista completa con avatar por color de raza, nivel, bajas, KOs, barra de HP porcentual, botón **Elegir** (fija remitente en chat), botón **Ingresar** y acción global **Agregar todos** para perfiles pendientes/eliminados. Si el luchador acaba de caer, el botón muestra «Espera N s» hasta que pase `rejoinCooldownSeconds` (contado desde su último guardado, el KO). Tras pulsar Ingresar, el panel comprueba en Firestore durante unos 6 s que la arena lo haya dejado entrar y, si no, explica el motivo probable (espera tras el KO, ventana de la arena cerrada o perfil desactivado). La lista no se redibuja si nada cambió ni mientras se mantiene presionado el mouse sobre ella, para no comerse el clic.
    - **Métricas:** Resumen global (total de luchadores, activos, KOs acumulados, nivel máximo), inspección detallada del luchador seleccionado con atributos derivados de su nivel, y registro de combate en vivo (`kiArenaEvents`).
 
 El juego no tiene botón de reinicio de partida: la arena es continua.

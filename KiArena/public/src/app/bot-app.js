@@ -15,6 +15,9 @@ function raceOfPlayer(player) {
 let gameplaySettings = normalizeGameSettings(DEFAULT_GAME_SETTINGS);
 let cachedPlayers = [];
 let selectedPlayerKey = null;
+let lastRosterHtml = '';
+let rosterPointerDown = false;
+let rosterPending = false;
 
 function xpForNext(level) {
   return Math.round(100 + level * 24 + level * level * 1.3);
@@ -104,6 +107,73 @@ function renderSelectedPlayer() {
   `;
 }
 
+// Segundos que faltan para que la arena deje volver a un caído (Settings.rejoinCooldownSeconds).
+// La arena cuenta desde el KO, que es el último guardado del jugador (updatedAt).
+function rejoinWaitFor(player) {
+  const at = Date.parse(player.updatedAt || '');
+  if (!Number.isFinite(at)) return 0;
+  const left = Math.ceil(Number(gameplaySettings.rejoinCooldownSeconds ?? 10) - (Date.now() - at) / 1000);
+  return left > 0 ? left : 0;
+}
+
+// Eventos de la lista delegados una sola vez, para que sobrevivan a cada redibujado.
+function wireRoster() {
+  const roster = $('#roster');
+  if (!roster) return;
+  roster.addEventListener('pointerdown', () => { rosterPointerDown = true; });
+  window.addEventListener('pointerup', () => {
+    if (!rosterPointerDown) return;
+    rosterPointerDown = false;
+    if (rosterPending) {
+      rosterPending = false;
+      // Después del click que dispara este mismo pointerup.
+      setTimeout(() => renderRoster(cachedPlayers), 0);
+    }
+  });
+  roster.addEventListener('click', event => {
+    const enter = event.target.closest('[data-enter-user]');
+    if (enter) {
+      if (enter.disabled) return;
+      const name = enter.dataset.enterUser;
+      if ($('#chat-user')) $('#chat-user').value = name;
+      sendCommand(name, 'E', { confirmEntry: enter.dataset.enterKey });
+      return;
+    }
+    const choose = event.target.closest('[data-choose-user]');
+    if (choose) {
+      const name = choose.dataset.chooseUser;
+      if ($('#chat-user')) $('#chat-user').value = name;
+      showStatus(`Remitente de comandos fijado en @${name}`);
+      renderRoster(cachedPlayers);
+      return;
+    }
+    const item = event.target.closest('.fighter[data-player-key]');
+    if (item) {
+      selectedPlayerKey = item.dataset.playerKey;
+      renderSelectedPlayer();
+      renderRoster(cachedPlayers);
+    }
+  });
+}
+
+// Tras pedir Ingresar, mira en Firestore si la arena lo dejó entrar; si no, dice por qué puede ser.
+async function confirmEntry(name, key = name) {
+  for (let i = 0; i < 6; i++) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const profile = await window.kiArenaCloud.get(key).catch(() => null);
+    if (profile && profile.alive !== false) {
+      showStatus(`@${name} entró a la arena.`);
+      return loadRoster();
+    }
+  }
+  const profile = await window.kiArenaCloud.get(key).catch(() => null);
+  const wait = profile ? rejoinWaitFor(profile) : 0;
+  if (profile?.isActive === false) return showStatus(`@${name} está desactivado; reactívalo en Usuarios para que pueda entrar.`, true);
+  showStatus(wait
+    ? `@${name} acaba de caer: podrá volver en ${wait} s. Pulsa Ingresar de nuevo entonces.`
+    : `@${name} todavía no entra. La ventana de la arena tiene que estar abierta para procesar el E; si lo está, revisa su chat.`, true);
+}
+
 function renderRoster(players) {
   cachedPlayers = players;
   const roster = $('#roster');
@@ -111,7 +181,7 @@ function renderRoster(players) {
 
   const currentChatUser = normalize($('#chat-user')?.value || '');
 
-  roster.innerHTML = players.map(player => {
+  const html = players.map(player => {
     const key = normalize(player.username);
     const race = raceOfPlayer(player);
     const level = Math.max(1, Number(player.level) || 1);
@@ -123,6 +193,7 @@ function renderRoster(players) {
     const percent = Math.min(100, Math.max(0, hp / maxHp * 100));
     const isSelected = selectedPlayerKey === key;
     const isTarget = currentChatUser === key;
+    const wait = isAlive ? 0 : rejoinWaitFor(player);
 
     return `
       <article class="fighter ${isSelected ? 'selected' : ''} ${isTarget ? 'chat-target' : ''}" data-player-key="${key}" style="opacity:${isAlive ? 1 : 0.65}; cursor:pointer">
@@ -136,37 +207,18 @@ function renderRoster(players) {
           <small>HP ${Math.round(hp)}/${Math.round(maxHp)} · XP ${Math.round(xp)}/${xpForNext(level)} · KO ${Number(player.deaths) || 0}</small>
         </div>
         <div class="bar"><i style="width:${percent}%"></i></div>
-        <button class="fighter-entry" data-enter-user="${escapeHtml(player.username)}" ${isAlive ? 'disabled' : ''}>${isAlive ? 'Dentro' : 'Ingresar'}</button>
+        <button class="fighter-entry" data-enter-user="${escapeHtml(player.username)}" data-enter-key="${escapeHtml(player.usernameKey || player.id || key)}" ${isAlive || wait ? 'disabled' : ''} title="${wait ? `Acaba de caer: la arena lo deja volver a los ${gameplaySettings.rejoinCooldownSeconds} s` : ''}">${isAlive ? 'Dentro' : wait ? `Espera ${wait} s` : 'Ingresar'}</button>
       </article>
     `;
   }).join('') || '<p class="help">Aún no hay luchadores registrados en Firestore.</p>';
 
-  roster.querySelectorAll('.fighter[data-player-key]').forEach(item => {
-    item.addEventListener('click', () => {
-      selectedPlayerKey = item.dataset.playerKey;
-      renderSelectedPlayer();
-      renderRoster(cachedPlayers);
-    });
-  });
-
-  roster.querySelectorAll('[data-choose-user]').forEach(btn => {
-    btn.addEventListener('click', event => {
-      event.stopPropagation();
-      const name = btn.dataset.chooseUser;
-      if ($('#chat-user')) $('#chat-user').value = name;
-      showStatus(`Remitente de comandos fijado en @${name}`);
-      renderRoster(cachedPlayers);
-    });
-  });
-
-  roster.querySelectorAll('[data-enter-user]').forEach(btn => {
-    btn.addEventListener('click', event => {
-      event.stopPropagation();
-      const name = btn.dataset.enterUser;
-      if ($('#chat-user')) $('#chat-user').value = name;
-      sendCommand(name, 'E');
-    });
-  });
+  // Reemplazar los botones a mitad de un clic se come el clic: solo se redibuja si cambió algo
+  // y, si el mouse está presionado sobre la lista, al soltarlo.
+  if (rosterPointerDown) rosterPending = true;
+  else if (html !== lastRosterHtml) {
+    roster.innerHTML = html;
+    lastRosterHtml = html;
+  }
 
   renderGlobalMetrics(players);
   if (selectedPlayerKey) {
@@ -225,7 +277,8 @@ async function refreshCombatFeed() {
   }
 }
 
-async function sendCommand(username, text) {
+// confirmEntry: true o la clave del documento del jugador para comprobar que entró.
+async function sendCommand(username, text, { confirmEntry: confirm = false } = {}) {
   const name = String(username || '').trim();
   const message = String(text || '').trim();
   if (!/^[A-Za-z0-9_.-]{3,24}$/.test(name)) {
@@ -254,6 +307,7 @@ async function sendCommand(username, text) {
     showStatus(message.toUpperCase() === 'E' ? `Comando E (Entrar) enviado para @${name}.` : `Comando "${message}" enviado por @${name}.`);
     await refreshChat();
     await loadRoster();
+    if (confirm) await confirmEntry(name, confirm === true ? name : confirm);
   } catch (error) {
     showStatus(`No se pudo enviar: ${error.message}`, true);
   }
@@ -287,8 +341,9 @@ export async function startBot() {
   }
 
   if (joinBtn && userInput) {
-    joinBtn.addEventListener('click', () => sendCommand(userInput.value, 'E'));
+    joinBtn.addEventListener('click', () => sendCommand(userInput.value, 'E', { confirmEntry: true }));
   }
+  wireRoster();
 
   // Un botón por cada poder con mecánica que no tiene letra (golpes, combos, rayos, Genkidama).
   const powerBox = $('#power-shortcuts');
